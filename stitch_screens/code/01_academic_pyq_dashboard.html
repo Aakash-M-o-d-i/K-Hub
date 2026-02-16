@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Academic PYQ Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1a355b",
+                        "primary-light": "#2c4a75",
+                        "accent": "#38bdf8", // Sky Blue
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#13181f",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1f2937",
+                        "text-muted": "#64748b",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background-color: #334155;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 h-screen overflow-hidden flex font-display transition-colors duration-200">
+<!-- Sidebar Navigation -->
+<aside class="w-64 bg-primary text-white flex-shrink-0 flex flex-col h-full shadow-xl z-20 hidden md:flex">
+<!-- Logo Area -->
+<div class="p-6 flex items-center gap-3 border-b border-white/10">
+<div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
+<span class="material-icons text-accent">school</span>
+</div>
+<div>
+<h1 class="font-bold text-lg tracking-wide">UniRepo</h1>
+<p class="text-xs text-blue-200">Academic Archive</p>
+</div>
+</div>
+<!-- Navigation Menu -->
+<nav class="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/10 text-white font-medium transition-colors" href="#">
+<span class="material-icons text-accent">explore</span>
+                Home / Explore
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-blue-100 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-icons text-opacity-70">file_download</span>
+                My Downloads
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-blue-100 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-icons text-opacity-70">cloud_upload</span>
+                My Uploads
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-blue-100 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-icons text-opacity-70">bookmark</span>
+                Bookmarks
+            </a>
+<div class="pt-6 pb-2 px-4 text-xs font-semibold text-blue-300 uppercase tracking-wider">
+                Account
+            </div>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-blue-100 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-icons text-opacity-70">person</span>
+                Profile
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-blue-100 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-icons text-opacity-70">settings</span>
+                Settings
+            </a>
+</nav>
+<!-- Sidebar Footer / Logout -->
+<div class="p-4 border-t border-white/10">
+<button class="flex items-center w-full gap-3 px-4 py-3 rounded-lg text-red-300 hover:bg-red-500/10 hover:text-red-200 transition-colors">
+<span class="material-icons">logout</span>
+                Sign Out
+            </button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-full relative overflow-hidden">
+<!-- Sticky Header & Filters -->
+<header class="bg-surface-light dark:bg-surface-dark border-b border-slate-200 dark:border-slate-700 shadow-sm z-10">
+<!-- Top Search Bar -->
+<div class="px-6 py-4 flex items-center justify-between gap-6">
+<!-- Mobile Menu Button -->
+<button class="md:hidden p-2 text-slate-600 dark:text-slate-300">
+<span class="material-icons">menu</span>
+</button>
+<!-- Search Input -->
+<div class="flex-1 max-w-3xl relative">
+<span class="material-icons absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 border-none focus:ring-2 focus:ring-primary/50 text-slate-700 dark:text-slate-200 placeholder-slate-400 transition-all shadow-inner" placeholder="Search by subject code (e.g., CS101), name, or year..." type="text"/>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-4">
+<button class="flex items-center gap-2 bg-primary hover:bg-primary-light text-white px-5 py-2.5 rounded-lg shadow-lg hover:shadow-xl transition-all font-medium">
+<span class="material-icons text-sm">add</span>
+<span class="hidden sm:inline">Upload Paper</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden border-2 border-slate-100 dark:border-slate-600 cursor-pointer">
+<img alt="Profile avatar" class="w-full h-full object-cover" data-alt="Young professional woman portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1rA5NyO8jJrr4-2MbMkYNvABAsfrdZWyapzkvHVFeqMZfOT4ND6DlnWlO6z8dTYrQ1gRF9zTrE3pm6mSRiUElmRndyfNwNoDBUhQQ0QOZpP0h57aSMwbSqGPmxIXcZlfPhqBnXzDHl4UItJe3Hc-dyl0MdLcTzOAkjDDGy5JrqEJThgpLlRnYb6KvIJJvYlYTZssyBL67XtzV_ajeK_lQcmQgLv0VjcXc33FcziMxSYNgIZHzmD1q24_Hh38bOKX90hfs5zPyyndj"/>
+</div>
+</div>
+</div>
+<!-- Smart Filters Bar -->
+<div class="px-6 pb-4 pt-1 flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-3 overflow-x-auto no-scrollbar">
+<div class="relative group">
+<select class="appearance-none pl-3 pr-8 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-sm font-medium text-slate-600 dark:text-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer hover:border-primary/50 transition-colors">
+<option>All Branches</option>
+<option>Computer Science</option>
+<option>Electrical Eng.</option>
+<option>Mechanical Eng.</option>
+<option>Civil Eng.</option>
+</select>
+<span class="material-icons absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">expand_more</span>
+</div>
+<div class="relative group">
+<select class="appearance-none pl-3 pr-8 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-sm font-medium text-slate-600 dark:text-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer hover:border-primary/50 transition-colors">
+<option>All Semesters</option>
+<option>Semester 1</option>
+<option>Semester 2</option>
+<option>Semester 3</option>
+<option>Semester 4</option>
+<option>Semester 5</option>
+<option>Semester 6</option>
+</select>
+<span class="material-icons absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">expand_more</span>
+</div>
+<div class="relative group">
+<select class="appearance-none pl-3 pr-8 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-sm font-medium text-slate-600 dark:text-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer hover:border-primary/50 transition-colors">
+<option>Any Year</option>
+<option>2023</option>
+<option>2022</option>
+<option>2021</option>
+<option>2020</option>
+</select>
+<span class="material-icons absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">expand_more</span>
+</div>
+<div class="h-6 w-px bg-slate-300 dark:bg-slate-600 mx-1"></div>
+<button class="text-sm font-medium text-primary dark:text-blue-300 hover:underline">Clear All</button>
+</div>
+<div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+<span>Sort by:</span>
+<button class="font-semibold text-slate-700 dark:text-slate-200 hover:text-primary flex items-center gap-1">
+                        Newest First
+                        <span class="material-icons text-sm">arrow_downward</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Dashboard Content Grid -->
+<div class="flex-1 overflow-y-auto p-6 bg-background-light dark:bg-background-dark">
+<div class="flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto h-full">
+<!-- Left: PYQ Cards Grid -->
+<div class="flex-1">
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-xl font-bold text-primary dark:text-white">Recent Papers</h2>
+<span class="text-sm text-slate-500 dark:text-slate-400">Showing 1-12 of 458 results</span>
+</div>
+<!-- Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+<!-- Card 1 -->
+<div class="group bg-surface-light dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm hover:shadow-md hover:border-primary/30 transition-all flex flex-col h-full relative overflow-hidden">
+<div class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-primary/5 to-transparent rounded-bl-full -mr-4 -mt-4"></div>
+<div class="flex justify-between items-start mb-3">
+<span class="px-2.5 py-1 rounded bg-blue-50 dark:bg-blue-900/30 text-primary dark:text-blue-300 text-xs font-bold uppercase tracking-wider">CS302</span>
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-icons text-[20px]">bookmark_border</span>
+</button>
+</div>
+<h3 class="font-bold text-lg text-primary dark:text-white mb-1 line-clamp-2 group-hover:text-accent transition-colors">Data Structures &amp; Algorithms</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Computer Science • Semester 3</p>
+<div class="mt-auto">
+<div class="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 mb-4 font-medium">
+<span class="flex items-center gap-1 bg-slate-100 dark:bg-slate-700/50 px-2 py-1 rounded">
+<span class="material-icons text-[14px] text-red-500">picture_as_pdf</span> PDF
+                                    </span>
+<span>2.4 MB</span>
+<span>•</span>
+<span>Dec 2023</span>
+</div>
+<div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700">
+<div class="flex items-center gap-1 text-yellow-500">
+<span class="material-icons text-[16px]">star</span>
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-300">4.8</span>
+<span class="text-xs text-slate-400 font-normal">(12)</span>
+</div>
+<button class="flex items-center gap-1.5 text-sm font-semibold text-primary dark:text-blue-300 hover:text-accent transition-colors">
+                                        Download
+                                        <span class="material-icons text-[16px]">download</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group bg-surface-light dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm hover:shadow-md hover:border-primary/30 transition-all flex flex-col h-full relative overflow-hidden">
+<div class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-purple-500/5 to-transparent rounded-bl-full -mr-4 -mt-4"></div>
+<div class="flex justify-between items-start mb-3">
+<span class="px-2.5 py-1 rounded bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-bold uppercase tracking-wider">MA201</span>
+<button class="text-slate-400 hover:text-purple-600 transition-colors">
+<span class="material-icons text-[20px]">bookmark_border</span>
+</button>
+</div>
+<h3 class="font-bold text-lg text-primary dark:text-white mb-1 line-clamp-2 group-hover:text-purple-600 transition-colors">Engineering Mathematics III</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Common • Semester 3</p>
+<div class="mt-auto">
+<div class="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 mb-4 font-medium">
+<span class="flex items-center gap-1 bg-slate-100 dark:bg-slate-700/50 px-2 py-1 rounded">
+<span class="material-icons text-[14px] text-blue-500">description</span> DOCX
+                                    </span>
+<span>840 KB</span>
+<span>•</span>
+<span>May 2023</span>
+</div>
+<div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700">
+<div class="flex items-center gap-1 text-yellow-500">
+<span class="material-icons text-[16px]">star</span>
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-300">4.2</span>
+<span class="text-xs text-slate-400 font-normal">(8)</span>
+</div>
+<button class="flex items-center gap-1.5 text-sm font-semibold text-primary dark:text-blue-300 hover:text-purple-500 transition-colors">
+                                        Download
+                                        <span class="material-icons text-[16px]">download</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group bg-surface-light dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm hover:shadow-md hover:border-primary/30 transition-all flex flex-col h-full relative overflow-hidden">
+<div class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-green-500/5 to-transparent rounded-bl-full -mr-4 -mt-4"></div>
+<div class="flex justify-between items-start mb-3">
+<span class="px-2.5 py-1 rounded bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-bold uppercase tracking-wider">EE102</span>
+<button class="text-slate-400 hover:text-green-600 transition-colors">
+<span class="material-icons text-[20px]">bookmark_border</span>
+</button>
+</div>
+<h3 class="font-bold text-lg text-primary dark:text-white mb-1 line-clamp-2 group-hover:text-green-600 transition-colors">Basic Electrical Engineering</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Electrical Eng. • Semester 1</p>
+<div class="mt-auto">
+<div class="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 mb-4 font-medium">
+<span class="flex items-center gap-1 bg-slate-100 dark:bg-slate-700/50 px-2 py-1 rounded">
+<span class="material-icons text-[14px] text-red-500">picture_as_pdf</span> PDF
+                                    </span>
+<span>5.1 MB</span>
+<span>•</span>
+<span>Dec 2022</span>
+</div>
+<div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700">
+<div class="flex items-center gap-1 text-yellow-500">
+<span class="material-icons text-[16px]">star</span>
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-300">4.5</span>
+<span class="text-xs text-slate-400 font-normal">(24)</span>
+</div>
+<button class="flex items-center gap-1.5 text-sm font-semibold text-primary dark:text-blue-300 hover:text-green-500 transition-colors">
+                                        Download
+                                        <span class="material-icons text-[16px]">download</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="group bg-surface-light dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm hover:shadow-md hover:border-primary/30 transition-all flex flex-col h-full relative overflow-hidden">
+<div class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-orange-500/5 to-transparent rounded-bl-full -mr-4 -mt-4"></div>
+<div class="flex justify-between items-start mb-3">
+<span class="px-2.5 py-1 rounded bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs font-bold uppercase tracking-wider">ME405</span>
+<button class="text-slate-400 hover:text-orange-600 transition-colors">
+<span class="material-icons text-[20px]">bookmark_border</span>
+</button>
+</div>
+<h3 class="font-bold text-lg text-primary dark:text-white mb-1 line-clamp-2 group-hover:text-orange-600 transition-colors">Thermodynamics</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Mechanical Eng. • Semester 4</p>
+<div class="mt-auto">
+<div class="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 mb-4 font-medium">
+<span class="flex items-center gap-1 bg-slate-100 dark:bg-slate-700/50 px-2 py-1 rounded">
+<span class="material-icons text-[14px] text-red-500">picture_as_pdf</span> PDF
+                                    </span>
+<span>3.8 MB</span>
+<span>•</span>
+<span>May 2022</span>
+</div>
+<div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700">
+<div class="flex items-center gap-1 text-yellow-500">
+<span class="material-icons text-[16px]">star</span>
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-300">4.9</span>
+<span class="text-xs text-slate-400 font-normal">(42)</span>
+</div>
+<button class="flex items-center gap-1.5 text-sm font-semibold text-primary dark:text-blue-300 hover:text-orange-500 transition-colors">
+                                        Download
+                                        <span class="material-icons text-[16px]">download</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 5 -->
+<div class="group bg-surface-light dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm hover:shadow-md hover:border-primary/30 transition-all flex flex-col h-full relative overflow-hidden">
+<div class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-pink-500/5 to-transparent rounded-bl-full -mr-4 -mt-4"></div>
+<div class="flex justify-between items-start mb-3">
+<span class="px-2.5 py-1 rounded bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 text-xs font-bold uppercase tracking-wider">HS201</span>
+<button class="text-slate-400 hover:text-pink-600 transition-colors">
+<span class="material-icons text-[20px]">bookmark_border</span>
+</button>
+</div>
+<h3 class="font-bold text-lg text-primary dark:text-white mb-1 line-clamp-2 group-hover:text-pink-600 transition-colors">Professional Communication</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Humanities • Semester 2</p>
+<div class="mt-auto">
+<div class="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 mb-4 font-medium">
+<span class="flex items-center gap-1 bg-slate-100 dark:bg-slate-700/50 px-2 py-1 rounded">
+<span class="material-icons text-[14px] text-blue-500">description</span> DOCX
+                                    </span>
+<span>650 KB</span>
+<span>•</span>
+<span>Dec 2021</span>
+</div>
+<div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700">
+<div class="flex items-center gap-1 text-yellow-500">
+<span class="material-icons text-[16px]">star</span>
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-300">3.8</span>
+<span class="text-xs text-slate-400 font-normal">(5)</span>
+</div>
+<button class="flex items-center gap-1.5 text-sm font-semibold text-primary dark:text-blue-300 hover:text-pink-500 transition-colors">
+                                        Download
+                                        <span class="material-icons text-[16px]">download</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 6 -->
+<div class="group bg-surface-light dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm hover:shadow-md hover:border-primary/30 transition-all flex flex-col h-full relative overflow-hidden">
+<div class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-indigo-500/5 to-transparent rounded-bl-full -mr-4 -mt-4"></div>
+<div class="flex justify-between items-start mb-3">
+<span class="px-2.5 py-1 rounded bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-xs font-bold uppercase tracking-wider">CS401</span>
+<button class="text-slate-400 hover:text-indigo-600 transition-colors">
+<span class="material-icons text-[20px]">bookmark_border</span>
+</button>
+</div>
+<h3 class="font-bold text-lg text-primary dark:text-white mb-1 line-clamp-2 group-hover:text-indigo-600 transition-colors">Operating Systems</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Computer Science • Semester 4</p>
+<div class="mt-auto">
+<div class="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 mb-4 font-medium">
+<span class="flex items-center gap-1 bg-slate-100 dark:bg-slate-700/50 px-2 py-1 rounded">
+<span class="material-icons text-[14px] text-red-500">picture_as_pdf</span> PDF
+                                    </span>
+<span>3.1 MB</span>
+<span>•</span>
+<span>May 2021</span>
+</div>
+<div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700">
+<div class="flex items-center gap-1 text-yellow-500">
+<span class="material-icons text-[16px]">star</span>
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-300">4.7</span>
+<span class="text-xs text-slate-400 font-normal">(31)</span>
+</div>
+<button class="flex items-center gap-1.5 text-sm font-semibold text-primary dark:text-blue-300 hover:text-indigo-500 transition-colors">
+                                        Download
+                                        <span class="material-icons text-[16px]">download</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="mt-8 flex justify-center pb-8">
+<nav class="flex items-center gap-2">
+<button class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50">
+<span class="material-icons text-sm">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-primary text-white font-medium text-sm">1</button>
+<button class="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium text-sm transition-colors">2</button>
+<button class="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium text-sm transition-colors">3</button>
+<span class="text-slate-400">...</span>
+<button class="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium text-sm transition-colors">12</button>
+<button class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800">
+<span class="material-icons text-sm">chevron_right</span>
+</button>
+</nav>
+</div>
+</div>
+<!-- Right: Leaderboard Widget (Fixed width on desktop) -->
+<aside class="w-full lg:w-80 flex-shrink-0">
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 sticky top-6">
+<div class="flex items-center gap-2 mb-6 border-b border-slate-100 dark:border-slate-700 pb-4">
+<span class="material-icons text-yellow-500">emoji_events</span>
+<h3 class="font-bold text-primary dark:text-white">Top Contributors</h3>
+</div>
+<div class="space-y-5">
+<!-- User 1 -->
+<div class="flex items-center gap-3 group cursor-pointer">
+<div class="relative">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-yellow-400">
+<img alt="User avatar" class="w-full h-full object-cover" data-alt="Smiling man with glasses" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBt7TZsIyVUoW8dgTk-P00uhICNwT1OpHdKxYQ77EYJwegwbV7sSarImwiVg6lF2S8n3x9dEnPKhGZhcPyAf7C4yQ7a-HZk-eWG8QYWlZL3DAw6GWVgBAOWKbzQzvV0UXaHkJSvAn_KkTJHIrQIpoXYMg5Zwu26EuwgpaM1OZNX-xiEg9UnV2InocO9QRWRZjJcQ_mNkhIszO0gvuLqeXBqbGFAbf91Bhc5LZJ7LS_q_UHL44WE9l00zYXxZgMpSjKsLZq8M6Nn3lB8"/>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-yellow-400 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm">1</div>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-semibold text-slate-800 dark:text-slate-200 group-hover:text-primary transition-colors">Alex Johnson</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">145 Uploads</p>
+</div>
+<div class="text-xs font-bold text-accent bg-accent/10 px-2 py-1 rounded-full">
+                                    +2.4k pts
+                                </div>
+</div>
+<!-- User 2 -->
+<div class="flex items-center gap-3 group cursor-pointer">
+<div class="relative">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-slate-300 dark:border-slate-600">
+<img alt="User avatar" class="w-full h-full object-cover" data-alt="Woman smiling outdoors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAup3YTqvU2ttWbAYtgr-ROQmKPSwzlwco30HfJYNjUMxu0b7Oni2KSBk1DQw1F-guAsh6huEywuwR8hrzfwWdj3jWeOXEsSvdVJMItjtFpwXe0nxN-wk1ec_m_CK8exhalk3pTLFldoBnH-iXhTg4HbkzP_12gtKm0UMwDhH1QKllR3PdCCF3lV62TOK1nq--cx1RBKfvs9pnd8u4Azt2Qc28hphYudYGQFTzY02_7qr6F-7-POoipSRrqphVrVVFY0ngW6bZ7VRvf"/>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-slate-400 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm">2</div>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-semibold text-slate-800 dark:text-slate-200 group-hover:text-primary transition-colors">Sarah Williams</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">98 Uploads</p>
+</div>
+<div class="text-xs font-bold text-accent bg-accent/10 px-2 py-1 rounded-full">
+                                    +1.8k pts
+                                </div>
+</div>
+<!-- User 3 -->
+<div class="flex items-center gap-3 group cursor-pointer">
+<div class="relative">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-slate-300 dark:border-slate-600">
+<img alt="User avatar" class="w-full h-full object-cover" data-alt="Man portrait indoors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCys_mAmUcFc1m7a-EKGe7qMMM7vPJcv5yPzs1V4QB0fewASdRqJ2SQGZafFUnU7RsUsJ7kgwCyowqefdNrOjgeqCo8p3ztt5heqlQGaBc9XPe767WS_X1XRVuTSj5GXXS7jxn8g1uNoeOaLGXpSYMEamYaEEqYOCHM5ih4-Kp1lI_q8LPAxYC5A5pa7VFT2L-SqXg6zmQL_YyXyhxZV5IKLm9AFzp-7kZgJE06bPlOa025xyh_tn3XToPXd58kB0bo8ZeDLfbuBGd0"/>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-orange-700 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm">3</div>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-semibold text-slate-800 dark:text-slate-200 group-hover:text-primary transition-colors">Michael Chen</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">82 Uploads</p>
+</div>
+<div class="text-xs font-bold text-accent bg-accent/10 px-2 py-1 rounded-full">
+                                    +1.5k pts
+                                </div>
+</div>
+<!-- User 4 -->
+<div class="flex items-center gap-3 group cursor-pointer opacity-75">
+<div class="relative">
+<div class="w-10 h-10 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100">
+<img alt="User avatar" class="w-full h-full object-cover" data-alt="Woman portrait light background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmB4P0LrQRP6BWXmDJhOVQHNqEqroiKfQcE8dM2Pmx8WewBrvSvOdQ7T7NUsL3MjHRBSBsNyt8hXb-IiyG-F4uFdvzvSe5fbfH5rbhScGW0AQ6ix8ksmUY8A8YyTZ1xMsm43lPqKRYIEJjDt810nM4fyWdX6dIQmDf8xLANpdVjnVe-FePZ2i-a_xbCaFAQIVxxqu4thq6COg17_3yFXrkHt24cqdUTmlRpphkIYN1qSk0ulHmG-iENv4nFL0DzilE-Z2qJGQBIwKr"/>
+</div>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-semibold text-slate-800 dark:text-slate-200 group-hover:text-primary transition-colors">Emma Davis</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">65 Uploads</p>
+</div>
+<div class="text-xs font-bold text-slate-500 dark:text-slate-400">
+                                    980 pts
+                                </div>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700 text-center">
+<a class="text-sm text-primary dark:text-blue-300 font-medium hover:underline" href="#">View Full Leaderboard</a>
+</div>
+</div>
+<!-- Quick Stats Widget -->
+<div class="mt-6 bg-primary rounded-xl p-6 text-white shadow-md relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-10 -mt-10"></div>
+<div class="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-8 -mb-8"></div>
+<h4 class="font-bold text-lg mb-1 relative z-10">Contribution Goal</h4>
+<p class="text-blue-200 text-xs mb-4 relative z-10">Semester 3 papers needed!</p>
+<div class="w-full bg-primary-light rounded-full h-2.5 mb-2 relative z-10">
+<div class="bg-accent h-2.5 rounded-full" style="width: 70%"></div>
+</div>
+<div class="flex justify-between text-xs text-blue-100 relative z-10">
+<span>70/100</span>
+<span>70%</span>
+</div>
+<button class="mt-4 w-full bg-white text-primary text-sm font-bold py-2 rounded-lg hover:bg-blue-50 transition-colors relative z-10">
+                            Contribute Now
+                        </button>
+</div>
+</aside>
+</div>
+</div>
+</main>
+</body></html>

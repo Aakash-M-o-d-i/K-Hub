@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Super Admin Control Center</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#428bf0",
+                "background-light": "#f6f7f8",
+                "background-dark": "#101822",
+                "surface-dark": "#16202c", 
+                "surface-darker": "#0d131b",
+              },
+              fontFamily: {
+                "display": ["Inter", "sans-serif"]
+              },
+              borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            },
+          },
+        }
+      </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 min-h-screen flex overflow-hidden selection:bg-primary selection:text-white">
+<!-- Sidebar -->
+<aside class="w-64 flex-shrink-0 bg-white dark:bg-surface-dark border-r border-slate-200 dark:border-slate-800 flex flex-col transition-all duration-300 z-20">
+<!-- Logo Area -->
+<div class="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center shadow-lg shadow-primary/30">
+<span class="material-icons text-white text-lg">school</span>
+</div>
+<h1 class="font-bold text-lg tracking-tight text-slate-900 dark:text-white">PYQ<span class="text-primary font-normal">Admin</span></h1>
+</div>
+</div>
+<!-- Navigation -->
+<nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+<p class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Main</p>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-primary/10 text-primary dark:text-primary transition-colors" href="#">
+<span class="material-icons text-[20px]">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors group" href="#">
+<span class="material-icons text-[20px] group-hover:text-primary transition-colors">gavel</span>
+                Moderation Queue
+                <span class="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">42</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors group" href="#">
+<span class="material-icons text-[20px] group-hover:text-primary transition-colors">people</span>
+                User Management
+            </a>
+<p class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mt-8 mb-2">System</p>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors group" href="#">
+<span class="material-icons text-[20px] group-hover:text-primary transition-colors">history</span>
+                Audit Logs
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors group" href="#">
+<span class="material-icons text-[20px] group-hover:text-primary transition-colors">settings</span>
+                Settings
+            </a>
+</nav>
+<!-- User Profile (Compact) -->
+<div class="p-4 border-t border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3">
+<img alt="Admin Profile" class="w-9 h-9 rounded-full border border-slate-200 dark:border-slate-700 data-alt='User profile avatar'" src="https://lh3.googleusercontent.com/aida-public/AB6AXuADQ5pAyvkD_qtHAT2jrcL00hH2uw_6SIt3HG68Z0UNMHM2wzoCbaj0Ua-4oB3JeFHHu4jKRYjXLRNQszdYe7sSes5eMmSsuA4UTlbgAbtgKFhJc5ZAA4BCnbKBIvpPacvvd4JOv_Hh5xl2RA1zEq5fzBNXiWpYPA1qY72XsekiEkEbI1y6c0u_g1fp8lIi1XobsP40-LBfPUNPKc1_I_vy7r-itewcy3HuKjkEpx3YqePQt9Jxq_Qg7Dh3BS7OrTiQu1OI7tzMXfdk"/>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-slate-900 dark:text-white truncate">Super Admin</p>
+<p class="text-xs text-slate-500 dark:text-slate-400 truncate">admin@university.edu</p>
+</div>
+<button class="text-slate-400 hover:text-white transition-colors">
+<span class="material-icons text-lg">logout</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+<!-- Top Bar -->
+<header class="h-16 flex items-center justify-between px-6 bg-white dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 z-10 sticky top-0">
+<div class="flex items-center gap-4">
+<h2 class="text-lg font-semibold text-slate-800 dark:text-white">Control Center</h2>
+<span class="px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary border border-primary/20">v2.4.0</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-icons text-slate-400 text-lg">search</span>
+</span>
+<input class="pl-10 pr-4 py-1.5 w-64 text-sm bg-slate-100 dark:bg-surface-dark border-none rounded-lg focus:ring-2 focus:ring-primary placeholder-slate-500 text-slate-900 dark:text-white" placeholder="Search globally..." type="text"/>
+</div>
+<button class="relative p-2 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors">
+<span class="material-icons">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-background-dark"></span>
+</button>
+</div>
+</header>
+<!-- Dashboard Content -->
+<div class="flex-1 overflow-y-auto p-6 space-y-6">
+<!-- Stat Cards Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Card 1 -->
+<div class="bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group hover:border-primary/50 transition-colors">
+<div class="flex justify-between items-start mb-4">
+<div>
+<p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Papers</p>
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white mt-1">12,450</h3>
+</div>
+<div class="p-2 bg-primary/10 rounded-lg text-primary">
+<span class="material-icons text-xl">library_books</span>
+</div>
+</div>
+<div class="flex items-center gap-1 text-xs text-green-500 font-medium">
+<span class="material-icons text-xs">trending_up</span>
+<span>+124 this week</span>
+</div>
+</div>
+<!-- Card 2 (Alert) -->
+<div class="bg-red-50 dark:bg-red-900/10 p-5 rounded-xl border border-red-200 dark:border-red-900/30 shadow-sm relative overflow-hidden group">
+<div class="absolute inset-0 bg-red-500/5 dark:bg-red-500/5 pointer-events-none"></div>
+<div class="flex justify-between items-start mb-4">
+<div>
+<p class="text-xs font-medium text-red-600 dark:text-red-400 uppercase tracking-wide">Pending Reviews</p>
+<h3 class="text-2xl font-bold text-red-700 dark:text-white mt-1">42</h3>
+</div>
+<div class="p-2 bg-red-100 dark:bg-red-500/20 rounded-lg text-red-600 dark:text-red-400 animate-pulse">
+<span class="material-icons text-xl">priority_high</span>
+</div>
+</div>
+<div class="flex items-center gap-1 text-xs text-red-600 dark:text-red-300 font-medium">
+<span>Requires immediate action</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group hover:border-yellow-500/50 transition-colors">
+<div class="flex justify-between items-start mb-4">
+<div>
+<p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Flagged Content</p>
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white mt-1">8</h3>
+</div>
+<div class="p-2 bg-yellow-500/10 rounded-lg text-yellow-500">
+<span class="material-icons text-xl">flag</span>
+</div>
+</div>
+<div class="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 font-medium">
+<span>Needs review within 24h</span>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group hover:border-primary/50 transition-colors">
+<div class="flex justify-between items-start mb-4">
+<div>
+<p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Contributors</p>
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white mt-1">1,205</h3>
+</div>
+<div class="p-2 bg-indigo-500/10 rounded-lg text-indigo-500">
+<span class="material-icons text-xl">group</span>
+</div>
+</div>
+<div class="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 font-medium">
+<span>Across 12 departments</span>
+</div>
+</div>
+</div>
+<!-- Main Content Area: Moderation Queue -->
+<div class="flex flex-col gap-4">
+<!-- Toolbar -->
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center gap-2">
+<h3 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                            Moderation Queue
+                            <span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs px-2 py-0.5 rounded-full font-medium">42 Pending</span>
+</h3>
+</div>
+<div class="flex items-center gap-3 w-full sm:w-auto">
+<div class="flex bg-slate-100 dark:bg-background-dark p-1 rounded-lg">
+<button class="px-3 py-1.5 text-xs font-medium rounded bg-white dark:bg-surface-dark text-slate-800 dark:text-white shadow-sm border border-slate-200 dark:border-slate-700">All</button>
+<button class="px-3 py-1.5 text-xs font-medium rounded text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white">Pending</button>
+<button class="px-3 py-1.5 text-xs font-medium rounded text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white">Flagged</button>
+</div>
+<div class="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-1 hidden sm:block"></div>
+<button class="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-white bg-primary hover:bg-blue-600 rounded-lg shadow-sm shadow-primary/30 transition-all">
+<span class="material-icons text-sm">filter_list</span>
+                            Filter
+                        </button>
+</div>
+</div>
+<!-- Data Table -->
+<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex-1">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-background-dark border-b border-slate-200 dark:border-slate-800">
+<th class="py-3 px-4 w-12 text-center">
+<input class="rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-surface-dark text-primary focus:ring-offset-0 focus:ring-2 focus:ring-primary/50" type="checkbox"/>
+</th>
+<th class="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Paper Title</th>
+<th class="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Uploader</th>
+<th class="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Department</th>
+<th class="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Date</th>
+<th class="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+<th class="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+<!-- Row 1 -->
+<tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="py-3 px-4 text-center">
+<input class="rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-surface-dark text-primary focus:ring-offset-0 focus:ring-2 focus:ring-primary/50" type="checkbox"/>
+</td>
+<td class="py-3 px-4">
+<div class="flex flex-col">
+<span class="text-sm font-medium text-slate-900 dark:text-white">Data Structures &amp; Algo 2023</span>
+<span class="text-xs text-slate-500 dark:text-slate-400">PDF • 2.4 MB</span>
+</div>
+</td>
+<td class="py-3 px-4">
+<div class="flex items-center gap-2">
+<img alt="User avatar" class="w-6 h-6 rounded-full" data-alt="John Doe Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTVw4LnGugEAElB5a9b0-RDCVv02uBPfCPQwwo1hQsFfbCDu1_MgH4Ly85FnQjmGt2VS7dyoHuG7f2VaEWD5X2P4GDGP_IKe1-4YV2NPsknUZeeX3we58KdcyiBLQg3GOABCWFObPtj0zcXz9z7rngpE48uxLbnvc7QG33NZeup8K_N0jIqj1o3Q5_cflfxKLV0O8SPvd9KP9z5S_UbDHSif-L9Do93yA3a6GMa4zwQp2Jcd9yx15_GzPUwGJPBzGdTrdNiRLGPRov"/>
+<span class="text-sm text-slate-700 dark:text-slate-300">John Doe</span>
+</div>
+</td>
+<td class="py-3 px-4">
+<span class="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded font-medium">CS</span>
+</td>
+<td class="py-3 px-4 text-sm text-slate-600 dark:text-slate-400 font-mono">Oct 24, 2023</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
+<span class="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
+                                            Pending
+                                        </span>
+</td>
+<td class="py-3 px-4 text-right">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1.5 rounded bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/40" title="Approve">
+<span class="material-icons text-sm">check</span>
+</button>
+<button class="p-1.5 rounded bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40" title="Reject">
+<span class="material-icons text-sm">close</span>
+</button>
+<button class="p-1.5 rounded bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600" title="Preview">
+<span class="material-icons text-sm">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 (Flagged) -->
+<tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors bg-red-50/50 dark:bg-red-900/5">
+<td class="py-3 px-4 text-center">
+<input class="rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-surface-dark text-primary focus:ring-offset-0 focus:ring-2 focus:ring-primary/50" type="checkbox"/>
+</td>
+<td class="py-3 px-4">
+<div class="flex flex-col">
+<span class="text-sm font-medium text-slate-900 dark:text-white">Fluid Mechanics 2022</span>
+<span class="text-xs text-slate-500 dark:text-slate-400">IMG • 4.1 MB</span>
+</div>
+</td>
+<td class="py-3 px-4">
+<div class="flex items-center gap-2">
+<img alt="User avatar" class="w-6 h-6 rounded-full" data-alt="Jane Smith Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_0aOKPu0sceJEhh6Bl_XN-YuLG7Q6MVzj7WEUAHM0pmbVT8xxdXG24IvlkzH-u5YSrxvx49Qf7_2Ym7VQDr1KkVpWhZNxI-dlsLkZ2cbslm1d0NZkNemlq6qMAVxLM2Oj2Xok60vncnbNIuOiff9wanM0YhCIzG4tiDkXzNXtCF2ft0Jjs9gxitWmYk7nLbvFwWDn-OsufbIf2Zu4YJW9KREIw_YxUg6HlDPOmXIj-huAzMBIE2eiyuKN4yd0deDdiDf0iVtIJBlF"/>
+<span class="text-sm text-slate-700 dark:text-slate-300">Jane Smith</span>
+</div>
+</td>
+<td class="py-3 px-4">
+<span class="px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs rounded font-medium">Mech</span>
+</td>
+<td class="py-3 px-4 text-sm text-slate-600 dark:text-slate-400 font-mono">Oct 23, 2023</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
+<span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                                            Flagged
+                                        </span>
+</td>
+<td class="py-3 px-4 text-right">
+<div class="flex items-center justify-end gap-2"> <!-- Always visible for flagged items -->
+<button class="p-1.5 rounded bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/40" title="Resolve">
+<span class="material-icons text-sm">check_circle</span>
+</button>
+<button class="p-1.5 rounded bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40" title="Delete">
+<span class="material-icons text-sm">delete</span>
+</button>
+<button class="p-1.5 rounded bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600" title="Preview">
+<span class="material-icons text-sm">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="py-3 px-4 text-center">
+<input class="rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-surface-dark text-primary focus:ring-offset-0 focus:ring-2 focus:ring-primary/50" type="checkbox"/>
+</td>
+<td class="py-3 px-4">
+<div class="flex flex-col">
+<span class="text-sm font-medium text-slate-900 dark:text-white">Applied Chemistry Sem 1</span>
+<span class="text-xs text-slate-500 dark:text-slate-400">PDF • 1.1 MB</span>
+</div>
+</td>
+<td class="py-3 px-4">
+<div class="flex items-center gap-2">
+<img alt="User avatar" class="w-6 h-6 rounded-full" data-alt="Mike Ross Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCm5BN9z9uMj6mx5auQwWnGlxgAfVqK3ic2qu1GDvfOBNtf3UBP0tAAswFziGsXYcDud43nukGYEeEmxqUZCQvlqqIEoTgcxeyvoWX8mnl55bPU7_1m_73J3GawuJc-xwBuqg0acAh2po3E0BpF1xNsHsF6KGRS9VH68MnoGp2HMPyLjHepKqAQwH3ra_xXub6w5ubNaZoDb0wWmA2U6PBG58ABzGyjDqCZMgxRYvUFfOSo42rHLaYkxvE5eAxqywnWfmMEwduUpvVY"/>
+<span class="text-sm text-slate-700 dark:text-slate-300">Mike Ross</span>
+</div>
+</td>
+<td class="py-3 px-4">
+<span class="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded font-medium">Chem</span>
+</td>
+<td class="py-3 px-4 text-sm text-slate-600 dark:text-slate-400 font-mono">Oct 22, 2023</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
+<span class="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
+                                            Pending
+                                        </span>
+</td>
+<td class="py-3 px-4 text-right">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1.5 rounded bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/40" title="Approve">
+<span class="material-icons text-sm">check</span>
+</button>
+<button class="p-1.5 rounded bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40" title="Reject">
+<span class="material-icons text-sm">close</span>
+</button>
+<button class="p-1.5 rounded bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600" title="Preview">
+<span class="material-icons text-sm">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="py-3 px-4 text-center">
+<input class="rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-surface-dark text-primary focus:ring-offset-0 focus:ring-2 focus:ring-primary/50" type="checkbox"/>
+</td>
+<td class="py-3 px-4">
+<div class="flex flex-col">
+<span class="text-sm font-medium text-slate-900 dark:text-white">Machine Learning Finals 2021</span>
+<span class="text-xs text-slate-500 dark:text-slate-400">PDF • 5.8 MB</span>
+</div>
+</td>
+<td class="py-3 px-4">
+<div class="flex items-center gap-2">
+<img alt="User avatar" class="w-6 h-6 rounded-full" data-alt="Sarah Lee Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCADXmPxqM4Zllb6t0HsvbjX8tD2vWx5HB0_LN_Wl0Y7gKbtUKSUlEOFvOaqVRFcmt9v3J6wXsjzoZQk1ISM0cI3HHhXxlG6tofcCX0oURe27DAfu8jEYsbt7uepH4Olgw-AD4wmD6MGWiKAFgZoGIqHigaoZwrdBC7fqTSHoL7DQMiBkX_FdMYO13lBDcSV22a6e5O0GtLGH1tj10IrdDXSkcAZeV1ERpWlxKuYg9Oo4v9dpeHK9meM1BzUNTrLf7vdl8mIpCXjaHh"/>
+<span class="text-sm text-slate-700 dark:text-slate-300">Sarah Lee</span>
+</div>
+</td>
+<td class="py-3 px-4">
+<span class="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded font-medium">CS</span>
+</td>
+<td class="py-3 px-4 text-sm text-slate-600 dark:text-slate-400 font-mono">Oct 21, 2023</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                            Approved
+                                        </span>
+</td>
+<td class="py-3 px-4 text-right">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1.5 rounded bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600" title="Edit">
+<span class="material-icons text-sm">edit</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="py-3 px-4 text-center">
+<input class="rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-surface-dark text-primary focus:ring-offset-0 focus:ring-2 focus:ring-primary/50" type="checkbox"/>
+</td>
+<td class="py-3 px-4">
+<div class="flex flex-col">
+<span class="text-sm font-medium text-slate-900 dark:text-white">Business Ethics Midterm</span>
+<span class="text-xs text-slate-500 dark:text-slate-400">DOCX • 0.8 MB</span>
+</div>
+</td>
+<td class="py-3 px-4">
+<div class="flex items-center gap-2">
+<img alt="User avatar" class="w-6 h-6 rounded-full" data-alt="Alex W Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1UdViapOsV4XwTHhfo4hjRIlXZvk2gtU-P4QEiCZ8TF6Eo5gCYM0AvJthDCGXzce7ATZPPrfshuPLqIXz4WX-VL8wSyAHslg3qmtym6l8wvd1DWs7E9efEsmBNmLnFbZbPUqHVZDAhbMHgYvlI6h45qg2Q5hTU1kLG-iAWtwWettlIFrDfv-92u1Jyjc02pvMLQjrF4cstwnDox5gNpiZc1wCf5nQi54XoTnywgs1WbNQSNgINENNE7rkeQaJOJAN1ThlwiZDl74Q"/>
+<span class="text-sm text-slate-700 dark:text-slate-300">Alex W</span>
+</div>
+</td>
+<td class="py-3 px-4">
+<span class="px-2 py-1 bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 text-xs rounded font-medium">Mgmt</span>
+</td>
+<td class="py-3 px-4 text-sm text-slate-600 dark:text-slate-400 font-mono">Oct 20, 2023</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
+<span class="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
+                                            Pending
+                                        </span>
+</td>
+<td class="py-3 px-4 text-right">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1.5 rounded bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/40" title="Approve">
+<span class="material-icons text-sm">check</span>
+</button>
+<button class="p-1.5 rounded bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40" title="Reject">
+<span class="material-icons text-sm">close</span>
+</button>
+<button class="p-1.5 rounded bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600" title="Preview">
+<span class="material-icons text-sm">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="px-4 py-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-background-dark/50">
+<div class="text-xs text-slate-500 dark:text-slate-400">
+                            Showing <span class="font-medium">1-5</span> of <span class="font-medium">42</span> pending items
+                        </div>
+<div class="flex gap-2">
+<button class="px-2 py-1 rounded text-xs text-slate-500 dark:text-slate-400 disabled:opacity-50 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" disabled="">
+                                Previous
+                            </button>
+<button class="px-2 py-1 rounded text-xs bg-primary text-white hover:bg-blue-600 transition-colors">
+                                1
+                            </button>
+<button class="px-2 py-1 rounded text-xs text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                                2
+                            </button>
+<button class="px-2 py-1 rounded text-xs text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                                3
+                            </button>
+<span class="px-2 py-1 text-xs text-slate-500 dark:text-slate-400">...</span>
+<button class="px-2 py-1 rounded text-xs text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                                Next
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer / System Status -->
+<div class="mt-8 pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center text-xs text-slate-500 dark:text-slate-500">
+<div class="flex gap-4">
+<span class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-green-500"></span>
+                        System Operational
+                    </span>
+<span class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-green-500"></span>
+                        Database Synced
+                    </span>
+</div>
+<div>Last backup: 2 hours ago</div>
+</div>
+</div>
+</main>
+</body></html>

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Scholar Rank Leaderboard</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Config -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1978e5",
+                        "primary-dark": "#145bb5",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#111821",
+                        "navy": "#0f172a", // Deep Navy adaptation
+                        "gold": "#FFC107",
+                        "silver": "#9CA3AF",
+                        "bronze": "#B45309",
+                    },
+                    fontFamily: {
+                        "display": ["Sora", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow-gold': '0 0 15px rgba(255, 193, 7, 0.4)',
+                        'glow-silver': '0 0 15px rgba(156, 163, 175, 0.4)',
+                        'glow-bronze': '0 0 15px rgba(180, 83, 9, 0.4)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for clean look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 font-display min-h-screen flex flex-col">
+<!-- Navbar -->
+<nav class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between h-16">
+<div class="flex items-center gap-4">
+<div class="flex-shrink-0 flex items-center gap-2">
+<div class="h-8 w-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-lg">
+<span class="material-icons-round text-xl">school</span>
+</div>
+<span class="font-bold text-xl tracking-tight text-navy dark:text-white">ScholarPYQ</span>
+</div>
+<div class="hidden md:flex ml-8 space-x-8">
+<a class="border-b-2 border-primary text-navy dark:text-white font-medium px-1 pt-1 h-16 flex items-center" href="#">Leaderboard</a>
+<a class="border-b-2 border-transparent hover:border-slate-300 text-slate-500 hover:text-navy dark:text-slate-400 dark:hover:text-white px-1 pt-1 h-16 flex items-center font-medium" href="#">Uploads</a>
+<a class="border-b-2 border-transparent hover:border-slate-300 text-slate-500 hover:text-navy dark:text-slate-400 dark:hover:text-white px-1 pt-1 h-16 flex items-center font-medium" href="#">My Profile</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative inline-block text-left">
+<button class="inline-flex justify-center w-full rounded-lg border border-slate-200 shadow-sm px-4 py-2 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none" type="button">
+                            Fall Semester 2023
+                            <span class="material-icons-round ml-2 -mr-1 text-slate-400">expand_more</span>
+</button>
+</div>
+<div class="h-8 w-8 rounded-full bg-slate-200 overflow-hidden border border-slate-300">
+<img alt="User Profile" class="h-full w-full object-cover" data-alt="Small profile picture of logged in user" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgr4B1r1e0BOgUwi8lZVQwiXADCrrYTOpWXPDNBmv-JsptPAlz0D3pt7Su9tA8hgi7PLJzGqjiyhl9t9JAjgrERRNIFHcD-gnTsQXTxpDSgzwikEkn828J8ELZ6jZ2qDdHRRWb6gWbbfSZBA62sVfFjieRGYFRzuZ94A4eAEEEyb9jTO2LN-VIdpVeP_TMNgyLtWSArdgOjMWH6HraVrtd7xmKV1E2wxM-onW1LNLwi_LJ4pbi0KfbjuoSNsdiW91sxweQg2AiWLg7"/>
+</div>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-grow pb-24"> <!-- Padding bottom for sticky footer -->
+<!-- Header & Breadcrumbs -->
+<div class="bg-navy dark:bg-slate-900 py-12 relative overflow-hidden">
+<!-- Abstract Background Pattern -->
+<div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
+<div class="absolute right-0 top-0 w-1/3 h-full bg-gradient-to-l from-primary/20 to-transparent pointer-events-none"></div>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary-light border border-primary/30 text-white mb-4 backdrop-blur-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-green-400 mr-2 animate-pulse"></span>
+                    Live Rankings
+                </span>
+<h1 class="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">Academic Grand Scholars</h1>
+<p class="text-slate-300 max-w-2xl mx-auto text-lg">Top contributors shaping the future of learning. Earn reputation by uploading high-quality PYQs and helping peers.</p>
+</div>
+</div>
+<!-- Podium Section -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20 mb-16">
+<div class="flex flex-col md:flex-row justify-center items-end gap-6 md:gap-8 min-h-[320px]">
+<!-- Rank 2: Silver -->
+<div class="order-2 md:order-1 flex-1 max-w-[300px] w-full group">
+<div class="flex flex-col items-center">
+<div class="relative mb-4">
+<div class="absolute inset-0 rounded-full border-4 border-silver shadow-glow-silver"></div>
+<div class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-silver text-white text-xs font-bold px-3 py-0.5 rounded-full border-2 border-white shadow-sm z-10">2nd</div>
+<img alt="Rank 2 Scholar" class="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-slate-800" data-alt="Portrait of a male student smiling with glasses" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1T8i2Ib2Cleuc65aiWqOvzYJn9kwsr5LwF2YrZxr-AP3-jtjRRHdCdb2JFmU6EE_XCJU0AcYuElmVtWr3sHFYamPEumBlMOg2-VJYZzHKoZm0lZAvpef5Y4OkExD2_rQL-j9bIyaPrM0Nnj_eIbbOsF_m14t0wwP3e5U8urCAVtqN9qlUXaFv6XS4BOYjhtJowgkb-Sfxx-y66pTc0gNARAb3QiA1E3BVuzjS97Rt5hWl5xhcjdjL2VOKoojA1KUhUHD9d8pGNdqe"/>
+</div>
+<div class="bg-white dark:bg-slate-800 rounded-xl shadow-soft p-6 w-full text-center relative overflow-hidden transform transition hover:-translate-y-1 hover:shadow-lg border-t-4 border-silver">
+<div class="absolute top-0 right-0 p-2 opacity-5 text-silver">
+<span class="material-icons-round text-6xl">emoji_events</span>
+</div>
+<h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">David Chen</h3>
+<p class="text-slate-500 text-sm mb-4">Computer Science</p>
+<div class="flex justify-center gap-4 text-sm">
+<div class="text-center">
+<div class="font-bold text-slate-800 dark:text-slate-200">1,120</div>
+<div class="text-xs text-slate-400">Points</div>
+</div>
+<div class="w-px bg-slate-200 dark:bg-slate-700"></div>
+<div class="text-center">
+<div class="font-bold text-slate-800 dark:text-slate-200">45</div>
+<div class="text-xs text-slate-400">Uploads</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Rank 1: Gold -->
+<div class="order-1 md:order-2 flex-1 max-w-[340px] w-full -mt-12 md:-mt-0 group relative">
+<!-- Shine Effect behind Rank 1 -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gold/10 blur-3xl rounded-full pointer-events-none"></div>
+<div class="flex flex-col items-center transform md:-translate-y-8">
+<div class="relative mb-4">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 text-gold animate-bounce">
+<span class="material-icons-round text-4xl drop-shadow-md">military_tech</span>
+</div>
+<div class="absolute inset-0 rounded-full border-4 border-gold shadow-glow-gold"></div>
+<div class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-gold text-white text-sm font-bold px-4 py-1 rounded-full border-2 border-white shadow-sm z-10 uppercase tracking-wider">Grand Scholar</div>
+<img alt="Rank 1 Scholar" class="w-32 h-32 rounded-full object-cover border-4 border-white dark:border-slate-800" data-alt="Portrait of a female student looking confident" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsTglPtZzLZDTzKHBFpah0xNeuRw_EXpa_BOg2_gdynFgWWb_MTWTBuWjdLjyLeiM02cPyxN8O-y0wjwel1DitpuliX1UF3IAMzrEaZam7fLpgdcV9pks14gsXSSwwTZccZ7XqAp9Lwn1vzYLeSjhn_I5uiolA0e1uXyY2RvcH1IwlD4_w5N3IjlozntulFrZHohTWrSVZ3dxo8rp_pGio5U44tI2qJUvcsAAs85gbXk9WY_lyh7wlGAiVB_uDk85t4If-X4z6BoW7"/>
+</div>
+<div class="bg-white dark:bg-slate-800 rounded-xl shadow-soft p-8 w-full text-center relative overflow-hidden transform transition hover:-translate-y-1 hover:shadow-xl border-t-4 border-gold z-10">
+<div class="absolute top-0 right-0 p-2 opacity-10 text-gold">
+<span class="material-icons-round text-7xl">workspace_premium</span>
+</div>
+<h3 class="font-bold text-xl text-slate-900 dark:text-white mb-1">Sarah Jenkins</h3>
+<p class="text-primary font-medium text-sm mb-6">Mechanical Engineering</p>
+<div class="bg-background-light dark:bg-slate-900/50 rounded-lg p-3 flex justify-between items-center px-6">
+<div class="text-left">
+<div class="text-xs text-slate-500 uppercase font-semibold tracking-wider">Total Score</div>
+<div class="font-bold text-2xl text-navy dark:text-white">1,450</div>
+</div>
+<div class="text-right">
+<div class="text-xs text-slate-500 uppercase font-semibold tracking-wider">Contributions</div>
+<div class="font-bold text-lg text-primary">82</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Rank 3: Bronze -->
+<div class="order-3 md:order-3 flex-1 max-w-[300px] w-full group">
+<div class="flex flex-col items-center">
+<div class="relative mb-4">
+<div class="absolute inset-0 rounded-full border-4 border-bronze shadow-glow-bronze"></div>
+<div class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-bronze text-white text-xs font-bold px-3 py-0.5 rounded-full border-2 border-white shadow-sm z-10">3rd</div>
+<img alt="Rank 3 Scholar" class="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-slate-800" data-alt="Portrait of a student with a bright smile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_7BCjNVyYPFY6vd2tz_qtfQyesh1jz3y5Gmd87IK9FLChP5Min8z3yxJz5gMkLGWs9uSdWevEHU85mpoCOI3VHvf3DPovv1vSzdcHvILPWbWOxMjiTMFDDlnFoBiwruLrMWhjvJBYwtwr8XVTGgLooPdm1N2qDuO_MmkkxmIcThVIVpthNk1bOrNjY-Cn1AHCUToI2HxpDVBAFe_AYPMkyOiDHROC2ENWWaSeWJIyNZs3lBsz5c2zow4pf9qM4hVltOm0SiHMRnWP"/>
+</div>
+<div class="bg-white dark:bg-slate-800 rounded-xl shadow-soft p-6 w-full text-center relative overflow-hidden transform transition hover:-translate-y-1 hover:shadow-lg border-t-4 border-bronze">
+<div class="absolute top-0 right-0 p-2 opacity-5 text-bronze">
+<span class="material-icons-round text-6xl">stars</span>
+</div>
+<h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Amara Okeke</h3>
+<p class="text-slate-500 text-sm mb-4">Biochemistry</p>
+<div class="flex justify-center gap-4 text-sm">
+<div class="text-center">
+<div class="font-bold text-slate-800 dark:text-slate-200">980</div>
+<div class="text-xs text-slate-400">Points</div>
+</div>
+<div class="w-px bg-slate-200 dark:bg-slate-700"></div>
+<div class="text-center">
+<div class="font-bold text-slate-800 dark:text-slate-200">38</div>
+<div class="text-xs text-slate-400">Uploads</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Master Contributors Table -->
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-2xl font-bold text-navy dark:text-white flex items-center gap-2">
+<span class="material-icons-round text-primary">verified</span>
+                    Master Contributors
+                </h2>
+<div class="flex gap-2">
+<button class="text-sm font-medium text-slate-500 hover:text-primary px-3 py-1 rounded-lg hover:bg-slate-100 transition-colors">Weekly</button>
+<button class="text-sm font-medium text-white bg-primary px-3 py-1 rounded-lg shadow-sm">All Time</button>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-800 rounded-xl shadow-soft border border-slate-100 dark:border-slate-700 overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700 text-xs uppercase tracking-wider text-slate-500 font-semibold">
+<th class="p-4 w-20 text-center">Rank</th>
+<th class="p-4">Student Scholar</th>
+<th class="p-4 hidden md:table-cell">Major</th>
+<th class="p-4 text-center">Uploads</th>
+<th class="p-4 text-right">Reputation</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+<!-- Row 4 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group cursor-pointer">
+<td class="p-4 text-center font-bold text-slate-400 group-hover:text-primary transition-colors">#4</td>
+<td class="p-4">
+<div class="flex items-center gap-3">
+<img alt="User 4" class="w-10 h-10 rounded-full object-cover border border-slate-200" data-alt="Small avatar of a student" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAigUvXJk5h3xf42rNVpix6uMe5hpTA8cL9uPJYK4y6Nqw6RBmckp-FrETkQU8WcUwt5MF-P_7J2m9tYIZLlkZjgb5pTmiK_aeygahZKwRfLbNYDN3FZwAxU6jrPHLcJbRrZAc_vNyRnjEApWjXrH-bv37z7_UGNiI4WzvRMpOCGNSaiLusNs3Iwx3zciZ0T6O4Rk90E2BwuOimPB--yliYpG-DtMm01EppkKiM5bu0bjY5vTLomnaXsKVV6aIh2yV388RthX1uSjwY"/>
+<div>
+<div class="font-semibold text-slate-900 dark:text-white">Liam Thompson</div>
+<div class="text-xs text-slate-500 md:hidden">Law</div>
+</div>
+</div>
+</td>
+<td class="p-4 text-sm text-slate-600 dark:text-slate-300 hidden md:table-cell">Law</td>
+<td class="p-4 text-center text-sm font-medium text-slate-700 dark:text-slate-300">65</td>
+<td class="p-4 text-right font-bold text-primary">920 pts</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group cursor-pointer">
+<td class="p-4 text-center font-bold text-slate-400 group-hover:text-primary transition-colors">#5</td>
+<td class="p-4">
+<div class="flex items-center gap-3">
+<img alt="User 5" class="w-10 h-10 rounded-full object-cover border border-slate-200" data-alt="Small avatar of a student" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASAhB2Z_fkedoK5i9ewZCfbBCLoMRhdJmyHy35wCxdvnDpY2HjiMWHI9UkLerkyCpFx-C0aicJv5y9HEODJXJlGc4Tm0nWvrAMoJi28zSBkDMvAqQBfoHf4KYjHfZh1WGs1tRb2NnJUBZvHrFLXJHCUVkquXMol32jaJOJ4wKoIxVwlnE_-ZuVPbmfPQN8U2uNuadkiuoP9r6Qpjltvwt_FfneXU3UJqUHfzsS9VlyzNe7jHwBXf0XizuPXY2obId0XX0ZRZacaTnd"/>
+<div>
+<div class="font-semibold text-slate-900 dark:text-white">Sophia Rodriguez</div>
+</div>
+</div>
+</td>
+<td class="p-4 text-sm text-slate-600 dark:text-slate-300 hidden md:table-cell">Psychology</td>
+<td class="p-4 text-center text-sm font-medium text-slate-700 dark:text-slate-300">58</td>
+<td class="p-4 text-right font-bold text-primary">895 pts</td>
+</tr>
+<!-- Row 6 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group cursor-pointer">
+<td class="p-4 text-center font-bold text-slate-400 group-hover:text-primary transition-colors">#6</td>
+<td class="p-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">AK</div>
+<div>
+<div class="font-semibold text-slate-900 dark:text-white">Arjun Kumar</div>
+</div>
+</div>
+</td>
+<td class="p-4 text-sm text-slate-600 dark:text-slate-300 hidden md:table-cell">Mathematics</td>
+<td class="p-4 text-center text-sm font-medium text-slate-700 dark:text-slate-300">54</td>
+<td class="p-4 text-right font-bold text-primary">850 pts</td>
+</tr>
+<!-- Row 7 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group cursor-pointer">
+<td class="p-4 text-center font-bold text-slate-400 group-hover:text-primary transition-colors">#7</td>
+<td class="p-4">
+<div class="flex items-center gap-3">
+<img alt="User 7" class="w-10 h-10 rounded-full object-cover border border-slate-200" data-alt="Small avatar of a student" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAduN_9MpLIzXf33K7oPBOkOGJ13iHZnrJJbpQ0N7OpiJXE3WaLIWAo8J8yG-jEPZs4A_FOhNh__N79YCXvqv3s5mr1u9wQFb_zBGDQ7NJXfQDcsvY0eP-mE7oMpuf6DQWxYG3dtylFBVYUDGs_z1tzsV3J_HGHyqoecN7sQgBpBMcEeenzaI-5nBcX0TjVU9dPiKDW4XSOKY3rYkX7CbEad6lAA2xXnOImDeH6USLs_99fOUs9sjcxScMwV8MVAFxufVm2g9phwJl"/>
+<div>
+<div class="font-semibold text-slate-900 dark:text-white">Emma Wilson</div>
+</div>
+</div>
+</td>
+<td class="p-4 text-sm text-slate-600 dark:text-slate-300 hidden md:table-cell">History</td>
+<td class="p-4 text-center text-sm font-medium text-slate-700 dark:text-slate-300">50</td>
+<td class="p-4 text-right font-bold text-primary">815 pts</td>
+</tr>
+<!-- Row 8 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group cursor-pointer">
+<td class="p-4 text-center font-bold text-slate-400 group-hover:text-primary transition-colors">#8</td>
+<td class="p-4">
+<div class="flex items-center gap-3">
+<img alt="User 8" class="w-10 h-10 rounded-full object-cover border border-slate-200" data-alt="Small avatar of a student" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8bcX67E8R2jWCFANQx0C2VU72oCi-Ra3AnNbgmSXnlQy4nP-CfCOKly949GeBhy5OtxsxFGhiC9EyfLTnx9WJCtVJhbEYYCTi4r0i4JP_wfELhUWSP7pccXQqkZtuorLXprG8JQkboFn1W1ireTsuKbElA08l6q6d5OPu5rqKROIc7cCVAupMDIgvWBJa3O1cIFEScUy0Z6xv0KeApnbaaay7YQc5CRKj9sqwKjwUxK1JI1G1RBXEC0vFHs3XyFPNvctKhMErxUaX"/>
+<div>
+<div class="font-semibold text-slate-900 dark:text-white">Hassan Ali</div>
+</div>
+</div>
+</td>
+<td class="p-4 text-sm text-slate-600 dark:text-slate-300 hidden md:table-cell">Engineering</td>
+<td class="p-4 text-center text-sm font-medium text-slate-700 dark:text-slate-300">48</td>
+<td class="p-4 text-right font-bold text-primary">790 pts</td>
+</tr>
+<!-- Row 9 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group cursor-pointer">
+<td class="p-4 text-center font-bold text-slate-400 group-hover:text-primary transition-colors">#9</td>
+<td class="p-4">
+<div class="flex items-center gap-3">
+<img alt="User 9" class="w-10 h-10 rounded-full object-cover border border-slate-200" data-alt="Small avatar of a student" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLhq61eNj7gg3zMhxxKfK2IGHOsMyBeSyxtazz3R4i7dVzpsUTF9nsIlwjRErvv5QfKNiIE8ukN-W-NrC8-OfTjAAqrxTi3zn6aWI-xpUqsaQI43ENLVKBALSNfbAkqiDMgw554wZhkcBlPwAuB2uDEpk2P6ELJ3URmNDoVWm1wEZnuWQ70t9cUsasVoq5lMGY71wTx1SQK0cDu8ixOsLmk7P0q-JPcpIQ-i86f2sTQKBJhg6O8zeo_Sx79FpO_RCH8wWehFPWbQUQ"/>
+<div>
+<div class="font-semibold text-slate-900 dark:text-white">Olivia Chen</div>
+</div>
+</div>
+</td>
+<td class="p-4 text-sm text-slate-600 dark:text-slate-300 hidden md:table-cell">Physics</td>
+<td class="p-4 text-center text-sm font-medium text-slate-700 dark:text-slate-300">45</td>
+<td class="p-4 text-right font-bold text-primary">765 pts</td>
+</tr>
+<!-- Row 10 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group cursor-pointer border-none">
+<td class="p-4 text-center font-bold text-slate-400 group-hover:text-primary transition-colors">#10</td>
+<td class="p-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm">MP</div>
+<div>
+<div class="font-semibold text-slate-900 dark:text-white">Marcus P.</div>
+</div>
+</div>
+</td>
+<td class="p-4 text-sm text-slate-600 dark:text-slate-300 hidden md:table-cell">Business</td>
+<td class="p-4 text-center text-sm font-medium text-slate-700 dark:text-slate-300">42</td>
+<td class="p-4 text-right font-bold text-primary">740 pts</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 text-center">
+<a class="text-sm text-primary font-medium hover:text-primary-dark inline-flex items-center gap-1" href="#">
+                        View Full Ranking
+                        <span class="material-icons-round text-base">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</main>
+<!-- Sticky User Rank Footer -->
+<div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.1)] border-t border-slate-200 dark:border-slate-700 z-50">
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="flex flex-col items-center justify-center w-12 h-12 rounded-lg bg-navy text-white shadow-md">
+<span class="text-[10px] opacity-70 uppercase font-bold tracking-wider">Rank</span>
+<span class="font-bold text-lg leading-none">142</span>
+</div>
+<div>
+<div class="text-sm font-semibold text-slate-900 dark:text-white">Alex Morgan (You)</div>
+<div class="text-xs text-slate-500">Business Administration</div>
+</div>
+</div>
+<div class="flex-1 mx-8 hidden sm:block">
+<div class="flex justify-between text-xs mb-1">
+<span class="text-slate-500">Current: 240 pts</span>
+<span class="text-primary font-medium">Next Rank (#141): 285 pts</span>
+</div>
+<div class="w-full bg-slate-100 rounded-full h-2 dark:bg-slate-700">
+<div class="bg-primary h-2 rounded-full" style="width: 84%"></div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-xs text-slate-500 uppercase font-semibold">Reputation</div>
+<div class="font-bold text-xl text-primary">240 <span class="text-sm text-slate-400 font-normal">pts</span></div>
+</div>
+</div>
+</div>
+</div>
+</body></html>

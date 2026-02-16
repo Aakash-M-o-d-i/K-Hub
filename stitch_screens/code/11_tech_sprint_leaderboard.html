@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tech-Sprint Gamified Leaderboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1978e5",
+                        "primary-light": "#60a5fa",
+                        "primary-dark": "#1e40af",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#111821",
+                        "dark-surface": "#121212",
+                        "dark-card": "#1E1E1E", 
+                    },
+                    fontFamily: {
+                        "display": ["Sora", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for table container if needed */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1E1E1E; 
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #333; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #1978e5; 
+        }
+        
+        /* Neon glow effects */
+        .neon-text {
+            text-shadow: 0 0 10px rgba(25, 120, 229, 0.5);
+        }
+        .neon-border {
+            box-shadow: 0 0 15px rgba(25, 120, 229, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-[#121212] font-display text-white min-h-screen flex flex-col">
+<!-- Top Navigation / Header -->
+<header class="sticky top-0 z-50 bg-[#121212]/95 backdrop-blur border-b border-gray-800 px-6 py-4">
+<div class="max-w-7xl mx-auto flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 bg-primary rounded-lg flex items-center justify-center neon-border">
+<span class="material-icons text-white">code</span>
+</div>
+<div>
+<h1 class="text-xl font-bold tracking-tight text-white">Tech-Sprint</h1>
+<p class="text-xs text-gray-400 uppercase tracking-wider">PYQ Leaderboard • Semester 2</p>
+</div>
+</div>
+<div class="flex-1 max-w-md mx-8 hidden md:block">
+<div class="relative">
+<span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-icons text-gray-500 text-lg">search</span>
+</span>
+<input class="block w-full pl-10 pr-3 py-2 border border-gray-700 rounded-lg leading-5 bg-[#1E1E1E] text-gray-300 placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary sm:text-sm transition duration-150 ease-in-out" placeholder="Find peer..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex flex-col items-end mr-2">
+<span class="text-sm font-semibold text-white">Alex Chen</span>
+<span class="text-xs text-primary font-medium">Lvl 12 • 5,240 XP</span>
+</div>
+<button class="relative p-1 rounded-full bg-gray-800 hover:bg-gray-700 transition">
+<img alt="User Avatar" class="h-10 w-10 rounded-full border-2 border-primary" data-alt="Profile picture of a young male student" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1biKpnhBtgPqWOXDz1pV4wwGp2-BlwfuK-O3kRy_i552DreZqtMVJ6WIOi80IiKTJpPqFgFNioY6LMBbGCNwXybrGNKKiZ4ddUxVukSp-Rd-Wk6szHuH2nlWwfVuBVBy-cE1NkfQEa-LtQIGmpVCSu0paop9to0-oapFsL41aIohAq7yBPElYDknxeQfAcOksZSjuBPkOQ4LpC4nAAxA_kfsdwuOh65abuOO0FDxEhxSAz1bOTHdmnR2kNGVGe7_p5iCzfDMvkwP-"/>
+<div class="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-[#121212] rounded-full"></div>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-grow p-6 max-w-7xl mx-auto w-full space-y-8">
+<!-- Top 3 Podium Section -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end justify-center mb-12 mt-4 relative">
+<!-- Rank 2 -->
+<div class="order-2 md:order-1 flex flex-col items-center">
+<div class="relative group">
+<div class="absolute -inset-1 bg-gradient-to-r from-primary/20 to-cyan-500/20 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+<img alt="2nd place student" class="relative w-24 h-24 rounded-full border-4 border-gray-700 object-cover" data-alt="Portrait of a female student smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-SNCow2yE2CJIiGgFjmtc40DAjCo0A9k5-gOJgryLZKPX8NUWkUL_Z_U-ca1WW5C29U0lMok0AUwIhOl2OWCR0eBTHbEpvA3k57jFZ70cWL_PFEoOCAAGVF_WZi_jcyBvhbgDimYA55sdmLCR98YV85NcikMdFbNF5Smhv14aYvfO7N5D3msz1VQVhc2gk8fdSXJbBsEXGIcfglQLIiQGD9HMtdFFGybNDRkYlz8_JXu4AfNAnVXbhdfrTTAmK5S_sUcm3JOYee9N"/>
+<div class="absolute -bottom-3 left-1/2 transform -translate-x-1/2 bg-gray-700 text-gray-300 text-xs font-bold px-2 py-1 rounded-full border border-gray-600">
+                        #2
+                    </div>
+</div>
+<div class="mt-4 text-center">
+<h3 class="text-lg font-bold text-white">Sarah J.</h3>
+<p class="text-sm text-cyan-400">Master Debugger</p>
+<div class="mt-2 text-2xl font-bold text-gray-400">4,850 <span class="text-sm font-normal text-gray-500">XP</span></div>
+</div>
+</div>
+<!-- Rank 1 -->
+<div class="order-1 md:order-2 flex flex-col items-center -mt-8 relative z-10">
+<div class="relative group">
+<div class="absolute -inset-4 bg-gradient-to-r from-primary to-cyan-400 rounded-full blur opacity-40 group-hover:opacity-60 transition duration-1000 animate-pulse"></div>
+<img alt="1st place student" class="relative w-32 h-32 rounded-full border-4 border-primary object-cover shadow-[0_0_30px_rgba(25,120,229,0.3)]" data-alt="Portrait of a confident male student" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAECdY0v9kF5sOFbxIHI13kZ7XCu78AbrfOv-_ftppp7LNY2SKdRokmRDr9Y09BHKo5nh2q_YSXyX4KFwqlT3y_a3xOMijAbPfxiVrhnAhPi2LjQH1M-kab4XJIck08GMk-Lrw-5f9y9QVt4h9ZRb74v9k8va7f3M9qOnDGXrbkcjM4TUMS0M_MV_PaI7wmbFK7Cp0oFkoz0kSTXyloz7w_KJvN1su0hrbQjxwNdbNeyLebY6O6tCtOF8N_fGxsTN8BUPwAqPGNxpZl"/>
+<div class="absolute -top-6 left-1/2 transform -translate-x-1/2">
+<span class="material-icons text-yellow-400 text-4xl drop-shadow-lg">emoji_events</span>
+</div>
+<div class="absolute -bottom-4 left-1/2 transform -translate-x-1/2 bg-primary text-white text-sm font-bold px-3 py-1 rounded-full shadow-lg border border-primary-light">
+                        #1
+                    </div>
+</div>
+<div class="mt-6 text-center">
+<h3 class="text-xl font-bold text-white neon-text">David K.</h3>
+<p class="text-sm text-primary-light font-medium">Legendary Contributor</p>
+<div class="mt-2 text-3xl font-bold text-white">5,120 <span class="text-sm font-normal text-gray-400">XP</span></div>
+</div>
+</div>
+<!-- Rank 3 -->
+<div class="order-3 md:order-3 flex flex-col items-center">
+<div class="relative group">
+<div class="absolute -inset-1 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+<img alt="3rd place student" class="relative w-24 h-24 rounded-full border-4 border-gray-700 object-cover" data-alt="Portrait of a male student with glasses" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRULVhX3uTAmFcBS5iTvVjXo4QNFmfTO5MdP-wn1cgQ5UyMAqGT0p30A192PBp2VYWHG9g1_qorPa_SLSLKnZqQ_OnUHPnl23rI3AZDsAyKgFXw72nz4FpjtY_KFo1zId0iZ3jd8mRIyd-0qKSDbuzsrIuiI-kpwi4MH0EhB5JGVCLDO0S81yHhIohkDl-s-RFbrrszcI80kadjP64Bims_HGxC8QNRYW72Ufa8rBIQex8yI6Tsh65gtx3e1Rp1dnHvACnd2hWdc1l"/>
+<div class="absolute -bottom-3 left-1/2 transform -translate-x-1/2 bg-gray-700 text-gray-300 text-xs font-bold px-2 py-1 rounded-full border border-gray-600">
+                        #3
+                    </div>
+</div>
+<div class="mt-4 text-center">
+<h3 class="text-lg font-bold text-white">Mike T.</h3>
+<p class="text-sm text-purple-400">Bug Hunter</p>
+<div class="mt-2 text-2xl font-bold text-gray-400">4,720 <span class="text-sm font-normal text-gray-500">XP</span></div>
+</div>
+</div>
+</section>
+<!-- Main Leaderboard Table -->
+<section class="bg-[#1E1E1E] rounded-xl border border-gray-800 shadow-2xl overflow-hidden">
+<div class="p-6 border-b border-gray-800 flex justify-between items-center bg-[#1E1E1E]">
+<h2 class="text-lg font-bold text-white flex items-center gap-2">
+<span class="material-icons text-primary">leaderboard</span>
+                    Top Contributors
+                </h2>
+<div class="flex gap-2">
+<button class="px-3 py-1.5 text-xs font-medium bg-primary/20 text-primary rounded hover:bg-primary/30 transition">Weekly</button>
+<button class="px-3 py-1.5 text-xs font-medium text-gray-400 hover:text-white transition">Monthly</button>
+<button class="px-3 py-1.5 text-xs font-medium text-gray-400 hover:text-white transition">All Time</button>
+</div>
+</div>
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="text-xs text-gray-500 uppercase tracking-wider border-b border-gray-800 bg-[#151b23]">
+<th class="px-6 py-4 font-semibold w-16">Rank</th>
+<th class="px-6 py-4 font-semibold min-w-[200px]">Student</th>
+<th class="px-6 py-4 font-semibold hidden md:table-cell min-w-[200px]">Consistency Heatmap</th>
+<th class="px-6 py-4 font-semibold w-32 text-center">Streak</th>
+<th class="px-6 py-4 font-semibold min-w-[180px]">Next Level</th>
+<th class="px-6 py-4 font-semibold text-right w-24">Total XP</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-800">
+<!-- Row 4 -->
+<tr class="hover:bg-gray-800/50 transition group">
+<td class="px-6 py-4">
+<span class="font-bold text-gray-400">#4</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="relative">
+<img alt="Jane Doe" class="h-10 w-10 rounded-lg object-cover" data-alt="Portrait of a female student" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdbukU_cPXdpZnLfBvbPbhxV1M3FJ92tEjUY7yYwd9GfoHb3JJqnMUWijV_jvhcljLcNKGZ9fcvYhihnFoTY6TOAaIZX76iyxzgrqo11qDlRjjw5n9TVXDCKA5CL7IYFfZ5Yh3y-8aGeWyMfFaSdyFQeyF0wIM-xCbjwtiX6dmiLKo9R4AsqE8xzR6HBEIKtX8iKZz2UWRJu_uzXEPSdGrCtU6s5sCNembjfqFWjeE6WgOHYfq840-FYEJS3e_4_e3KISO8XpKbhTT"/>
+</div>
+<div>
+<div class="font-medium text-white group-hover:text-primary transition">Jane Doe</div>
+<div class="text-xs text-gray-500">Level 8 • Algo Expert</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 hidden md:table-cell">
+<div class="flex gap-1 items-end h-8">
+<!-- Heatmap simulation -->
+<div class="w-3 h-3 rounded-sm bg-gray-700" title="0 contributions"></div>
+<div class="w-3 h-3 rounded-sm bg-primary/40" title="2 contributions"></div>
+<div class="w-3 h-3 rounded-sm bg-primary" title="5 contributions"></div>
+<div class="w-3 h-3 rounded-sm bg-primary/80" title="4 contributions"></div>
+<div class="w-3 h-3 rounded-sm bg-primary" title="6 contributions"></div>
+<div class="w-3 h-3 rounded-sm bg-gray-700" title="0 contributions"></div>
+<div class="w-3 h-3 rounded-sm bg-primary/20" title="1 contribution"></div>
+<div class="w-3 h-3 rounded-sm bg-primary" title="7 contributions"></div>
+<div class="w-3 h-3 rounded-sm bg-primary" title="5 contributions"></div>
+<div class="w-3 h-3 rounded-sm bg-primary/60" title="3 contributions"></div>
+<div class="w-3 h-3 rounded-sm bg-primary" title="8 contributions"></div>
+<div class="w-3 h-3 rounded-sm bg-primary-light" title="10+ contributions"></div>
+</div>
+<div class="text-[10px] text-gray-500 mt-1">Last 12 days activity</div>
+</td>
+<td class="px-6 py-4 text-center">
+<div class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-orange-900/30 text-orange-400 border border-orange-700/50">
+<span class="mr-1">🔥</span> 12
+                                </div>
+</td>
+<td class="px-6 py-4">
+<div class="w-full">
+<div class="flex justify-between text-xs mb-1">
+<span class="text-gray-400">Lvl 8</span>
+<span class="text-gray-400">85%</span>
+</div>
+<div class="w-full bg-gray-700 rounded-full h-2">
+<div class="bg-primary h-2 rounded-full relative overflow-hidden" style="width: 85%">
+<div class="absolute top-0 left-0 bottom-0 right-0 bg-gradient-to-r from-transparent via-white/20 to-transparent w-full -translate-x-full animate-[shimmer_2s_infinite]"></div>
+</div>
+</div>
+<div class="text-[10px] text-gray-500 mt-1 text-right">300 XP to Lvl 9</div>
+</div>
+</td>
+<td class="px-6 py-4 text-right font-bold text-white text-lg">
+                                4,500
+                            </td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-gray-800/50 transition group">
+<td class="px-6 py-4">
+<span class="font-bold text-gray-400">#5</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="relative">
+<img alt="Tom Cook" class="h-10 w-10 rounded-lg object-cover" data-alt="Portrait of a male student smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCP6QNT7tCU-r2-K6qEZxxZgk56cNCv6mbIKHwsFQlN4QAVMIDKEATp1_RT34znY1TDfdSu8GQP51kbYuTiMkYpeDXWNU8lOvoyWN2rvxhYd3WHGZ5HJfuWA-JdSQziHIqO4UiZxNxXgZ2L8pWBzMHEpkpeQJgPDNQF7rzGcG-rtzA0_QiHokKxF-88goKzDyajUlC4_BwM2A7OxJiXEYw8St7dkAVUHTC_ZL4_E_OMkl3p4eZUWaJompxDQt-GCu3hVw6aSmup_a6z"/>
+</div>
+<div>
+<div class="font-medium text-white group-hover:text-primary transition">Tom Cook</div>
+<div class="text-xs text-gray-500">Level 7 • Code Ninja</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 hidden md:table-cell">
+<div class="flex gap-1 items-end h-8">
+<div class="w-3 h-3 rounded-sm bg-primary/20"></div>
+<div class="w-3 h-3 rounded-sm bg-primary/20"></div>
+<div class="w-3 h-3 rounded-sm bg-primary/60"></div>
+<div class="w-3 h-3 rounded-sm bg-primary/80"></div>
+<div class="w-3 h-3 rounded-sm bg-primary-light"></div>
+<div class="w-3 h-3 rounded-sm bg-primary"></div>
+<div class="w-3 h-3 rounded-sm bg-gray-700"></div>
+<div class="w-3 h-3 rounded-sm bg-gray-700"></div>
+<div class="w-3 h-3 rounded-sm bg-primary/40"></div>
+<div class="w-3 h-3 rounded-sm bg-primary"></div>
+<div class="w-3 h-3 rounded-sm bg-primary/80"></div>
+<div class="w-3 h-3 rounded-sm bg-primary-light"></div>
+</div>
+<div class="text-[10px] text-gray-500 mt-1">Last 12 days activity</div>
+</td>
+<td class="px-6 py-4 text-center">
+<div class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-800 text-gray-400 border border-gray-700">
+<span class="mr-1 grayscale opacity-50">🔥</span> 4
+                                </div>
+</td>
+<td class="px-6 py-4">
+<div class="w-full">
+<div class="flex justify-between text-xs mb-1">
+<span class="text-gray-400">Lvl 7</span>
+<span class="text-gray-400">45%</span>
+</div>
+<div class="w-full bg-gray-700 rounded-full h-2">
+<div class="bg-primary h-2 rounded-full" style="width: 45%"></div>
+</div>
+<div class="text-[10px] text-gray-500 mt-1 text-right">850 XP to Lvl 8</div>
+</div>
+</td>
+<td class="px-6 py-4 text-right font-bold text-white text-lg">
+                                4,120
+                            </td>
+</tr>
+<!-- Row 6 -->
+<tr class="hover:bg-gray-800/50 transition group">
+<td class="px-6 py-4">
+<span class="font-bold text-gray-400">#6</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="h-10 w-10 rounded-lg bg-indigo-900 flex items-center justify-center text-indigo-300 font-bold border border-indigo-700">RB</div>
+</div>
+<div>
+<div class="font-medium text-white group-hover:text-primary transition">Rachel B.</div>
+<div class="text-xs text-gray-500">Level 7 • QA Wizard</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 hidden md:table-cell">
+<div class="flex gap-1 items-end h-8">
+<div class="w-3 h-3 rounded-sm bg-gray-700"></div>
+<div class="w-3 h-3 rounded-sm bg-primary/20"></div>
+<div class="w-3 h-3 rounded-sm bg-gray-700"></div>
+<div class="w-3 h-3 rounded-sm bg-gray-700"></div>
+<div class="w-3 h-3 rounded-sm bg-primary/40"></div>
+<div class="w-3 h-3 rounded-sm bg-primary"></div>
+<div class="w-3 h-3 rounded-sm bg-primary/80"></div>
+<div class="w-3 h-3 rounded-sm bg-primary"></div>
+<div class="w-3 h-3 rounded-sm bg-primary-light"></div>
+<div class="w-3 h-3 rounded-sm bg-primary"></div>
+<div class="w-3 h-3 rounded-sm bg-primary/60"></div>
+<div class="w-3 h-3 rounded-sm bg-gray-700"></div>
+</div>
+<div class="text-[10px] text-gray-500 mt-1">Last 12 days activity</div>
+</td>
+<td class="px-6 py-4 text-center">
+<div class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-800 text-gray-400 border border-gray-700">
+<span class="mr-1 grayscale opacity-50">🔥</span> 0
+                                </div>
+</td>
+<td class="px-6 py-4">
+<div class="w-full">
+<div class="flex justify-between text-xs mb-1">
+<span class="text-gray-400">Lvl 7</span>
+<span class="text-gray-400">12%</span>
+</div>
+<div class="w-full bg-gray-700 rounded-full h-2">
+<div class="bg-cyan-500 h-2 rounded-full" style="width: 12%"></div>
+</div>
+<div class="text-[10px] text-gray-500 mt-1 text-right">1200 XP to Lvl 8</div>
+</div>
+</td>
+<td class="px-6 py-4 text-right font-bold text-white text-lg">
+                                3,890
+                            </td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 border-t border-gray-800 flex justify-center">
+<button class="text-sm text-gray-400 hover:text-primary transition flex items-center gap-1">
+                    Load more students
+                    <span class="material-icons text-sm">expand_more</span>
+</button>
+</div>
+</section>
+</main>
+<!-- Floating Action Button for immediate engagement -->
+<div class="fixed bottom-8 right-8 z-40 group">
+<div class="absolute bottom-full right-0 mb-4 flex flex-col items-end space-y-3 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition duration-300 pointer-events-none group-hover:pointer-events-auto">
+<button class="flex items-center gap-2 bg-[#1E1E1E] border border-gray-700 text-white px-4 py-2 rounded-lg shadow-xl hover:bg-gray-800 transition">
+<span class="text-sm font-medium">Start Quiz</span>
+<span class="material-icons text-primary text-sm">quiz</span>
+</button>
+<button class="flex items-center gap-2 bg-[#1E1E1E] border border-gray-700 text-white px-4 py-2 rounded-lg shadow-xl hover:bg-gray-800 transition">
+<span class="text-sm font-medium">Upload PYQ</span>
+<span class="material-icons text-green-500 text-sm">upload_file</span>
+</button>
+</div>
+<button class="bg-primary hover:bg-primary-dark text-white p-4 rounded-full shadow-[0_0_20px_rgba(25,120,229,0.5)] transition-all duration-300 transform hover:scale-110 flex items-center justify-center">
+<span class="material-icons text-2xl">add</span>
+</button>
+</div>
+</body></html>
