@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS papers (
     subject_code    VARCHAR(20)  NOT NULL,
     year            VARCHAR(9)   NOT NULL,                  -- e.g. "2023-2024"
     semester        TINYINT      NOT NULL,                  -- 1-8
+    exam_type       VARCHAR(50)  DEFAULT 'End Semester',    -- Internal, End Semester, etc.
     file_url        VARCHAR(500) NOT NULL,
     file_type       VARCHAR(10)  DEFAULT 'pdf',
     file_size       INT          DEFAULT 0,                 -- bytes

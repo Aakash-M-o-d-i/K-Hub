@@ -10,7 +10,7 @@ from models.notification import Notification
 from models.leaderboard import AuditLog, LeaderboardPoints, SystemSetting
 from middleware.auth import admin_required
 
-admin_bp = Blueprint("admin", __name__, url_prefix="/api/admin")
+admin_bp = Blueprint("admin", __name__, url_prefix="/api/v1/internal")
 
 
 @admin_bp.route("/stats", methods=["GET"])

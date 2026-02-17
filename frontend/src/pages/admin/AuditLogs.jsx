@@ -62,7 +62,7 @@ export default function AuditLogs() {
     const fetchLogs = async () => {
         setLoading(true);
         try {
-            const res = await api.get('/admin/audit-logs', {
+            const res = await api.get('/v1/internal/audit-logs', {
                 params: {
                     page,
                     per_page: perPage,

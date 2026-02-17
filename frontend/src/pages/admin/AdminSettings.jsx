@@ -15,7 +15,7 @@ export default function AdminSettings() {
     const fetchSettings = async () => {
         setLoading(true);
         try {
-            const res = await api.get('/admin/settings');
+            const res = await api.get('/v1/internal/settings');
             const data = res.data;
             if (data.auto_approval !== undefined) setAutoApproval(data.auto_approval);
             if (data.mod_assignment) setModAssignment(data.mod_assignment);
@@ -37,7 +37,7 @@ export default function AdminSettings() {
         setSaving(true);
         setSaveStatus(null);
         try {
-            await api.post('/admin/settings', {
+            await api.post('/v1/internal/settings', {
                 auto_approval: autoApproval,
                 mod_assignment: modAssignment,
                 spam_sensitivity: spamSensitivity,

@@ -180,7 +180,7 @@ def upload_paper(**kwargs):
                 type='warning',
                 title='New Pending Paper',
                 message=f'User {current_user.name} uploaded "{title}". Approval required.',
-                link='/admin/moderation'
+                link='/sector-delta/moderation'
             )
             db.session.add(n)
         db.session.commit()

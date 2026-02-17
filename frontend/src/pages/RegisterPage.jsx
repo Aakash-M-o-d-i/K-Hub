@@ -78,9 +78,9 @@ export default function RegisterPage() {
                 <div className="absolute top-20 -left-20 w-80 h-80 bg-accent/20 rounded-full blur-3xl" />
                 <div className="absolute bottom-20 right-10 w-60 h-60 bg-landing-orange/15 rounded-full blur-3xl" />
                 <div className="relative z-10 text-center text-white px-12">
-                    <div className="w-20 h-20 bg-accent/20 rounded-2xl flex items-center justify-center mx-auto mb-8 overflow-hidden p-4">
+                    <Link to="/" className="w-20 h-20 bg-accent/20 rounded-2xl flex items-center justify-center mx-auto mb-8 overflow-hidden p-4 hover:scale-105 transition-transform cursor-pointer">
                         <img src="/logo.png" alt="Knowledge Hub Logo" className="w-full h-full object-contain" />
-                    </div>
+                    </Link>
                     <h2 className="font-display text-4xl font-extrabold mb-4">
                         {step === 'register' ? 'Join Knowledge Hub' : 'Verify Your Identity'}
                     </h2>
@@ -95,10 +95,10 @@ export default function RegisterPage() {
             {/* Right form */}
             <div className="flex-1 flex items-center justify-center p-8 bg-main">
                 <div className="w-full max-w-md">
-                    <div className="lg:hidden flex items-center gap-3 mb-10">
+                    <Link to="/" className="lg:hidden flex items-center gap-3 mb-10 hover:opacity-80 transition-opacity cursor-pointer">
                         <img src="/logo.png" alt="Knowledge Hub Logo" className="w-10 h-10 object-contain" />
                         <span className="font-display text-xl font-bold text-primary">Knowledge Hub</span>
-                    </div>
+                    </Link>
 
                     {step === 'register' ? (
                         <>

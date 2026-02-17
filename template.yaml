@@ -1,0 +1,119 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWS SAM Template for Knowledge Hub Platform
+
+Parameters:
+  DBUsername:
+    Type: String
+    Default: admin
+  DBPassword:
+    Type: String
+    NoEcho: true
+  Environment:
+    Type: String
+    Default: production
+  SecretKey:
+    Type: String
+    NoEcho: true
+  JwtSecretKey:
+    Type: String
+    NoEcho: true
+  BrevoApiKey:
+    Type: String
+    NoEcho: true
+  BrevoSenderEmail:
+    Type: String
+    Default: pyqs.works@gmail.com
+  BrevoSenderName:
+    Type: String
+    Default: Knowledge Hub
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Environment:
+      Variables:
+        DB_HOST: !GetAtt DBInstance.Endpoint.Address
+        DB_USER: !Ref DBUsername
+        DB_PASSWORD: !Ref DBPassword
+        DB_NAME: pyq_db
+        FLASK_ENV: !Ref Environment
+        SECRET_KEY: !Ref SecretKey
+        JWT_SECRET_KEY: !Ref JwtSecretKey
+        BREVO_API_KEY: !Ref BrevoApiKey
+        BREVO_SENDER_EMAIL: !Ref BrevoSenderEmail
+        BREVO_SENDER_NAME: !Ref BrevoSenderName
+
+Resources:
+  # --- Backend (Lambda + API Gateway) ---
+  BackendFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/
+      Handler: lambda_handler.handler
+      Runtime: python3.13
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+
+  # --- Frontend (S3 + CloudFront) ---
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::StackName}-frontend-bucket"
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Origins:
+          - DomainName: !GetAtt FrontendBucket.RegionalDomainName
+            Id: S3Origin
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+        Enabled: true
+        DefaultRootObject: index.html
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          ForwardedValues:
+            QueryString: false
+
+  # --- Database (RDS MySQL) ---
+  DBInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: '20'
+      DBInstanceClass: db.t3.micro
+      Engine: mysql
+      MasterUsername: !Ref DBUsername
+      MasterUserPassword: !Ref DBPassword
+      DBName: pyq_db
+      PubliclyAccessible: false
+      VPCSecurityGroups:
+        - !GetAtt DBSecurityGroup.GroupId
+
+  DBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow access to RDS from Lambda
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: 0.0.0.0/0 # Restricted to Lambda VPC in real world
+
+Outputs:
+  ApiUrl:
+    Description: "API Gateway HTTP API URL"
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com"
+  FrontendUrl:
+    Description: "CloudFront Distribution URL"
+    Value: !GetAtt CloudFrontDistribution.DomainName

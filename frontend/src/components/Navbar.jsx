@@ -15,6 +15,7 @@ export default function Navbar({ onMenuToggle }) {
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [showNotifications, setShowNotifications] = useState(false);
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
 
     const fetchNotifications = () => {
         if (!user) return;
@@ -189,10 +190,58 @@ export default function Navbar({ onMenuToggle }) {
 
                     {/* User Profile */}
                     {user && (
-                        <div className="flex items-center gap-3 pl-4 border-l border-border-main">
-                            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-primary/20 border-2 border-bg-surface ring-1 ring-border-main cursor-pointer hover:scale-105 transition-transform">
+                        <div className="relative pl-4 border-l border-border-main">
+                            <div
+                                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                                className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-primary/20 border-2 border-bg-surface ring-1 ring-border-main cursor-pointer hover:scale-105 transition-transform"
+                            >
                                 {user.name?.charAt(0).toUpperCase()}
                             </div>
+
+                            {showProfileMenu && (
+                                <>
+                                    <div className="fixed inset-0 z-40" onClick={() => setShowProfileMenu(false)} />
+                                    <div className="absolute right-0 mt-4 w-64 bg-[#1a2333] border border-white/5 rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in origin-top-right">
+                                        <div className="p-8 border-b border-white/5 text-center">
+                                            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white font-black text-2xl mx-auto mb-4 shadow-xl border-2 border-white/10">
+                                                {user.name?.charAt(0).toUpperCase()}
+                                            </div>
+                                            <h3 className="text-base font-black text-white truncate px-2">{user.name}</h3>
+                                            <p className="text-[11px] text-white/40 uppercase tracking-[0.25em] font-black mt-1.5">{user.role || 'Student'}</p>
+                                        </div>
+                                        <div className="p-2.5">
+                                            <Link
+                                                to="/profile"
+                                                onClick={() => setShowProfileMenu(false)}
+                                                className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-white/80 hover:bg-white/5 hover:text-white transition-all group"
+                                            >
+                                                <span className="material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform">person</span>
+                                                My Account Hub
+                                            </Link>
+                                            <Link
+                                                to="/preferences"
+                                                onClick={() => setShowProfileMenu(false)}
+                                                className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-white/80 hover:bg-white/5 hover:text-white transition-all group"
+                                            >
+                                                <span className="material-symbols-outlined text-[22px] group-hover:rotate-45 transition-transform">settings</span>
+                                                System Preferences
+                                            </Link>
+                                            <div className="h-px bg-white/5 my-2.5 mx-2" />
+                                            <button
+                                                onClick={() => {
+                                                    setShowProfileMenu(false);
+                                                    logout();
+                                                    navigate('/');
+                                                }}
+                                                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-rose-500 hover:bg-rose-500/5 transition-all group text-left"
+                                            >
+                                                <span className="material-symbols-outlined text-[22px] group-hover:translate-x-1 transition-transform">logout</span>
+                                                Logout Securely
+                                            </button>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     )}
                 </div>

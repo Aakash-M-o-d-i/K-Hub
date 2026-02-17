@@ -394,7 +394,7 @@ def verify_email():
                 type='success',
                 title='New User Registered',
                 message=f'User {user.name} ({user.email}) has joined and verified their account.',
-                link='/admin/users'
+                link='/sector-delta/users'
             )
             db.session.add(n)
         db.session.commit()

@@ -11,13 +11,14 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import Dashboard from './pages/Dashboard';
 import UploadPaper from './pages/UploadPaper';
-import LandingPageV1b from './pages/LandingPageV1b';
 import DepartmentalClash from './pages/DepartmentalClash';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UserCollections from './pages/UserCollections';
 import Profile from './pages/Profile';
 import Preferences from './pages/Preferences';
 import Security from './pages/Security';
+import Tutorial from './pages/Tutorial';
+import About from './pages/About';
 
 import './index.css';
 
@@ -44,7 +45,6 @@ export default function App() {
         <Routes>
           {/* Public - no sidebar */}
           <Route path="/" element={<LandingPage />} />
-          <Route path="/v1b" element={<LandingPageV1b />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/leaderboard" element={<AppLayout><DepartmentalClash /></AppLayout>} />
@@ -127,7 +127,7 @@ export default function App() {
           />
 
           <Route
-            path="/admin/*"
+            path="/sector-delta/*"
             element={
               <AdminRoute>
                 <AdminDashboard />
@@ -135,11 +135,23 @@ export default function App() {
             }
           />
           <Route
-            path="/admin/preferences"
+            path="/sector-delta/preferences"
             element={
               <AdminRoute>
                 <AdminDashboard />
               </AdminRoute>
+            }
+          />
+          <Route
+            path="/tutorial"
+            element={
+              <AppLayout><Tutorial /></AppLayout>
+            }
+          />
+          <Route
+            path="/about"
+            element={
+              <AppLayout><About /></AppLayout>
             }
           />
         </Routes>

@@ -1,0 +1,49 @@
+# Node components
+node_modules/
+dist/
+build/
+.npm/
+
+# Python components
+.venv/
+venv/
+ENV/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.eggs/
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+
+# File Uploads
+# backend/uploads/approved/*
+# backend/uploads/pending/*
+# !backend/uploads/approved/.gitkeep
+# !backend/uploads/pending/.gitkeep
+
+# SAM & AWS
+.aws-sam/
+
+# System Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.project
+.settings/
+*.swp
+*.swo

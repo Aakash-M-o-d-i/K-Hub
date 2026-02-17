@@ -14,7 +14,7 @@ export default function LoginPage() {
     // Auto-redirect if already logged in
     useEffect(() => {
         if (user) {
-            navigate(user.role === 'student' ? '/dashboard' : '/admin');
+            navigate(user.role === 'student' ? '/dashboard' : '/sector-delta');
         }
     }, [user, navigate]);
 
@@ -24,7 +24,7 @@ export default function LoginPage() {
         setLoading(true);
         try {
             const loggedInUser = await login(email, password);
-            navigate(loggedInUser.role === 'student' ? '/dashboard' : '/admin');
+            navigate(loggedInUser.role === 'student' ? '/dashboard' : '/sector-delta');
         } catch (err) {
             setError(err.response?.data?.error || 'Login failed');
         } finally {

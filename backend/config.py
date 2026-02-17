@@ -3,7 +3,15 @@ from datetime import timedelta
 from dotenv import load_dotenv
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-load_dotenv(os.path.join(basedir, ".env"))
+
+# Load environment variables based on FLASK_ENV
+env_mode = os.getenv("FLASK_ENV", "development")
+if env_mode == "production":
+    env_file = ".env.production"
+else:
+    env_file = ".env"
+
+load_dotenv(os.path.join(basedir, env_file))
 
 
 class Config:

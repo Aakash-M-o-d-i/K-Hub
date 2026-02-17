@@ -62,20 +62,20 @@ export default function LandingPage() {
                         <div className="hidden md:flex space-x-8 items-center">
                             <Link className="text-slate-600 dark:text-slate-300 hover:text-landing-primary dark:hover:text-landing-primary transition-colors font-medium" to="/dashboard">Browse</Link>
                             <Link className="text-slate-600 dark:text-slate-300 hover:text-landing-primary dark:hover:text-landing-primary transition-colors font-medium" to="/leaderboard">Leaderboard</Link>
-                            <Link className="text-slate-600 dark:text-slate-300 hover:text-landing-primary dark:hover:text-landing-primary transition-colors font-medium" to="/login">Tutorial</Link>
-                            <Link className="text-slate-600 dark:text-slate-300 hover:text-landing-primary dark:hover:text-landing-primary transition-colors font-medium" to="/register">About</Link>
+                            <Link className="text-slate-600 dark:text-slate-300 hover:text-landing-primary dark:hover:text-landing-primary transition-colors font-medium" to="/tutorial">Tutorial</Link>
+                            <Link className="text-slate-600 dark:text-slate-300 hover:text-landing-primary dark:hover:text-landing-primary transition-colors font-medium" to="/about">About</Link>
                         </div>
 
                         <div className="hidden md:flex items-center space-x-4">
                             {user ? (
-                                <Link className="bg-landing-primary hover:bg-landing-primary/90 text-white px-5 py-2 rounded-lg font-medium transition-all shadow-lg shadow-landing-primary/30" to={user.role === 'student' ? '/dashboard' : '/admin'}>
+                                <Link className="bg-landing-primary hover:bg-landing-primary/90 text-white px-5 py-2 rounded-lg font-medium transition-all shadow-lg shadow-landing-primary/30" to={user.role === 'student' ? '/dashboard' : '/sector-delta'}>
                                     Dashboard
                                 </Link>
                             ) : (
                                 <>
-                                    <Link className="text-slate-600 dark:text-slate-300 hover:text-landing-primary dark:hover:text-landing-primary font-medium" to="/login">Log in</Link>
+                                    <Link className="text-slate-600 dark:text-slate-300 hover:text-landing-primary dark:hover:text-landing-primary font-medium" to="/login">Sign In</Link>
                                     <Link className="bg-landing-primary hover:bg-landing-primary/90 text-white px-5 py-2 rounded-lg font-medium transition-all shadow-lg shadow-landing-primary/30" to="/register">
-                                        Sign Up
+                                        Create Account
                                     </Link>
                                 </>
                             )}
@@ -97,12 +97,13 @@ export default function LandingPage() {
                         <Link className="block text-slate-600 dark:text-slate-300 font-medium" to="/dashboard" onClick={() => setIsMenuOpen(false)}>Browse Papers</Link>
                         <Link className="block text-slate-600 dark:text-slate-300 font-medium" to="/leaderboard" onClick={() => setIsMenuOpen(false)}>Leaderboard</Link>
                         {user ? (
-                            <Link className="block w-full text-center bg-landing-primary text-white py-3 rounded-xl font-bold" to={user.role === 'student' ? '/dashboard' : '/admin'} onClick={() => setIsMenuOpen(false)}>
+                            <Link className="block w-full text-center bg-landing-primary text-white py-3 rounded-xl font-bold" to={user.role === 'student' ? '/dashboard' : '/sector-delta'} onClick={() => setIsMenuOpen(false)}>
                                 Go to Dashboard
                             </Link>
                         ) : (
                             <>
-                                <Link className="block text-slate-600 dark:text-slate-300 font-medium" to="/login" onClick={() => setIsMenuOpen(false)}>Log In</Link>
+                                <Link className="block text-slate-600 dark:text-slate-300 font-medium" to="/tutorial" onClick={() => setIsMenuOpen(false)}>Tutorial</Link>
+                                <Link className="block text-slate-600 dark:text-slate-300 font-medium" to="/about" onClick={() => setIsMenuOpen(false)}>About</Link>
                                 <Link className="block w-full text-center bg-landing-primary text-white py-3 rounded-xl font-bold" to="/register" onClick={() => setIsMenuOpen(false)}>Create Account</Link>
                             </>
                         )}

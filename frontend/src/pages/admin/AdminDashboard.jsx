@@ -45,14 +45,14 @@ function StatusBadge({ status }) {
 }
 
 const adminNavMain = [
-    { to: '/admin', icon: 'dashboard', label: 'Dashboard', end: true },
-    { to: '/admin/moderation', icon: 'gavel', label: 'Moderation Queue', badge: true },
-    { to: '/admin/users', icon: 'people', label: 'User Management' },
+    { to: '/sector-delta', icon: 'dashboard', label: 'Dashboard', end: true },
+    { to: '/sector-delta/moderation', icon: 'gavel', label: 'Moderation Queue', badge: true },
+    { to: '/sector-delta/users', icon: 'people', label: 'User Management' },
 ];
 const adminNavSystem = [
-    { to: '/admin/audit', icon: 'history', label: 'Audit Logs' },
-    { to: '/admin/settings', icon: 'settings', label: 'Settings' },
-    { to: '/admin/preferences', icon: 'settings_suggest', label: 'Preferences' },
+    { to: '/sector-delta/audit', icon: 'history', label: 'Audit Logs' },
+    { to: '/sector-delta/settings', icon: 'settings', label: 'Settings' },
+    { to: '/sector-delta/preferences', icon: 'settings_suggest', label: 'Preferences' },
 ];
 
 /* ────────────────────── Review Page (Screen #05) ────────────────────── */
@@ -96,7 +96,7 @@ function ReviewPage({ paper: initialPaper, pendingCount, onAction, onBack, user:
         }
         setIsSaving(true);
         try {
-            const res = await api.put(`/admin/papers/${paper.id}/metadata`, editData);
+            const res = await api.put(`/v1/internal/papers/${paper.id}/metadata`, editData);
             setPaper(res.data.paper);
             alert('Metadata protocol updated successfully.');
         } catch (err) {
@@ -448,10 +448,10 @@ export default function AdminDashboard() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const isUsersPage = location.pathname === '/admin/users';
-    const isAuditPage = location.pathname === '/admin/audit';
-    const isSettingsPage = location.pathname === '/admin/settings';
-    const isPreferencesPage = location.pathname === '/admin/preferences';
+    const isUsersPage = location.pathname === '/sector-delta/users';
+    const isAuditPage = location.pathname === '/sector-delta/audit';
+    const isSettingsPage = location.pathname === '/sector-delta/settings';
+    const isPreferencesPage = location.pathname === '/sector-delta/preferences';
 
     // Close mobile menu on route change
     useEffect(() => {
@@ -467,8 +467,8 @@ export default function AdminDashboard() {
     const fetchData = () => {
         setLoading(true);
         Promise.all([
-            api.get('/admin/stats'),
-            api.get('/admin/papers/pending', {
+            api.get('/v1/internal/stats'),
+            api.get('/v1/internal/papers/pending', {
                 params: {
                     page,
                     per_page: 20,
@@ -538,15 +538,15 @@ export default function AdminDashboard() {
 
         try {
             if (action === 'approve') {
-                await api.put(`/admin/papers/${paperId}/approve`);
+                await api.put(`/v1/internal/papers/${paperId}/approve`);
             } else if (action === 'reject') {
-                await api.put(`/admin/papers/${paperId}/reject`, { reason: reason || 'Rejected by admin' });
+                await api.put(`/v1/internal/papers/${paperId}/reject`, { reason: reason || 'Rejected by admin' });
             } else if (action === 'delete') {
-                await api.delete(`/admin/papers/${paperId}`);
+                await api.delete(`/v1/internal/papers/${paperId}`);
             }
 
             setPapers((prev) => prev.filter((p) => p.id !== paperId));
-            const res = await api.get('/admin/stats');
+            const res = await api.get('/v1/internal/stats');
             setStats(res.data);
             setReviewPaper(null);
         } catch (err) {

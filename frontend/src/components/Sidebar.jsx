@@ -13,6 +13,8 @@ const bottomItems = [
     { to: '/profile', icon: 'person', label: 'My Profile' },
     { to: '/preferences', icon: 'settings', label: 'Preferences' },
     { to: '/security', icon: 'verified_user', label: 'Security' },
+    { to: '/tutorial', icon: 'quiz', label: 'Tutorial' },
+    { to: '/about', icon: 'info', label: 'About' },
 ];
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -97,17 +99,17 @@ export default function Sidebar({ isOpen, onClose }) {
                         <div className="pt-4 space-y-1.5 border-t border-border-main/50 mt-4">
                             <p className="px-5 text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-3">Management</p>
                             <NavLink
-                                to="/admin"
+                                to="/sector-delta"
                                 onClick={onClose}
                                 className={() =>
                                     `flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-[13px] font-black transition-all duration-300 group
-                  ${location.pathname.startsWith('/admin')
+                  ${location.pathname.startsWith('/sector-delta')
                                         ? 'bg-primary/10 text-primary border border-primary/20 shadow-[0_4px_12px_rgba(var(--color-primary-rgb),0.1)]'
                                         : 'text-text-muted hover:bg-primary/5 hover:text-primary'
                                     }`
                                 }
                             >
-                                <span className={`material-symbols-outlined text-[22px] transition-transform group-hover:scale-110 ${location.pathname.startsWith('/admin') ? 'text-primary' : 'text-text-muted group-hover:text-primary'}`}>
+                                <span className={`material-symbols-outlined text-[22px] transition-transform group-hover:scale-110 ${location.pathname.startsWith('/sector-delta') ? 'text-primary' : 'text-text-muted group-hover:text-primary'}`}>
                                     {user?.role?.toLowerCase() === 'super_admin' ? 'admin_panel_settings' : 'shield_person'}
                                 </span>
                                 {user?.role?.toLowerCase() === 'super_admin' ? 'Control Center' : 'Admin Panel'}
@@ -125,8 +127,9 @@ export default function Sidebar({ isOpen, onClose }) {
 
                 {/* Bottom Section */}
                 <div className="p-3 space-y-1 border-t border-border-main">
-                    {user ? (
-                        bottomItems.map((item) => (
+                    {bottomItems
+                        .filter(item => user || item.label === 'Tutorial')
+                        .map((item) => (
                             <NavLink
                                 key={item.to}
                                 to={item.to}
@@ -139,14 +142,16 @@ export default function Sidebar({ isOpen, onClose }) {
                                 <span className={`material-symbols-outlined text-xl ${isItemActive(item.to) ? 'text-white' : ''}`}>{item.icon}</span>
                                 {item.label}
                             </NavLink>
-                        ))
-                    ) : (
+                        ))}
+
+                    {!user && (
                         <Link
                             to="/login"
-                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-primary font-bold hover:bg-primary/5 transition-all"
+                            onClick={onClose}
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-black text-primary hover:bg-primary/5 transition-all duration-300"
                         >
                             <span className="material-symbols-outlined text-xl">login</span>
-                            Sign In to Sync
+                            Sign In
                         </Link>
                     )}
 

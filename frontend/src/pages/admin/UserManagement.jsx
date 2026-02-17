@@ -37,7 +37,7 @@ function UserSlideOver({ userId, onClose }) {
     useEffect(() => {
         if (!userId) return;
         setLoading(true);
-        api.get(`/admin/users/${userId}`)
+        api.get(`/v1/internal/users/${userId}`)
             .then(res => {
                 setUser(res.data);
                 setAdminToggle(res.data.role === 'admin' || res.data.role === 'super_admin');
@@ -49,7 +49,7 @@ function UserSlideOver({ userId, onClose }) {
     const handleToggleAdmin = async () => {
         const newRole = adminToggle ? 'student' : 'admin';
         try {
-            const res = await api.put(`/admin/users/${userId}/role`, { role: newRole });
+            const res = await api.put(`/v1/internal/users/${userId}/role`, { role: newRole });
             setUser(res.data.user);
             setAdminToggle(newRole !== 'student');
         } catch {
@@ -284,7 +284,7 @@ export default function UserManagement() {
     const fetchUsers = async () => {
         setLoading(true);
         try {
-            const res = await api.get('/admin/users', { params: { page, per_page: perPage, search } });
+            const res = await api.get('/v1/internal/users', { params: { page, per_page: perPage, search } });
             setUsers(res.data.users);
             setTotalPages(res.data.pages);
             setTotalCount(res.data.total);
@@ -297,7 +297,7 @@ export default function UserManagement() {
 
     const fetchStats = async () => {
         try {
-            const res = await api.get('/admin/users/stats');
+            const res = await api.get('/v1/internal/users/stats');
             setUserStats(res.data);
         } catch (err) {
             console.error('Failed to fetch user stats:', err);
@@ -314,7 +314,7 @@ export default function UserManagement() {
 
     const handleExport = async () => {
         try {
-            const res = await api.get('/admin/users/export', {
+            const res = await api.get('/v1/internal/users/export', {
                 params: { search },
                 responseType: 'blob'
             });
