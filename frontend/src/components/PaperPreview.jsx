@@ -1,8 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../api/axios';
+import StarRating from './StarRating';
 
 export default function PaperPreview({ paper, onClose }) {
     const [downloading, setDownloading] = useState(false);
+    const [myScore, setMyScore] = useState(null);
+    const [ratingAvg, setRatingAvg] = useState(paper?.rating_avg || 0);
+    const [ratingCount, setRatingCount] = useState(paper?.rating_count || 0);
+    const [loadingRating, setLoadingRating] = useState(false);
+
+    const isLoggedIn = !!localStorage.getItem('pyq_token');
+
+    // Fetch user's existing rating on mount
+    useEffect(() => {
+        if (!paper || !isLoggedIn) return;
+        setLoadingRating(true);
+        api.get(`/papers/${paper.id}/rating`)
+            .then((res) => setMyScore(res.data.score))
+            .catch(() => { })
+            .finally(() => setLoadingRating(false));
+    }, [paper?.id]);
 
     if (!paper) return null;
 
@@ -22,6 +39,21 @@ export default function PaperPreview({ paper, onClose }) {
             alert('Download failed. Please log in first.');
         } finally {
             setDownloading(false);
+        }
+    };
+
+    const handleRate = async (score) => {
+        try {
+            const res = await api.post(`/papers/${paper.id}/rate`, { score });
+            setMyScore(score);
+            setRatingAvg(res.data.rating_avg);
+            setRatingCount(res.data.rating_count);
+            // Also update the paper object so parent components reflect the change
+            paper.rating_avg = res.data.rating_avg;
+            paper.rating_count = res.data.rating_count;
+        } catch (err) {
+            const msg = err.response?.data?.error || 'Failed to submit rating';
+            alert(msg);
         }
     };
 
@@ -145,12 +177,13 @@ export default function PaperPreview({ paper, onClose }) {
                         </div>
 
                         {/* Stats row */}
-                        <div className="flex items-center justify-between mb-8 p-4 bg-white/5 rounded-2xl border border-white/5">
+                        <div className="flex items-center justify-between mb-4 p-4 bg-white/5 rounded-2xl border border-white/5">
                             <div className="text-center px-4">
                                 <p className="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-1">Rating</p>
                                 <div className="flex items-center gap-1.5 justify-center">
                                     <span className="material-symbols-outlined text-[18px] text-amber-300" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                    <span className="font-bold text-lg">{paper.rating_avg || '0'}</span>
+                                    <span className="font-bold text-lg">{ratingAvg || '0'}</span>
+                                    <span className="text-white/40 text-xs">({ratingCount})</span>
                                 </div>
                             </div>
                             <div className="w-px h-8 bg-white/10" />
@@ -162,6 +195,33 @@ export default function PaperPreview({ paper, onClose }) {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Interactive Rating */}
+                        {paper.status === 'approved' && (
+                            <div className="mb-8 p-4 bg-white/5 rounded-2xl border border-white/5">
+                                <p className="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-3">
+                                    {isLoggedIn ? 'Rate this paper' : 'Log in to rate'}
+                                </p>
+                                {isLoggedIn ? (
+                                    <div className="flex items-center gap-3">
+                                        <StarRating
+                                            currentScore={myScore}
+                                            onRate={handleRate}
+                                            disabled={loadingRating}
+                                        />
+                                        {myScore && (
+                                            <span className="text-xs text-white/50">
+                                                Your rating: {myScore}/5
+                                            </span>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <p className="text-white/40 text-xs">
+                                        Sign in to rate and review papers
+                                    </p>
+                                )}
+                            </div>
+                        )}
 
                         {/* Actions */}
                         <div className="space-y-3">

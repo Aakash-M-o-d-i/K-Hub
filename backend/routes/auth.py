@@ -9,7 +9,7 @@ from models.session import UserSession
 from models.security_log import SecurityLog
 from models.notification import Notification
 from models.otp import OTP
-from utils.email_utils import send_otp_email
+from utils.email_utils import send_otp_email, send_password_reset_email
 from middleware.auth import jwt_required_with_user, get_jwt
 from sqlalchemy import func
 from datetime import datetime, timedelta
@@ -456,3 +456,158 @@ def resend_otp():
         return jsonify({"error": "Failed to send verification email"}), 500
         
     return jsonify({"message": "Verification code resent successfully"}), 200
+
+
+@auth_bp.route("/forgot-password", methods=["POST"])
+def forgot_password():
+    """Step 1: Send OTP to the registered email for password reset."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Request body required"}), 400
+
+    email = data.get("email", "").strip().lower()
+    if not email:
+        return jsonify({"error": "Email is required"}), 400
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        # Don't reveal whether the email exists — always return success
+        return jsonify({"message": "If this email is registered, you will receive a reset code."}), 200
+
+    # Generate OTP and store it (reuse OTP table with name=__PASSWORD_RESET__ to distinguish)
+    otp_code = OTP.generate_code()
+    expires_at = datetime.utcnow() + timedelta(minutes=10)
+
+    # Remove any existing reset OTPs for this email
+    OTP.query.filter_by(email=email, name="__PASSWORD_RESET__").delete()
+
+    otp = OTP(
+        email=email,
+        code=otp_code,
+        expires_at=expires_at,
+        name="__PASSWORD_RESET__",
+    )
+    db.session.add(otp)
+    db.session.commit()
+
+    email_sent = send_password_reset_email(email, user.name, otp_code)
+
+    if not email_sent:
+        return jsonify({"error": "Failed to send reset email. Please try again."}), 500
+
+    return jsonify({"message": "If this email is registered, you will receive a reset code."}), 200
+
+
+@auth_bp.route("/verify-reset-otp", methods=["POST"])
+def verify_reset_otp():
+    """Step 2: Verify the OTP code for password reset (max 3 attempts)."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Request body required"}), 400
+
+    email = data.get("email", "").strip().lower()
+    code = data.get("code", "").strip()
+
+    if not email or not code:
+        return jsonify({"error": "Email and code are required"}), 400
+
+    # Find the reset OTP for this email (regardless of code — to track attempts)
+    otp = OTP.query.filter_by(
+        email=email, name="__PASSWORD_RESET__"
+    ).order_by(OTP.created_at.desc()).first()
+
+    if not otp:
+        return jsonify({"error": "No reset request found. Please request a new code."}), 400
+
+    if otp.is_expired():
+        OTP.query.filter_by(email=email, name="__PASSWORD_RESET__").delete()
+        db.session.commit()
+        return jsonify({"error": "Reset code has expired. Please request a new one.", "expired": True}), 400
+
+    # Check if already exceeded max attempts
+    if otp.attempts >= OTP.MAX_ATTEMPTS:
+        OTP.query.filter_by(email=email, name="__PASSWORD_RESET__").delete()
+        db.session.commit()
+        return jsonify({
+            "error": "Too many failed attempts. This code has been invalidated. Please request a new one.",
+            "locked": True,
+            "attempts_remaining": 0,
+        }), 429
+
+    # Check if code matches
+    if otp.code != code:
+        otp.attempts += 1
+        remaining = OTP.MAX_ATTEMPTS - otp.attempts
+
+        if remaining <= 0:
+            # Max attempts reached — invalidate the OTP
+            OTP.query.filter_by(email=email, name="__PASSWORD_RESET__").delete()
+            db.session.commit()
+            return jsonify({
+                "error": "Too many failed attempts. This code has been invalidated. Please request a new one.",
+                "locked": True,
+                "attempts_remaining": 0,
+            }), 429
+
+        db.session.commit()
+        return jsonify({
+            "error": f"Invalid code. {remaining} attempt{'s' if remaining != 1 else ''} remaining.",
+            "attempts_remaining": remaining,
+        }), 400
+
+    # Code is correct — generate reset token
+    import secrets
+    reset_token = secrets.token_urlsafe(32)
+    otp.password_hash = reset_token
+    otp.attempts = 0  # reset attempts on success
+    db.session.commit()
+
+    return jsonify({
+        "message": "Code verified successfully",
+        "reset_token": reset_token,
+    }), 200
+
+
+@auth_bp.route("/reset-password", methods=["POST"])
+def reset_password():
+    """Step 3: Set new password using the reset token."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Request body required"}), 400
+
+    email = data.get("email", "").strip().lower()
+    reset_token = data.get("reset_token", "").strip()
+    new_password = data.get("new_password", "")
+
+    if not email or not reset_token or not new_password:
+        return jsonify({"error": "Email, reset token, and new password are required"}), 400
+
+    if len(new_password) < 6:
+        return jsonify({"error": "Password must be at least 6 characters"}), 400
+
+    # Verify the reset token
+    otp = OTP.query.filter_by(
+        email=email, name="__PASSWORD_RESET__", password_hash=reset_token
+    ).first()
+
+    if not otp:
+        return jsonify({"error": "Invalid or expired reset session"}), 400
+
+    if otp.is_expired():
+        return jsonify({"error": "Reset session has expired. Please start over."}), 400
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    # Update password
+    user.password_hash = bcrypt.generate_password_hash(new_password).decode("utf-8")
+    user.password_changed_at = datetime.utcnow()
+
+    # Clean up all reset OTPs for this email
+    OTP.query.filter_by(email=email, name="__PASSWORD_RESET__").delete()
+    db.session.commit()
+
+    log_security_event(user.id, "PWD_RESET", metadata={"method": "email_otp"})
+
+    return jsonify({"message": "Password reset successfully. You can now log in."}), 200

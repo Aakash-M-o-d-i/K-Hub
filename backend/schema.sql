@@ -132,7 +132,25 @@ CREATE TABLE IF NOT EXISTS bookmarks (
 ) ENGINE=InnoDB;
 
 -- ============================================================
--- 8. User Sessions (Active Sessions Tracking)
+-- 8. Ratings
+-- ============================================================
+CREATE TABLE IF NOT EXISTS ratings (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    user_id         INT NOT NULL,
+    paper_id        INT NOT NULL,
+    score           TINYINT NOT NULL,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_rating (user_id, paper_id),
+    FOREIGN KEY (user_id)  REFERENCES users(id)  ON DELETE CASCADE,
+    FOREIGN KEY (paper_id) REFERENCES papers(id) ON DELETE CASCADE,
+    INDEX idx_rating_paper (paper_id, score),
+    INDEX idx_rating_user  (user_id),
+    CHECK (score BETWEEN 1 AND 5)
+) ENGINE=InnoDB;
+
+-- ============================================================
+-- 9. User Sessions (Active Sessions Tracking)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS user_sessions (
     id              INT AUTO_INCREMENT PRIMARY KEY,

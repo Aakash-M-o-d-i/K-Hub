@@ -13,7 +13,10 @@ class OTP(db.Model):
     name = db.Column(db.String(100), nullable=True)
     password_hash = db.Column(db.String(255), nullable=True)
     department_id = db.Column(db.Integer, nullable=True)
+    attempts = db.Column(db.Integer, default=0)
     
+    MAX_ATTEMPTS = 3  # Max wrong OTP attempts before invalidation
+
     expires_at = db.Column(db.DateTime, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 

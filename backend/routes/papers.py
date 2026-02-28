@@ -8,6 +8,7 @@ from models.department import Department
 from models.leaderboard import Download, LeaderboardPoints, SystemSetting, Bookmark
 from models.user import User
 from models.notification import Notification
+from models.rating import Rating
 from middleware.auth import jwt_required_with_user
 
 papers_bp = Blueprint("papers", __name__, url_prefix="/api/papers")
@@ -332,6 +333,90 @@ def get_public_stats():
         }), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@papers_bp.route("/<int:paper_id>/rate", methods=["POST"])
+@jwt_required_with_user
+def rate_paper(paper_id, **kwargs):
+    """Submit or update a rating for a paper (1-5 stars).
+    Optimized for 1000+ ratings per paper using incremental avg updates.
+    """
+    current_user = kwargs["current_user"]
+    paper = Paper.query.get_or_404(paper_id)
+
+    if paper.status != "approved":
+        return jsonify({"error": "Can only rate approved papers"}), 403
+
+    data = request.get_json() or {}
+    score = data.get("score")
+
+    if not score or not isinstance(score, int) or score < 1 or score > 5:
+        return jsonify({"error": "Score must be an integer between 1 and 5"}), 400
+
+    # Check for existing rating (indexed lookup)
+    rating = Rating.query.filter_by(
+        user_id=current_user.id, paper_id=paper.id
+    ).first()
+
+    if rating:
+        # Skip if same score — no DB write needed
+        if rating.score == score:
+            return jsonify({
+                "message": "Rating unchanged",
+                "score": score,
+                "rating_avg": float(paper.rating_avg),
+                "rating_count": paper.rating_count,
+            }), 200
+
+        # Incremental avg update: O(1) instead of re-aggregating all rows
+        # new_avg = old_avg + (new_score - old_score) / count
+        old_score = rating.score
+        count = paper.rating_count or 1
+        old_avg = float(paper.rating_avg) if paper.rating_avg else 0.0
+        new_avg = old_avg + (score - old_score) / count
+        rating.score = score
+        paper.rating_avg = round(new_avg, 1)
+    else:
+        # New rating: update avg with simple weighted formula
+        # new_avg = (old_avg * old_count + new_score) / (old_count + 1)
+        old_count = paper.rating_count or 0
+        old_avg = float(paper.rating_avg) if paper.rating_avg else 0.0
+        new_count = old_count + 1
+        new_avg = (old_avg * old_count + score) / new_count
+
+        rating = Rating(
+            user_id=current_user.id,
+            paper_id=paper.id,
+            score=score,
+        )
+        db.session.add(rating)
+        paper.rating_count = new_count
+        paper.rating_avg = round(new_avg, 1)
+
+    db.session.commit()
+
+    return jsonify({
+        "message": "Rating submitted",
+        "score": score,
+        "rating_avg": float(paper.rating_avg),
+        "rating_count": paper.rating_count,
+    }), 200
+
+
+@papers_bp.route("/<int:paper_id>/rating", methods=["GET"])
+@jwt_required_with_user
+def get_my_rating(paper_id, **kwargs):
+    """Get the current user's rating for a paper."""
+    current_user = kwargs["current_user"]
+    Paper.query.get_or_404(paper_id)
+
+    rating = Rating.query.filter_by(
+        user_id=current_user.id, paper_id=paper_id
+    ).first()
+
+    return jsonify({
+        "score": rating.score if rating else None,
+    }), 200
 
 
 def paper_id_counter():
