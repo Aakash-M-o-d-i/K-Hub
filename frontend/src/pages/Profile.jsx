@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 
-export default function Profile() {
+function Profile() {
     const { user, refreshUser } = useAuth();
     const [departments, setDepartments] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -15,6 +15,8 @@ export default function Profile() {
         roll_no: '',
         department_id: '',
         year: '',
+        semester: '',
+        phone_number: '',
         bio: ''
     });
 
@@ -26,6 +28,8 @@ export default function Profile() {
                 roll_no: user.roll_no || '',
                 department_id: user.department_id || '',
                 year: user.year || '',
+                semester: user.semester || '',
+                phone_number: user.phone_number || '',
                 bio: user.bio || ''
             });
         }
@@ -107,19 +111,40 @@ export default function Profile() {
                                         <h2 className="text-3xl font-black text-text-main tracking-tight">{user.name}</h2>
                                         <p className="flex items-center gap-2 text-[11px] font-black text-text-muted uppercase tracking-widest opacity-70">
                                             <span className="material-symbols-outlined text-lg text-primary">school</span>
-                                            {user.department?.name || 'Department Neutral'}, Year {user.year || '3'}
+                                            {user.department?.name || 'Department Neutral'}, Semester {user.semester || '1'}
                                         </p>
                                     </div>
                                     <div className="flex flex-wrap gap-2">
-                                        <span className="px-5 py-2 bg-primary/10 text-primary text-[9px] font-black uppercase tracking-widest rounded-full border border-primary/20 flex items-center gap-2 shadow-sm">
-                                            <span className="material-symbols-outlined text-base">verified</span> Top Contributor
-                                        </span>
-                                        <span className="px-5 py-2 bg-warning/10 text-warning text-[9px] font-black uppercase tracking-widest rounded-full border border-warning/20 flex items-center gap-2 shadow-sm">
-                                            <span className="material-symbols-outlined text-base">auto_awesome</span> Beta Tester
-                                        </span>
-                                        <span className="px-5 py-2 bg-success/10 text-success text-[9px] font-black uppercase tracking-widest rounded-full border border-success/20 flex items-center gap-2 shadow-sm">
-                                            <span className="material-symbols-outlined text-base">library_books</span> 50+ Papers
-                                        </span>
+                                        {user.is_top_contributor && (
+                                            <span className="px-5 py-2 bg-primary/10 text-primary text-[9px] font-black uppercase tracking-widest rounded-full border border-primary/20 flex items-center gap-2 shadow-sm">
+                                                <span className="material-symbols-outlined text-base">verified</span> Top Contributor
+                                            </span>
+                                        )}
+                                        {user.is_beta_tester && (
+                                            <span className="px-5 py-2 bg-warning/10 text-warning text-[9px] font-black uppercase tracking-widest rounded-full border border-warning/20 flex items-center gap-2 shadow-sm">
+                                                <span className="material-symbols-outlined text-base">auto_awesome</span> Beta Tester
+                                            </span>
+                                        )}
+                                        {user.total_uploads >= 50 && (
+                                            <span className="px-5 py-2 bg-success/10 text-success text-[9px] font-black uppercase tracking-widest rounded-full border border-success/20 flex items-center gap-2 shadow-sm">
+                                                <span className="material-symbols-outlined text-base">workspace_premium</span> Master Contributor
+                                            </span>
+                                        )}
+                                        {user.total_uploads >= 10 && user.total_uploads < 50 && (
+                                            <span className="px-5 py-2 bg-blue-500/10 text-blue-500 text-[9px] font-black uppercase tracking-widest rounded-full border border-blue-500/20 flex items-center gap-2 shadow-sm">
+                                                <span className="material-symbols-outlined text-base">star</span> Rising Star
+                                            </span>
+                                        )}
+                                        {user.total_uploads >= 1 && user.total_uploads < 10 && (
+                                            <span className="px-5 py-2 bg-indigo-500/10 text-indigo-500 text-[9px] font-black uppercase tracking-widest rounded-full border border-indigo-500/20 flex items-center gap-2 shadow-sm">
+                                                <span className="material-symbols-outlined text-base">rocket_launch</span> First Step
+                                            </span>
+                                        )}
+                                        {user.total_uploads === 0 && (
+                                            <span className="px-5 py-2 bg-bg-main/50 text-text-muted text-[9px] font-black uppercase tracking-widest rounded-full border border-border-main flex items-center gap-2 shadow-sm opacity-60">
+                                                <span className="material-symbols-outlined text-base">person</span> Contributor
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
 
@@ -150,9 +175,9 @@ export default function Profile() {
                 </div>
 
                 {/* Content Grid: Form & Chart */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-10">
+                <div className="grid grid-cols-1 lg:grid-cols-1 gap-8 mt-10">
                     {/* Personal Information (Left) */}
-                    <div className="lg:col-span-8">
+                    <div className="w-full">
                         <div className="bg-bg-surface rounded-3xl border border-border-main shadow-sm flex flex-col h-full overflow-hidden">
                             <div className="px-8 py-6 border-b border-border-main flex items-center justify-between">
                                 <h3 className="text-sm font-black text-text-main uppercase tracking-widest">Personal Information</h3>
@@ -217,6 +242,36 @@ export default function Profile() {
                                             <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none">expand_more</span>
                                         </div>
                                     </div>
+                                    <div className="space-y-3">
+                                        <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 opacity-60">Phone Number</label>
+                                        <div className="relative group">
+                                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted opacity-40 group-focus-within:text-primary transition-all">call</span>
+                                            <input
+                                                type="text"
+                                                value={formData.phone_number}
+                                                onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+                                                className="w-full pl-12 pr-6 py-3.5 bg-bg-main border border-border-main rounded-xl text-[13px] font-bold text-text-main focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm"
+                                                placeholder="1234567890"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-3">
+                                        <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 opacity-60">Semester</label>
+                                        <div className="relative group">
+                                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted opacity-40 group-focus-within:text-primary transition-all">school</span>
+                                            <select
+                                                value={formData.semester}
+                                                onChange={(e) => setFormData({ ...formData, semester: e.target.value })}
+                                                className="w-full pl-12 pr-10 py-3.5 bg-bg-main border border-border-main rounded-xl text-[13px] font-bold text-text-main focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all appearance-none cursor-pointer"
+                                            >
+                                                <option value="">Select Semester</option>
+                                                {[1, 2, 3, 4, 5, 6, 7, 8].map(s => (
+                                                    <option key={s} value={s}>Semester {s}</option>
+                                                ))}
+                                            </select>
+                                            <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none">expand_more</span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="space-y-3">
                                     <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 opacity-60">Bio</label>
@@ -230,44 +285,109 @@ export default function Profile() {
                                 </div>
                             </form>
                         </div>
+
                     </div>
 
-                    {/* Contribution Summary (Right) */}
-                    <div className="lg:col-span-4">
-                        <div className="bg-bg-surface p-8 rounded-3xl border border-border-main shadow-sm h-full flex flex-col">
-                            <h3 className="text-sm font-black text-text-main uppercase tracking-widest mb-1">Contribution Summary</h3>
-                            <p className="text-[11px] text-text-muted font-bold opacity-60 mb-10">Upload activity over the last 6 months.</p>
+                    {/* Premium GitHub-style Contribution Section */}
+                    <div className="mt-8 bg-[#0d1117] rounded-xl border border-[#30363d] p-6 shadow-2xl overflow-hidden">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-[13px] font-normal text-white">
+                                <span className="font-bold">{user.total_uploads || 0} contributions - paper</span> in the last year
+                            </h3>
+                        </div>
 
-                            <div className="flex-1 flex items-end justify-between gap-3 h-48 border-b border-border-main/30 pb-4 mb-8">
-                                {[30, 45, 25, 60, 80, 55].map((h, i) => (
-                                    <div key={i} className="flex-1 flex flex-col items-center gap-3 group/bar relative">
-                                        <div className="w-full bg-slate-100 dark:bg-bg-main/50 rounded-lg relative overflow-hidden h-full">
-                                            <div
-                                                className={`absolute bottom-0 left-0 w-full transition-all duration-1000 ${i === 5 ? 'bg-slate-900 dark:bg-primary h-11' : 'bg-slate-200 dark:bg-primary/20'}`}
-                                                style={{ height: i === 5 ? '11px' : `${h}%` }}
-                                            />
-                                            {i === 5 && (
-                                                <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-bg-main text-white dark:text-text-main px-1.5 py-0.5 rounded text-[8px] font-bold">11</div>
-                                            )}
-                                        </div>
-                                        <span className={`text-[9px] font-bold uppercase tracking-widest ${i === 5 ? 'text-slate-900 dark:text-primary' : 'text-text-muted opacity-40'}`}>
-                                            {'JanFebMarAprMayJun'.slice(i * 3, (i + 1) * 3)}
-                                        </span>
+                        <div className="border border-[#30363d] rounded-md p-5 bg-[#0d1117]">
+                            <div className="flex gap-3">
+                                {/* Day Labels (Sun-Sat) */}
+                                <div className="grid grid-rows-7 gap-[4px] h-[108px] text-[10px] text-[#8b949e] select-none text-right w-8 mt-7">
+                                    <span className="flex items-center justify-end">Sun</span>
+                                    <span className="flex items-center justify-end">Mon</span>
+                                    <span className="flex items-center justify-end">Tue</span>
+                                    <span className="flex items-center justify-end">Wed</span>
+                                    <span className="flex items-center justify-end">Thu</span>
+                                    <span className="flex items-center justify-end">Fri</span>
+                                    <span className="flex items-center justify-end">Sat</span>
+                                </div>
+                                
+                                <div className="flex-1 overflow-x-auto pb-4 scrollbar-hide">
+                                    {/* Month Labels Dynamic Alignment */}
+                                    <div className="relative h-5 mb-2 text-[10px] text-[#8b949e] select-none min-w-[832px]">
+                                        {Array.from({ length: 52 }).map((_, weekIndex) => {
+                                            const date = new Date();
+                                            date.setDate(date.getDate() - (51 - weekIndex) * 7);
+                                            const month = date.toLocaleString('default', { month: 'short' });
+                                            const isFirstWeekOfMonth = date.getDate() <= 7;
+                                            
+                                            if (!isFirstWeekOfMonth) return null;
+
+                                            return (
+                                                <span 
+                                                    key={weekIndex} 
+                                                    className="absolute" 
+                                                    style={{ left: `${weekIndex * 16}px` }}
+                                                >
+                                                    {month}
+                                                </span>
+                                            );
+                                        })}
                                     </div>
-                                ))}
+
+                                    {/* Grid (Big Boxes) */}
+                                    <div className="flex gap-[4px] min-w-[832px]">
+                                        {Array.from({ length: 52 }).map((_, weekIndex) => (
+                                            <div key={weekIndex} className="flex flex-col gap-[4px] flex-shrink-0">
+                                                {Array.from({ length: 7 }).map((_, dayIndex) => {
+                                                    const todayRef = new Date();
+                                                    const currentD = todayRef.getDay(); // Sun=0, Mon=1, ... Sat=6
+                                                    const daysAgo = (51 - weekIndex) * 7 + (currentD - dayIndex);
+                                                    
+                                                    // Don't show future boxes or boxes more than 365 days ago if they don't fit
+                                                    if (daysAgo < 0) return <div key={dayIndex} className="w-[12px] h-[12px] opacity-0" />;
+
+                                                    const date = new Date();
+                                                    date.setDate(date.getDate() - daysAgo);
+                                                    const dateStr = date.toISOString().split('T')[0];
+                                                    const count = user.contribution_grid?.[dateStr] || 0;
+                                                    
+                                                    // Authentic GitHub Colors
+                                                    const color = count === 0 ? '#161b22' : 
+                                                                    count < 3 ? '#0e4429' : 
+                                                                    count < 6 ? '#006d32' : 
+                                                                    count < 10 ? '#26a641' : '#39d353';
+
+                                                    return (
+                                                        <div 
+                                                            key={dayIndex} 
+                                                            className="w-[12px] h-[12px] rounded-[2px] transition-all hover:scale-125 hover:ring-1 hover:ring-white cursor-pointer relative group-activity"
+                                                            style={{ backgroundColor: color }}
+                                                            title={`${count} contributions on ${date.toDateString()}`}
+                                                        />
+                                                    );
+                                                })}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className="space-y-5">
-                                <div className="flex justify-between items-center text-[11px] font-black uppercase tracking-widest">
-                                    <span className="text-text-muted opacity-60">Total this month</span>
-                                    <span className="text-text-main">11 Papers</span>
+                            <div className="flex items-center justify-between mt-4 border-t border-[#30363d] pt-4">
+                                <div className="text-[10px] text-[#8b949e]">
+                                    Each verified paper upload is a contribution. 
+                                    <a href="/upload/new" className="font-bold text-[#39d353] hover:text-white transition-all ml-1 p-1 px-2 bg-[#0e4429] rounded-md border border-[#26a641]/30">
+                                        Upload a new paper →
+                                    </a>
                                 </div>
-                                <div className="w-full bg-slate-100 dark:bg-bg-main rounded-full h-2.5 overflow-hidden">
-                                    <div className="h-full bg-success rounded-full" style={{ width: '73%' }} />
-                                </div>
-                                <div className="pt-2 text-[10px] text-success font-black uppercase tracking-widest flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                                    You are in the top 5% of uploaders!
+                                <div className="flex items-center gap-1.5 select-none">
+                                    <span className="text-[10px] text-[#8b949e]">Less</span>
+                                    {[0, 1, 2, 3, 4].map(i => (
+                                        <div key={i} className="w-2.5 h-2.5 rounded-[2px]" style={{ 
+                                            backgroundColor: i === 0 ? '#161b22' : 
+                                                            i === 1 ? '#0e4429' : 
+                                                            i === 2 ? '#006d32' : 
+                                                            i === 3 ? '#26a641' : '#39d353'
+                                        }} />
+                                    ))}
+                                    <span className="text-[10px] text-[#8b949e]">More</span>
                                 </div>
                             </div>
                         </div>
@@ -276,4 +396,6 @@ export default function Profile() {
             </div>
         </div>
     );
-}
+};
+
+export default Profile;

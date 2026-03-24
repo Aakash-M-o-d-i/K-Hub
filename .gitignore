@@ -26,14 +26,10 @@ coverage.xml
 
 # Environment & Secrets
 .env
+.env.production
 .env.*
 !.env.example
-
-# File Uploads
-# backend/uploads/approved/*
-# backend/uploads/pending/*
-# !backend/uploads/approved/.gitkeep
-# !backend/uploads/pending/.gitkeep
+!.env.production.example
 
 # SAM & AWS
 .aws-sam/
@@ -47,3 +43,12 @@ Thumbs.db
 .settings/
 *.swp
 *.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+.env.local

@@ -66,12 +66,14 @@ export function AuthProvider({ children }) {
         return newUser;
     };
 
-    const register = async (name, email, password, departmentId) => {
+    const register = async (name, email, password, departmentId, phoneNumber, semester) => {
         const res = await api.post('/auth/register', {
             name,
             email,
             password,
             department_id: departmentId,
+            phone_number: phoneNumber,
+            semester: parseInt(semester),
         });
         const { token: newToken, user: newUser } = res.data;
         localStorage.setItem('pyq_token', newToken);

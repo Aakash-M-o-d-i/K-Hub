@@ -1,6 +1,8 @@
+import secrets
+
 from models import db
 from datetime import datetime, timedelta
-import random
+
 
 class OTP(db.Model):
     __tablename__ = "otps"
@@ -13,6 +15,8 @@ class OTP(db.Model):
     name = db.Column(db.String(100), nullable=True)
     password_hash = db.Column(db.String(255), nullable=True)
     department_id = db.Column(db.Integer, nullable=True)
+    semester = db.Column(db.Integer, nullable=True)
+    phone_number = db.Column(db.String(20), nullable=True)
     attempts = db.Column(db.Integer, default=0)
     
     MAX_ATTEMPTS = 3  # Max wrong OTP attempts before invalidation
@@ -22,7 +26,8 @@ class OTP(db.Model):
 
     @staticmethod
     def generate_code():
-        return "".join([str(random.randint(0, 9)) for _ in range(6)])
+        """Generate a cryptographically secure 6-digit OTP code."""
+        return "".join([str(secrets.randbelow(10)) for _ in range(6)])
 
     def is_expired(self):
         return datetime.utcnow() > self.expires_at

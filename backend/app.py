@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from config import Config
@@ -9,6 +9,10 @@ from routes.papers import papers_bp
 from routes.admin import admin_bp
 from routes.leaderboard import leaderboard_bp
 from routes.notifications import notifications_bp
+from utils.security import (
+    limiter, add_security_headers, get_safe_cors_origins,
+    SessionSecurity, AuditLogger
+)
 
 
 def create_app():
@@ -22,15 +26,45 @@ def create_app():
     # Init extensions
     db.init_app(app)
     bcrypt.init_app(app)
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    
+    # Configure CORS with safe origins only
+    cors_origins = get_safe_cors_origins()
+    CORS(app, resources={
+        r"/api/*": {
+            "origins": cors_origins,
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
+            "supports_credentials": True,
+            "max_age": 3600
+        }
+    })
+    
     JWTManager(app)
-
+    limiter.init_app(app)
+    
+    # Configure session security
+    SessionSecurity.validate_session_cookie_settings(app)
+    
     # Register blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(papers_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(leaderboard_bp)
     app.register_blueprint(notifications_bp)
+
+    # ✅ Add security headers to all responses
+    @app.after_request
+    def apply_security_headers(response):
+        return add_security_headers(response)
+    
+    # ✅ Log all requests
+    @app.before_request
+    def log_request():
+        AuditLogger.log_event(
+            'HTTP_REQUEST',
+            details=f"{request.method} {request.path}",
+            severity='DEBUG'
+        )
 
     # Health check
     @app.route("/api/health")
@@ -42,4 +76,4 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
-    app.run(debug=True, port=5000)
+    app.run(debug=(os.getenv('FLASK_ENV') != 'production'), port=5000)

@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import jsonify
+from flask import jsonify, request, current_app
 from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity, get_jwt
 from models.user import User
 from models.session import UserSession
@@ -37,13 +37,10 @@ def admin_required(fn):
         if not user:
             return jsonify({"error": "User not found"}), 404
         if user.role not in ("admin", "super_admin"):
-            # Diagnostic logging for 403
-            import os
-            from datetime import datetime
-            error_file = os.path.join(os.getcwd(), "backend_error.txt")
-            with open(error_file, "a") as f:
-                f.write(f"\n--- 403 Forbidden ({datetime.utcnow()}) ---\n")
-                f.write(f"User ID: {user_id}, Role: {user.role}, Endpoint: {request.path}\n")
+            current_app.logger.warning(
+                f"403 Forbidden - User ID: {user_id}, Role: {user.role}, "
+                f"Endpoint: {request.path}"
+            )
             return jsonify({"error": "Admin access required"}), 403
         kwargs["current_user"] = user
         return fn(*args, **kwargs)

@@ -8,6 +8,8 @@ export default function RegisterPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [departmentId, setDepartmentId] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [semester, setSemester] = useState('');
     const [departments, setDepartments] = useState([]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -29,7 +31,7 @@ export default function RegisterPage() {
         setError('');
         setLoading(true);
         try {
-            await register(name, email, password, departmentId || null);
+            await register(name, email, password, departmentId, phoneNumber, semester);
             setStep('verify');
         } catch (err) {
             setError(err.response?.data?.error || 'Registration failed');
@@ -133,17 +135,42 @@ export default function RegisterPage() {
                                     <label className="block text-sm font-medium text-main mb-2">Password</label>
                                     <input
                                         type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                                        placeholder="Min 6 characters" required minLength={6}
+                                        placeholder="Min 8 characters" required minLength={8}
                                         className="w-full px-4 py-3 rounded-xl border border-main bg-surface text-main text-sm placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-all"
                                     />
+                                    <p className="text-[11px] text-muted mt-1.5 px-1">
+                                        Must include uppercase, lowercase, and numbers.
+                                    </p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-main mb-2">Phone Number</label>
+                                        <input
+                                            type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)}
+                                            placeholder="1234567890" required
+                                            className="w-full px-4 py-3 rounded-xl border border-main bg-surface text-main text-sm placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-all"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-main mb-2">Semester</label>
+                                        <select
+                                            value={semester} onChange={(e) => setSemester(e.target.value)} required
+                                            className="w-full px-4 py-3 rounded-xl border border-main bg-surface text-main text-sm placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-all"
+                                        >
+                                            <option value="">Select</option>
+                                            {[1, 2, 3, 4, 5, 6, 7, 8].map(s => (
+                                                <option key={s} value={s}>Semester {s}</option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-main mb-2">Department</label>
                                     <select
-                                        value={departmentId} onChange={(e) => setDepartmentId(e.target.value)}
+                                        value={departmentId} onChange={(e) => setDepartmentId(e.target.value)} required
                                         className="w-full px-4 py-3 rounded-xl border border-main bg-surface text-main text-sm placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-all"
                                     >
-                                        <option value="">Select Department (optional)</option>
+                                        <option value="">Select Department</option>
                                         {departments.map((d) => (
                                             <option key={d.id} value={d.id}>{d.code} — {d.name}</option>
                                         ))}

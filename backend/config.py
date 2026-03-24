@@ -15,9 +15,16 @@ load_dotenv(os.path.join(basedir, env_file))
 
 
 class Config:
-    SECRET_KEY = os.getenv("SECRET_KEY", "pyq-super-secret-key-change-in-prod")
-    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "jwt-secret-key-change-in-prod")
+    SECRET_KEY = os.getenv("SECRET_KEY")
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+    
+    if not SECRET_KEY or not JWT_SECRET_KEY:
+        raise ValueError(
+            "CRITICAL: SECRET_KEY and JWT_SECRET_KEY must be set in environment. "
+            "Copy .env.example to .env and fill in secure values."
+        )
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)
+    ENV = os.getenv("FLASK_ENV", "development")
 
     # MySQL
     DB_USER = os.getenv("DB_USER", "root")
@@ -30,10 +37,28 @@ class Config:
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # File uploads
+    # ✅ SECURITY: File upload restrictions
     UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads")
     MAX_CONTENT_LENGTH = 128 * 1024 * 1024  # 128 MB (Hard Node Limit)
     ALLOWED_EXTENSIONS = {"pdf", "jpg", "jpeg", "png", "docx", "zip", "txt"}
+    
+    # ✅ SECURITY: Session configuration
+    SESSION_COOKIE_SECURE = env_mode == "production"  # Only require HTTPS in production
+    SESSION_COOKIE_HTTPONLY = True  # No JavaScript access
+    SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF protection
+    PERMANENT_SESSION_LIFETIME = timedelta(hours=24)
+    SESSION_REFRESH_EACH_REQUEST = True
+    
+    # ✅ SECURITY: JWT Configuration
+    JWT_TOKEN_LOCATION = ['headers']
+    JWT_HEADER_NAME = 'Authorization'
+    JWT_HEADER_TYPE = 'Bearer'
+    
+    # ✅ SECURITY: CORS Configuration
+    CORS_ALLOWED_ORIGINS = os.getenv(
+        'CORS_ORIGINS',
+        'http://localhost:3000,http://localhost:5173'
+    ).split(',')
 
     # Brevo
     BREVO_API_KEY = os.getenv("BREVO_API_KEY")

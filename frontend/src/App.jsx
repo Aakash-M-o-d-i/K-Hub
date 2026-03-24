@@ -1,27 +1,36 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { PrivateRoute, AdminRoute } from './utils/PrivateRoute';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
-
-// Pages
-import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import Dashboard from './pages/Dashboard';
-import UploadPaper from './pages/UploadPaper';
-import DepartmentalClash from './pages/DepartmentalClash';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import UserCollections from './pages/UserCollections';
-import Profile from './pages/Profile';
-import Preferences from './pages/Preferences';
-import Security from './pages/Security';
-import Tutorial from './pages/Tutorial';
-import About from './pages/About';
-
 import './index.css';
+
+// Lazy load pages for production optimization
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const UploadPaper = lazy(() => import('./pages/UploadPaper'));
+const DepartmentalClash = lazy(() => import('./pages/DepartmentalClash'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const UserCollections = lazy(() => import('./pages/UserCollections'));
+const Profile = lazy(() => import('./pages/Profile'));
+const Preferences = lazy(() => import('./pages/Preferences'));
+const Security = lazy(() => import('./pages/Security'));
+const Tutorial = lazy(() => import('./pages/Tutorial'));
+const About = lazy(() => import('./pages/About'));
+
+// Sleek Loading Fallback
+const PageLoader = () => (
+  <div className="flex h-screen w-full items-center justify-center bg-bg-light/50 backdrop-blur-md">
+    <div className="flex flex-col items-center gap-4">
+      <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+      <p className="text-text-muted text-sm font-medium animate-pulse">Initializing KnowledgeHub...</p>
+    </div>
+  </div>
+);
 
 function AppLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -43,120 +52,121 @@ export default function App() {
   return (
     <AuthProvider>
       <Router>
-        <Routes>
-          {/* Public - no sidebar */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/leaderboard" element={<AppLayout><DepartmentalClash /></AppLayout>} />
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            {/* Public - no sidebar */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/leaderboard" element={<AppLayout><DepartmentalClash /></AppLayout>} />
 
+            {/* Authenticated - with sidebar */}
+            <Route
+              path="/dashboard"
+              element={
+                <PrivateRoute>
+                  <AppLayout><Dashboard /></AppLayout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/preferences"
+              element={
+                <PrivateRoute>
+                  <AppLayout><Preferences /></AppLayout>
+                </PrivateRoute>
+              }
+            />
 
-          {/* Authenticated - with sidebar */}
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute>
-                <AppLayout><Dashboard /></AppLayout>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/preferences"
-            element={
-              <PrivateRoute>
-                <AppLayout><Preferences /></AppLayout>
-              </PrivateRoute>
-            }
-          />
+            <Route
+              path="/downloads"
+              element={
+                <PrivateRoute>
+                  <AppLayout><UserCollections /></AppLayout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/uploads"
+              element={
+                <PrivateRoute>
+                  <AppLayout><UserCollections /></AppLayout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/upload"
+              element={
+                <PrivateRoute>
+                  <AppLayout><UserCollections /></AppLayout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/upload/new"
+              element={
+                <PrivateRoute>
+                  <AppLayout><UploadPaper /></AppLayout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/bookmarks"
+              element={
+                <PrivateRoute>
+                  <AppLayout><UserCollections /></AppLayout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <PrivateRoute>
+                  <AppLayout><Profile /></AppLayout>
+                </PrivateRoute>
+              }
+            />
 
-          <Route
-            path="/downloads"
-            element={
-              <PrivateRoute>
-                <AppLayout><UserCollections /></AppLayout>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/uploads"
-            element={
-              <PrivateRoute>
-                <AppLayout><UserCollections /></AppLayout>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/upload"
-            element={
-              <PrivateRoute>
-                <AppLayout><UserCollections /></AppLayout>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/upload/new"
-            element={
-              <PrivateRoute>
-                <AppLayout><UploadPaper /></AppLayout>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/bookmarks"
-            element={
-              <PrivateRoute>
-                <AppLayout><UserCollections /></AppLayout>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <PrivateRoute>
-                <AppLayout><Profile /></AppLayout>
-              </PrivateRoute>
-            }
-          />
+            <Route
+              path="/security"
+              element={
+                <PrivateRoute>
+                  <AppLayout><Security /></AppLayout>
+                </PrivateRoute>
+              }
+            />
 
-          <Route
-            path="/security"
-            element={
-              <PrivateRoute>
-                <AppLayout><Security /></AppLayout>
-              </PrivateRoute>
-            }
-          />
-
-          <Route
-            path="/sector-delta/*"
-            element={
-              <AdminRoute>
-                <AdminDashboard />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/sector-delta/preferences"
-            element={
-              <AdminRoute>
-                <AdminDashboard />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/tutorial"
-            element={
-              <AppLayout><Tutorial /></AppLayout>
-            }
-          />
-          <Route
-            path="/about"
-            element={
-              <AppLayout><About /></AppLayout>
-            }
-          />
-        </Routes>
+            <Route
+              path="/sector-delta/*"
+              element={
+                <AdminRoute>
+                  <AdminDashboard />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/sector-delta/preferences"
+              element={
+                <AdminRoute>
+                  <AdminDashboard />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/tutorial"
+              element={
+                <AppLayout><Tutorial /></AppLayout>
+              }
+            />
+            <Route
+              path="/about"
+              element={
+                <AppLayout><About /></AppLayout>
+              }
+            />
+          </Routes>
+        </Suspense>
       </Router>
     </AuthProvider>
   );

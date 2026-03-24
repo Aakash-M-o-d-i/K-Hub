@@ -10,6 +10,10 @@ from models.user import User
 from models.notification import Notification
 from models.rating import Rating
 from middleware.auth import jwt_required_with_user
+from utils.security import (
+    FileSecurityValidator, InputValidator, AccessControl, 
+    AuditLogger, EncryptionUtils, limiter
+)
 
 papers_bp = Blueprint("papers", __name__, url_prefix="/api/papers")
 
@@ -31,12 +35,18 @@ def list_papers():
     """Public: list approved papers with optional filters."""
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 12, type=int)
-    search = request.args.get("search", "").strip()
+    
+    # ✅ INPUT VALIDATION: Sanitize search terms
+    search = InputValidator.sanitize_text(request.args.get("search", ""), max_length=100)
+    
     department_id = request.args.get("department_id", type=int)
     semester = request.args.get("semester", type=int)
-    exam_type = request.args.get("exam_type", "").strip()
-    year = request.args.get("year", "").strip()
+    exam_type = InputValidator.sanitize_text(request.args.get("exam_type", ""), max_length=50)
+    year = InputValidator.sanitize_text(request.args.get("year", ""), max_length=4)
     sort_by = request.args.get("sort", "newest")
+    
+    # ✅ VALIDATION: Limit pagination
+    per_page = min(max(per_page, 1), 100)  # Between 1 and 100
 
     query = Paper.query.filter_by(status="approved")
 
@@ -88,6 +98,7 @@ def get_paper(paper_id):
 
 @papers_bp.route("/upload", methods=["POST"])
 @jwt_required_with_user
+@limiter.limit("10 per hour")  # Rate limit uploads
 def upload_paper(**kwargs):
     current_user = kwargs["current_user"]
 
@@ -98,95 +109,146 @@ def upload_paper(**kwargs):
     if file.filename == "":
         return jsonify({"error": "No selected file"}), 400
 
-    # Max File Size Check
-    max_mb = SystemSetting.get_val("max_file_size", 128)
-    file.seek(0, os.SEEK_END)
-    file_size = file.tell()
-    file.seek(0)
-    if file_size > max_mb * 1024 * 1024:
-        current_app.logger.warning(f"File size rejection: {file_size} > {max_mb}MB")
-        return jsonify({"error": f"File too large. Maximum allowed is {max_mb}MB"}), 400
+    # ✅ FILE SECURITY: Validate file size first
+    is_valid, error = FileSecurityValidator.validate_file_size(file)
+    if not is_valid:
+        AuditLogger.log_event('FILE_UPLOAD_REJECTED', user_id=current_user.id, details=error)
+        return jsonify({"error": error}), 400
 
-    if not allowed_file(file.filename):
-        current_app.logger.warning(f"Extension rejection: {file.filename}")
-        return jsonify({"error": "File type not allowed"}), 400
+    # ✅ FILE SECURITY: Validate extension
+    is_valid, error = FileSecurityValidator.validate_file_extension(file.filename)
+    if not is_valid:
+        AuditLogger.log_event('FILE_UPLOAD_REJECTED', user_id=current_user.id, details=f"Invalid extension: {error}")
+        return jsonify({"error": error}), 400
 
-    title = request.form.get("title", "").strip()
-    subject_code = request.form.get("subject_code", "").strip()
-    year = request.form.get("year", "").strip()
+    # ✅ INPUT VALIDATION: Sanitize form inputs
+    title = InputValidator.sanitize_text(request.form.get("title", ""), max_length=200)
+    subject_code = InputValidator.sanitize_text(request.form.get("subject_code", ""), max_length=50)
+    year = InputValidator.sanitize_text(request.form.get("year", ""), max_length=4)
     semester = request.form.get("semester", type=int)
-    exam_type = request.form.get("exam_type", "End Semester").strip()
+    exam_type = InputValidator.sanitize_text(request.form.get("exam_type", "End Semester"), max_length=50)
     department_id = request.form.get("department_id", type=int)
-    professor = request.form.get("professor", "").strip() or None
+    professor = InputValidator.sanitize_text(request.form.get("professor", ""), max_length=100) or None
 
     if not title or not subject_code or not year or not semester or not department_id:
         return jsonify({"error": "All required fields must be filled"}), 400
 
-    # Validate department exists
+    # ✅ ACCESS CONTROL: Validate department exists
     dept = Department.query.get(department_id)
     if not dept:
         return jsonify({"error": "Invalid department"}), 400
 
-    # Save file
+    # ✅ FILE SECURITY: Save file temporarily for validation
     filename = secure_filename(file.filename)
     ext = filename.rsplit(".", 1)[1].lower()
-    safe_name = f"{current_user.id}_{paper_id_counter()}_{filename}"
     
-    # Auto-approval check
-    auto_approve = SystemSetting.get_val("auto_approval", True)
-    target_status = "approved" if auto_approve else "pending"
-    target_dir_name = "approved" if auto_approve else "pending"
+    # Generate random filename to prevent directory traversal
+    random_id = EncryptionUtils.generate_secure_token(16)
+    temp_filename = f"{current_user.id}_{random_id}_{filename}"
     
     upload_dir = current_app.config["UPLOAD_FOLDER"]
-    target_dir = os.path.join(upload_dir, target_dir_name)
-    os.makedirs(target_dir, exist_ok=True)
+    temp_dir = os.path.join(upload_dir, "temp")
+    os.makedirs(temp_dir, exist_ok=True)
     
-    filepath = os.path.join(target_dir, safe_name)
-    file.save(filepath)
+    temp_filepath = os.path.join(temp_dir, temp_filename)
+    file.save(temp_filepath)
+    
+    try:
+        # ✅ FILE SECURITY: Validate file content (magic bytes)
+        is_valid, error = FileSecurityValidator.validate_file_content(temp_filepath)
+        if not is_valid:
+            os.remove(temp_filepath)
+            AuditLogger.log_event('FILE_UPLOAD_REJECTED', user_id=current_user.id, details=f"Malicious content: {error}")
+            return jsonify({"error": "File validation failed"}), 400
+        
+        # ✅ FILE SECURITY: Validate MIME type
+        is_valid, error = FileSecurityValidator.validate_mime_type(temp_filepath, filename)
+        if not is_valid:
+            os.remove(temp_filepath)
+            AuditLogger.log_event('FILE_UPLOAD_REJECTED', user_id=current_user.id, details=f"Invalid MIME: {error}")
+            return jsonify({"error": error}), 400
+        
+        # ✅ FILE SECURITY: Additional PDF validation
+        if ext == 'pdf':
+            is_valid, error = FileSecurityValidator.validate_pdf_safety(temp_filepath)
+            if not is_valid:
+                os.remove(temp_filepath)
+                AuditLogger.log_event('FILE_UPLOAD_REJECTED', user_id=current_user.id, details=f"PDF validation failed: {error}")
+                return jsonify({"error": error}), 400
+        
+        # ✅ SECURITY: Generate file hash for integrity verification
+        file_hash = EncryptionUtils.generate_file_hash(temp_filepath)
+        
+        # Move file to final location
+        auto_approve = SystemSetting.get_val("auto_approval", True)
+        target_status = "approved" if auto_approve else "pending"
+        target_dir_name = "approved" if auto_approve else "pending"
+        
+        target_dir = os.path.join(upload_dir, target_dir_name)
+        os.makedirs(target_dir, exist_ok=True)
+        
+        final_filepath = os.path.join(target_dir, temp_filename)
+        shutil.move(temp_filepath, final_filepath)
+        
+        # Get file size after validation
+        file_size = os.path.getsize(final_filepath)
+        
+        paper = Paper(
+            title=title,
+            subject_code=subject_code.upper(),
+            year=year,
+            semester=semester,
+            exam_type=exam_type,
+            file_url=temp_filename,  # Use random filename
+            file_type=ext,
+            file_size=file_size,
+            professor=professor,
+            uploader_id=current_user.id,
+            department_id=department_id,
+            status=target_status,
+        )
+        db.session.add(paper)
 
-    paper = Paper(
-        title=title,
-        subject_code=subject_code.upper(),
-        year=year,
-        semester=semester,
-        exam_type=exam_type,
-        file_url=safe_name,
-        file_type=ext,
-        file_size=file_size,
-        professor=professor,
-        uploader_id=current_user.id,
-        department_id=department_id,
-        status=target_status,
-    )
-    db.session.add(paper)
+        # Award upload points
+        pts = 5 if target_status == "pending" else 15
+        points = LeaderboardPoints(
+            user_id=current_user.id,
+            points=pts,
+            action_type="upload" if target_status == "pending" else "approved",
+        )
+        db.session.add(points)
+        current_user.total_points += pts
 
-    # Award upload points
-    pts = 5 if target_status == "pending" else 15 # Bonus for auto-approved
-    points = LeaderboardPoints(
-        user_id=current_user.id,
-        points=pts,
-        action_type="upload" if target_status == "pending" else "approved",
-    )
-    db.session.add(points)
-    current_user.total_points += pts
-
-    db.session.commit()
-
-    # Notify Admins
-    if not auto_approve:
-        admins = User.query.filter(User.role.in_(['admin', 'super_admin'])).all()
-        for admin in admins:
-            n = Notification(
-                user_id=admin.id,
-                type='warning',
-                title='New Pending Paper',
-                message=f'User {current_user.name} uploaded "{title}". Approval required.',
-                link='/sector-delta/moderation'
-            )
-            db.session.add(n)
         db.session.commit()
 
-    return jsonify({"message": f"Paper uploaded and {target_status} successfully", "paper": paper.to_dict()}), 201
+        # Notify Admins
+        if not auto_approve:
+            admins = User.query.filter(User.role.in_(['admin', 'super_admin'])).all()
+            for admin in admins:
+                n = Notification(
+                    user_id=admin.id,
+                    type='warning',
+                    title='New Pending Paper',
+                    message=f'User {current_user.name} uploaded "{title}". Approval required.',
+                    link='/sector-delta/moderation'
+                )
+                db.session.add(n)
+            db.session.commit()
+
+        # ✅ AUDIT: Log successful upload
+        AuditLogger.log_event('FILE_UPLOADED', user_id=current_user.id, details=f"Title: {title}, Hash: {file_hash}")
+
+        return jsonify({
+            "message": f"Paper uploaded and {target_status} successfully",
+            "paper": paper.to_dict()
+        }), 201
+    
+    except Exception as e:
+        # Clean up on error
+        if os.path.exists(temp_filepath):
+            os.remove(temp_filepath)
+        AuditLogger.log_event('FILE_UPLOAD_ERROR', user_id=current_user.id, details=str(e), severity='ERROR')
+        return jsonify({"error": "Failed to process file"}), 500
 
 
 @papers_bp.route("/<int:paper_id>/download", methods=["GET"])
@@ -195,7 +257,13 @@ def download_paper(paper_id, **kwargs):
     current_user = kwargs["current_user"]
     paper = Paper.query.get_or_404(paper_id)
 
+    # ✅ ACCESS CONTROL: Check if paper is approved
     if paper.status != "approved":
+        AuditLogger.log_event(
+            'UNAUTHORIZED_DOWNLOAD_ATTEMPT',
+            user_id=current_user.id,
+            details=f"Paper {paper_id} not approved"
+        )
         return jsonify({"error": "Paper not available for download"}), 403
 
     # Track download
@@ -204,10 +272,23 @@ def download_paper(paper_id, **kwargs):
     paper.download_count += 1
     db.session.commit()
 
-    # Determine folder
+    # ✅ SECURITY: Validate file path (prevent directory traversal)
     folder = os.path.join(current_app.config["UPLOAD_FOLDER"], "approved")
-    if not os.path.exists(os.path.join(folder, paper.file_url)):
+    filepath = os.path.join(folder, paper.file_url)
+    
+    # Ensure the resolved path is within the upload folder
+    if not os.path.abspath(filepath).startswith(os.path.abspath(folder)):
+        AuditLogger.log_event('PATH_TRAVERSAL_ATTEMPT', user_id=current_user.id, details=f"Paper {paper_id}")
+        return jsonify({"error": "Invalid file path"}), 400
+    
+    if not os.path.exists(filepath):
         folder = os.path.join(current_app.config["UPLOAD_FOLDER"], "pending")
+        filepath = os.path.join(folder, paper.file_url)
+        if not os.path.abspath(filepath).startswith(os.path.abspath(folder)):
+            return jsonify({"error": "Invalid file path"}), 400
+
+    # ✅ AUDIT: Log download
+    AuditLogger.log_event('FILE_DOWNLOADED', user_id=current_user.id, details=f"Paper: {paper.title}")
 
     return send_from_directory(folder, paper.file_url, as_attachment=True)
 
@@ -217,12 +298,20 @@ def preview_paper(paper_id):
     """Serve the paper file inline for preview (no auth needed for approved papers)."""
     paper = Paper.query.get_or_404(paper_id)
 
-    # Try approved folder first, then pending
+    # ✅ SECURITY: Only allow previewing approved papers
+    if paper.status != "approved":
+        return jsonify({"error": "Paper not available"}), 404
+
+    # Try approved folder first
     upload_dir = current_app.config["UPLOAD_FOLDER"]
     folder = os.path.join(upload_dir, "approved")
-    if not os.path.exists(os.path.join(folder, paper.file_url)):
-        folder = os.path.join(upload_dir, "pending")
-    if not os.path.exists(os.path.join(folder, paper.file_url)):
+    filepath = os.path.join(folder, paper.file_url)
+    
+    # ✅ SECURITY: Validate file path (prevent directory traversal)
+    if not os.path.abspath(filepath).startswith(os.path.abspath(folder)):
+        return jsonify({"error": "Invalid file path"}), 400
+    
+    if not os.path.exists(filepath):
         return jsonify({"error": "File not found"}), 404
 
     return send_from_directory(folder, paper.file_url, as_attachment=False)
@@ -232,6 +321,8 @@ def preview_paper(paper_id):
 @jwt_required_with_user
 def get_my_downloads(**kwargs):
     current_user = kwargs["current_user"]
+    
+    # ✅ ACCESS CONTROL: User can only see their own downloads
     downloads = (
         Download.query.filter_by(user_id=current_user.id)
         .order_by(Download.downloaded_at.desc())
@@ -332,7 +423,8 @@ def get_public_stats():
             "popular_tags": popular_tags if popular_tags else ["Data Structures", "Operating Systems", "Mathematics"]
         }), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        current_app.logger.error(f"Public stats error: {e}")
+        return jsonify({"error": "Failed to load stats"}), 500
 
 
 @papers_bp.route("/<int:paper_id>/rate", methods=["POST"])
@@ -418,8 +510,3 @@ def get_my_rating(paper_id, **kwargs):
         "score": rating.score if rating else None,
     }), 200
 
-
-def paper_id_counter():
-    """Simple counter based on existing papers count."""
-    import time
-    return int(time.time() * 1000) % 1000000

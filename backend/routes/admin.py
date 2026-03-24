@@ -1,6 +1,8 @@
 import os
 import csv
 import io
+import traceback
+from datetime import datetime
 from flask import Blueprint, request, jsonify, current_app, Response
 from models import db
 from models.paper import Paper
@@ -132,12 +134,10 @@ def approve_paper(paper_id, **kwargs):
 
         return jsonify({"message": "Paper approved", "paper": paper.to_dict()}), 200
     except Exception as e:
-        import traceback
-        error_file = os.path.join(os.getcwd(), "backend_error.txt")
-        with open(error_file, "a") as f:
-            f.write(f"\n--- Approve Error ({datetime.utcnow()}) ---\n")
-            f.write(f"Traceback:\n{traceback.format_exc()}\n")
-        return jsonify({"error": str(e)}), 500
+        current_app.logger.error(
+            f"Approve Error ({datetime.utcnow()}): {traceback.format_exc()}"
+        )
+        return jsonify({"error": "Internal server error"}), 500
 
 
 @admin_bp.route("/papers/<int:paper_id>/reject", methods=["PUT"])
@@ -174,13 +174,10 @@ def reject_paper(paper_id, **kwargs):
 
         return jsonify({"message": "Paper rejected and uploader notified", "paper": paper.to_dict()}), 200
     except Exception as e:
-        import traceback
-        error_file = os.path.join(os.getcwd(), "backend_error.txt")
-        with open(error_file, "a") as f:
-            f.write(f"\n--- Reject Error ({datetime.utcnow()}) ---\n")
-            f.write(f"Request Data: {request.get_json() if request.is_json else 'NOT JSON'}\n")
-            f.write(f"Traceback:\n{traceback.format_exc()}\n")
-        return jsonify({"error": str(e)}), 500
+        current_app.logger.error(
+            f"Reject Error ({datetime.utcnow()}): {traceback.format_exc()}"
+        )
+        return jsonify({"error": "Internal server error"}), 500
 
 
 @admin_bp.route("/papers/<int:paper_id>/metadata", methods=["PUT"])
@@ -307,6 +304,12 @@ def update_user_role(user_id, **kwargs):
     new_role = body.get("role", "student")
     if new_role not in ("student", "admin", "super_admin"):
         return jsonify({"error": "Invalid role"}), 400
+    
+    # ✅ SECURITY: Only super_admin can promote to admin or super_admin
+    current_user = kwargs.get("current_user")
+    if new_role in ("admin", "super_admin") and current_user.role != "super_admin":
+        return jsonify({"error": "Only super admin can assign admin roles"}), 403
+    
     u.role = new_role
     
     # Audit log
@@ -462,7 +465,7 @@ def delete_paper(paper_id, **kwargs):
                 try:
                     os.remove(file_path)
                 except Exception as e:
-                    print(f"Error deleting file {file_path}: {e}")
+                    current_app.logger.error(f"Error deleting file {file_path}: {e}")
 
         # Database deletion
         db.session.delete(paper)
@@ -480,9 +483,7 @@ def delete_paper(paper_id, **kwargs):
 
         return jsonify({"message": "Paper record purged successfully"}), 200
     except Exception as e:
-        import traceback
-        error_file = os.path.join(os.getcwd(), "backend_error.txt")
-        with open(error_file, "a") as f:
-            f.write(f"\n--- Delete Error ({datetime.utcnow()}) ---\n")
-            f.write(f"Traceback:\n{traceback.format_exc()}\n")
-        return jsonify({"error": str(e)}), 500
+        current_app.logger.error(
+            f"Delete Error ({datetime.utcnow()}): {traceback.format_exc()}"
+        )
+        return jsonify({"error": "Internal server error"}), 500

@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+.env.production
+backend_error.txt
+server.log
+server.pid
+uploads/temp/

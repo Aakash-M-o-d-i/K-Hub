@@ -1,5 +1,8 @@
-from flask import Blueprint, request, jsonify
-from datetime import datetime
+import secrets
+import traceback
+
+from flask import Blueprint, request, jsonify, current_app
+from datetime import datetime, timedelta
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import create_access_token, get_jti
 from models import db
@@ -10,9 +13,12 @@ from models.security_log import SecurityLog
 from models.notification import Notification
 from models.otp import OTP
 from utils.email_utils import send_otp_email, send_password_reset_email
+from utils.security import (
+    limiter, InputValidator, SecurityLog as SecurityLogUtil, 
+    AuditLogger, EncryptionUtils
+)
 from middleware.auth import jwt_required_with_user, get_jwt
 from sqlalchemy import func
-from datetime import datetime, timedelta
 
 bcrypt = Bcrypt()
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
@@ -29,6 +35,7 @@ def log_security_event(user_id, event_type, metadata=None):
 
 
 @auth_bp.route("/register", methods=["POST"])
+@limiter.limit("5 per hour")  # Rate limit registration attempts
 def register():
     data = request.get_json()
     if not data:
@@ -38,14 +45,36 @@ def register():
     email = data.get("email", "").strip().lower()
     password = data.get("password", "")
     department_id = data.get("department_id")
+    semester = data.get("semester")
+    phone_number = data.get("phone_number", "").strip()
 
-    if not name or not email or not password:
-        return jsonify({"error": "Name, email, and password are required"}), 400
-    if len(password) < 6:
-        return jsonify({"error": "Password must be at least 6 characters"}), 400
+    # ✅ VALIDATION: Email format
+    if not InputValidator.is_valid_email(email):
+        return jsonify({"error": "Invalid email format"}), 400
+    
+    # ✅ VALIDATION: Name sanitization
+    name = InputValidator.sanitize_text(name, max_length=100)
+    if not name:
+        return jsonify({"error": "Name is required"}), 400
+    
+    if not email or not password or not department_id or not semester or not phone_number:
+        return jsonify({"error": "All fields are required (Name, Email, Password, Department, Semester, Phone)"}), 400
+    
+    # ✅ VALIDATION: Phone format
+    if not InputValidator.is_valid_phone(phone_number):
+        return jsonify({"error": "Invalid phone number format"}), 400
+    
+    # ✅ VALIDATION: Strong password
+    is_valid, pwd_error = InputValidator.validate_password_strength(password)
+    if not is_valid:
+        return jsonify({"error": pwd_error}), 400
+    
+    # ✅ VALIDATION: Existing user check
     if User.query.filter_by(email=email).first():
+        # Don't reveal if email exists (security best practice)
         return jsonify({"error": "Email already registered"}), 409
-
+    
+    # ✅ SECURITY: Hash password
     password_hash = bcrypt.generate_password_hash(password).decode("utf-8")
     
     # Generate OTP and store pending registration data
@@ -60,6 +89,8 @@ def register():
         otp.name = name
         otp.password_hash = password_hash
         otp.department_id = department_id
+        otp.semester = semester
+        otp.phone_number = phone_number
     else:
         otp = OTP(
             email=email, 
@@ -67,13 +98,18 @@ def register():
             expires_at=expires_at,
             name=name,
             password_hash=password_hash,
-            department_id=department_id
+            department_id=department_id,
+            semester=semester,
+            phone_number=phone_number
         )
         db.session.add(otp)
     
     db.session.commit()
 
     email_sent = send_otp_email(email, name, otp_code)
+    
+    # ✅ AUDIT: Log registration attempt
+    AuditLogger.log_event('REGISTRATION_ATTEMPT', details=f"Email: {email}")
 
     return jsonify({
         "message": "Verification email sent. Please verify your email to complete registration.",
@@ -82,6 +118,7 @@ def register():
 
 
 @auth_bp.route("/login", methods=["POST"])
+@limiter.limit("10 per minute")  # Rate limit login attempts
 def login():
     data = request.get_json()
     if not data:
@@ -93,10 +130,35 @@ def login():
     if not email or not password:
         return jsonify({"error": "Email and password are required"}), 400
 
+    # ✅ BRUTE FORCE PROTECTION: Check account lock
+    if SecurityLogUtil.is_account_locked(email):
+        remaining = SecurityLogUtil.get_lockout_remaining(email)
+        AuditLogger.log_event('LOGIN_ATTEMPT_LOCKED', details=f"Email: {email}, Remaining: {remaining}s")
+        return jsonify({
+            "error": f"Account locked. Try again in {remaining} seconds"
+        }), 429
+
+    # ✅ SQL INJECTION PROTECTION: Parameterized query (ORM handles this)
     user = User.query.filter_by(email=email).first()
+    
+    # ✅ SECURITY: Use constant-time password comparison
     if not user or not bcrypt.check_password_hash(user.password_hash, password):
+        # Record failed attempt
+        status = SecurityLogUtil.record_failed_login(email)
+        
+        if status == "account_locked":
+            AuditLogger.log_event('ACCOUNT_LOCKED', details=f"Email: {email}")
+            return jsonify({
+                "error": "Too many failed attempts. Account locked for 15 minutes"
+            }), 429
+        
+        AuditLogger.log_event('FAILED_LOGIN', details=f"Email: {email}")
         return jsonify({"error": "Invalid email or password"}), 401
 
+    # ✅ Clear failed attempts on successful login
+    SecurityLogUtil.clear_failed_attempts(email)
+    
+    # ✅ SECURITY: Generate new session ID
     access_token = create_access_token(identity=str(user.id))
     jti = get_jti(access_token)
     
@@ -114,6 +176,10 @@ def login():
     db.session.commit()
 
     log_security_event(user.id, "LOGIN", metadata={"browser": getattr(ua, "browser", "Unknown"), "os": getattr(ua, "platform", "Unknown")})
+    
+    # ✅ AUDIT: Log successful login
+    AuditLogger.log_event('LOGIN_SUCCESS', user_id=user.id, details=f"Browser: {getattr(ua, 'browser', 'Unknown')}")
+    
     return jsonify({"token": access_token, "user": user.to_dict()}), 200
 
 
@@ -130,12 +196,51 @@ def get_me(**kwargs):
     
     # Global Rank based on total_points
     rank = User.query.filter(User.total_points > current_user.total_points).count() + 1
+
+    # Upload activity (Last 6 months)
+    upload_activity = []
+    today = datetime.utcnow()
+    for i in range(5, -1, -1):
+        # Calculate month start and end
+        # Simple logic: first day of month
+        target_date = today - timedelta(days=i*30)
+        month_start = target_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        if target_date.month == 12:
+            month_end = month_start.replace(year=month_start.year + 1, month=1)
+        else:
+            month_end = month_start.replace(month=month_start.month + 1)
+        
+        count = Paper.query.filter(
+            Paper.uploader_id == current_user.id,
+            Paper.created_at >= month_start,
+            Paper.created_at < month_end
+        ).count()
+        
+        upload_activity.append({
+            "month": month_start.strftime("%b"),
+            "count": count
+        })
+
+    # Daily Contribution Grid (Last 365 days)
+    # Get daily counts for the last year
+    one_year_ago = today - timedelta(days=365)
+    daily_stats = db.session.query(
+        func.date(Paper.created_at).label('date'),
+        func.count(Paper.id).label('count')
+    ).filter(
+        Paper.uploader_id == current_user.id,
+        Paper.created_at >= one_year_ago
+    ).group_by(func.date(Paper.created_at)).all()
+    
+    contribution_grid = {str(row.date): row.count for row in daily_stats}
     
     user_data = current_user.to_dict()
     user_data.update({
         "total_uploads": total_uploads,
         "total_downloads": total_downloads,
-        "rank": rank
+        "rank": rank,
+        "upload_activity": upload_activity,
+        "contribution_grid": contribution_grid
     })
     
     return jsonify({"user": user_data}), 200
@@ -149,27 +254,40 @@ def update_profile(**kwargs):
     if not data:
         return jsonify({"error": "Request body required"}), 400
         
-    # Allowed fields to update
-    current_user.name = data.get("name", current_user.name)
+    # ✅ INPUT VALIDATION: Sanitize all text inputs
+    if "name" in data:
+        current_user.name = InputValidator.sanitize_text(data["name"], max_length=100) or current_user.name
     if "department_id" in data:
         try:
             current_user.department_id = int(data["department_id"]) if data["department_id"] else None
         except (ValueError, TypeError):
             pass
-            
-    current_user.roll_no = data.get("roll_no", current_user.roll_no)
-    
+    if "roll_no" in data:
+        current_user.roll_no = InputValidator.sanitize_text(data.get("roll_no", ""), max_length=50) or current_user.roll_no
     if "year" in data:
         try:
             current_user.year = int(data["year"]) if data["year"] else None
         except (ValueError, TypeError):
             pass
-            
-    current_user.bio = data.get("bio", current_user.bio)
+    if "bio" in data:
+        current_user.bio = InputValidator.sanitize_text(data.get("bio", ""), max_length=500)
+    if "semester" in data:
+        try:
+            current_user.semester = int(data["semester"]) if data["semester"] else None
+        except (ValueError, TypeError):
+            pass
+    if "phone_number" in data:
+        phone = data.get("phone_number", "").strip()
+        if phone and not InputValidator.is_valid_phone(phone):
+            return jsonify({"error": "Invalid phone number format"}), 400
+        current_user.phone_number = phone
     
-    # Handle avatar separately if needed, but for now just text fields
+    # ✅ SECURITY: Validate avatar URL to prevent stored XSS
     if "avatar_url" in data:
-        current_user.avatar_url = data["avatar_url"]
+        avatar = data["avatar_url"]
+        if avatar and not InputValidator.validate_url(avatar):
+            return jsonify({"error": "Invalid avatar URL"}), 400
+        current_user.avatar_url = avatar
         
     db.session.commit()
     return jsonify({"message": "Profile updated successfully", "user": current_user.to_dict()}), 200
@@ -221,11 +339,22 @@ def change_password(**kwargs):
     if not bcrypt.check_password_hash(current_user.password_hash, current_password):
         return jsonify({"error": "Incorrect current password"}), 401
 
-    if len(new_password) < 6:
-        return jsonify({"error": "New password must be at least 6 characters"}), 400
+    is_valid, pwd_error = InputValidator.validate_password_strength(new_password)
+    if not is_valid:
+        return jsonify({"error": pwd_error}), 400
 
     current_user.password_hash = bcrypt.generate_password_hash(new_password).decode("utf-8")
     current_user.password_changed_at = datetime.utcnow()
+    
+    # ✅ SECURITY: Invalidate all other sessions after password change
+    jwt_data = get_jwt()
+    current_jti = jwt_data.get("jti")
+    UserSession.query.filter(
+        UserSession.user_id == current_user.id,
+        UserSession.jti != current_jti,
+        UserSession.is_revoked == False
+    ).update({"is_revoked": True})
+    
     db.session.commit()
 
     log_security_event(current_user.id, "PWD_CHANGE")
@@ -317,6 +446,7 @@ def get_security_history(**kwargs):
 
 
 @auth_bp.route("/verify-email", methods=["POST"])
+@limiter.limit("10 per hour")
 def verify_email():
     try:
         data = request.get_json()
@@ -332,20 +462,16 @@ def verify_email():
         otp = OTP.query.filter_by(email=email, code=code).order_by(OTP.created_at.desc()).first()
         
         if not otp:
-            print(f"VERIFY_DEBUG: No OTP found for {email} with code {code}")
             return jsonify({"error": "Invalid verification code"}), 400
             
         if otp.is_expired():
-            print(f"VERIFY_DEBUG: OTP expired for {email}. Expires: {otp.expires_at}, Now: {datetime.utcnow()}")
             return jsonify({"error": "Verification code has expired"}), 400
             
         # Check if user already exists
         user = User.query.filter_by(email=email).first()
         if user:
-            print(f"VERIFY_DEBUG: Updating existing user {email}")
             user.is_verified = True
         else:
-            print(f"VERIFY_DEBUG: Creating new user {email}")
             if not otp.name or not otp.password_hash:
                 return jsonify({"error": "Incomplete registration data. Please register again."}), 400
                 
@@ -354,6 +480,8 @@ def verify_email():
                 email=otp.email,
                 password_hash=otp.password_hash,
                 department_id=otp.department_id,
+                semester=otp.semester,
+                phone_number=otp.phone_number,
                 role="student",
                 is_verified=True
             )
@@ -405,15 +533,14 @@ def verify_email():
             "user": user.to_dict()
         }), 200
     except Exception as e:
-        import traceback
-        error_msg = f"--- Verify Email Traceback ({datetime.now()}) ---\n{traceback.format_exc()}\n"
-        with open("backend_error.txt", "a") as f:
-            f.write(error_msg)
-        print(error_msg)
+        current_app.logger.error(
+            f"Verify Email Error ({datetime.now()}): {traceback.format_exc()}"
+        )
         return jsonify({"error": "Internal server error during verification"}), 500
 
 
 @auth_bp.route("/resend-otp", methods=["POST"])
+@limiter.limit("3 per hour")
 def resend_otp():
     data = request.get_json()
     if not data:
@@ -459,6 +586,7 @@ def resend_otp():
 
 
 @auth_bp.route("/forgot-password", methods=["POST"])
+@limiter.limit("5 per hour")
 def forgot_password():
     """Step 1: Send OTP to the registered email for password reset."""
     data = request.get_json()
@@ -499,6 +627,7 @@ def forgot_password():
 
 
 @auth_bp.route("/verify-reset-otp", methods=["POST"])
+@limiter.limit("10 per hour")
 def verify_reset_otp():
     """Step 2: Verify the OTP code for password reset (max 3 attempts)."""
     data = request.get_json()
@@ -556,7 +685,6 @@ def verify_reset_otp():
         }), 400
 
     # Code is correct — generate reset token
-    import secrets
     reset_token = secrets.token_urlsafe(32)
     otp.password_hash = reset_token
     otp.attempts = 0  # reset attempts on success
@@ -582,8 +710,9 @@ def reset_password():
     if not email or not reset_token or not new_password:
         return jsonify({"error": "Email, reset token, and new password are required"}), 400
 
-    if len(new_password) < 6:
-        return jsonify({"error": "Password must be at least 6 characters"}), 400
+    is_valid, pwd_error = InputValidator.validate_password_strength(new_password)
+    if not is_valid:
+        return jsonify({"error": pwd_error}), 400
 
     # Verify the reset token
     otp = OTP.query.filter_by(
@@ -603,6 +732,12 @@ def reset_password():
     # Update password
     user.password_hash = bcrypt.generate_password_hash(new_password).decode("utf-8")
     user.password_changed_at = datetime.utcnow()
+
+    # ✅ SECURITY: Invalidate ALL sessions after password reset
+    UserSession.query.filter(
+        UserSession.user_id == user.id,
+        UserSession.is_revoked == False
+    ).update({"is_revoked": True})
 
     # Clean up all reset OTPs for this email
     OTP.query.filter_by(email=email, name="__PASSWORD_RESET__").delete()

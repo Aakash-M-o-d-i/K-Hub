@@ -1,7 +1,8 @@
 import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
 from flask import current_app
-import os
+from datetime import datetime
+
 
 def send_otp_email(target_email, user_name, otp_code):
     """
@@ -43,20 +44,14 @@ def send_otp_email(target_email, user_name, otp_code):
     )
 
     try:
-        api_response = api_instance.send_transac_email(send_smtp_email)
-        print(f"Brevo Email Sent: {api_response}")
+        api_instance.send_transac_email(send_smtp_email)
+        current_app.logger.info(f"OTP email sent to {target_email}")
         return True
     except ApiException as e:
-        error_msg = f"--- Brevo API Exception ({datetime.now()}) ---\n{e}\n"
-        with open("backend_error.txt", "a") as f:
-            f.write(error_msg)
-        print(error_msg)
+        current_app.logger.error(f"Brevo API Exception ({datetime.now()}): {e}")
         return False
     except Exception as e:
-        error_msg = f"--- General Email Exception ({datetime.now()}) ---\n{e}\n"
-        with open("backend_error.txt", "a") as f:
-            f.write(error_msg)
-        print(error_msg)
+        current_app.logger.error(f"General Email Exception ({datetime.now()}): {e}")
         return False
 
 
@@ -101,12 +96,12 @@ def send_password_reset_email(target_email, user_name, otp_code):
     )
 
     try:
-        api_response = api_instance.send_transac_email(send_smtp_email)
-        print(f"Brevo Password Reset Email Sent: {api_response}")
+        api_instance.send_transac_email(send_smtp_email)
+        current_app.logger.info(f"Password reset email sent to {target_email}")
         return True
     except ApiException as e:
-        print(f"Brevo API Exception (password reset): {e}")
+        current_app.logger.error(f"Brevo API Exception (password reset): {e}")
         return False
     except Exception as e:
-        print(f"General Email Exception (password reset): {e}")
+        current_app.logger.error(f"General Email Exception (password reset): {e}")
         return False
