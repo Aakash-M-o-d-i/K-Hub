@@ -22,7 +22,7 @@ class Paper(db.Model):
     rating_avg = db.Column(db.Numeric(2, 1), default=0.0)
     rating_count = db.Column(db.Integer, default=0)
     download_count = db.Column(db.Integer, default=0)
-    uploader_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    uploader_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
     department_id = db.Column(
         db.Integer, db.ForeignKey("departments.id"), nullable=False
     )

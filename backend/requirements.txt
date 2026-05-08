@@ -9,3 +9,5 @@ PyMySQL==1.1.1
 gunicorn==22.0.0
 sib-api-v3-sdk==7.6.0
 python-magic==0.4.27
+google-auth==2.29.0
+requests==2.32.3

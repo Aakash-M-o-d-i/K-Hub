@@ -8,7 +8,9 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
+    password_hash = db.Column(db.String(255), nullable=True)
+    oauth_provider = db.Column(db.String(20), default=None)
+    oauth_id = db.Column(db.String(255), default=None)
     role = db.Column(db.Enum("student", "admin", "super_admin"), default="student")
     avatar_url = db.Column(db.String(500), default=None)
     department_id = db.Column(db.Integer, db.ForeignKey("departments.id"), default=None)
@@ -33,6 +35,7 @@ class User(db.Model):
     default_department_id = db.Column(db.Integer, db.ForeignKey("departments.id"), default=None)
     download_behavior = db.Column(db.String(20), default="direct")
     is_verified = db.Column(db.Boolean, default=False)
+    is_banned = db.Column(db.Boolean, default=False)
 
     # Badge System
     is_top_contributor = db.Column(db.Boolean, default=False)
@@ -78,8 +81,10 @@ class User(db.Model):
             },
             "total_points": self.total_points,
             "is_verified": self.is_verified,
+            "is_banned": self.is_banned,
             "is_top_contributor": self.is_top_contributor,
             "is_beta_tester": self.is_beta_tester,
+            "oauth_provider": self.oauth_provider,
             "created_at": self.created_at.isoformat() + "Z" if self.created_at else None,
             "updated_at": self.updated_at.isoformat() + "Z" if self.updated_at else None,
         }

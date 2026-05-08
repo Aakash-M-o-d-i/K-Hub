@@ -19,6 +19,8 @@ from utils.security import (
 )
 from middleware.auth import jwt_required_with_user, get_jwt
 from sqlalchemy import func
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 bcrypt = Bcrypt()
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
@@ -183,6 +185,132 @@ def login():
     return jsonify({"token": access_token, "user": user.to_dict()}), 200
 
 
+@auth_bp.route("/google", methods=["POST"])
+@limiter.limit("20 per minute")
+def google_auth():
+    """Handle Google OAuth login/registration via ID token verification."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Request body required"}), 400
+
+    credential = data.get("credential", "")
+    action = data.get("action", "login")  # 'login' or 'register'
+    if not credential:
+        return jsonify({"error": "Google credential token is required"}), 400
+
+    try:
+        # Verify the Google ID token
+        google_client_id = current_app.config.get("GOOGLE_CLIENT_ID")
+        if not google_client_id:
+            return jsonify({"error": "Google OAuth is not configured on the server"}), 500
+
+        idinfo = id_token.verify_oauth2_token(
+            credential,
+            google_requests.Request(),
+            google_client_id
+        )
+
+        # Validate the issuer
+        if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+            return jsonify({"error": "Invalid token issuer"}), 401
+
+        # Extract user info from Google token
+        google_id = idinfo['sub']
+        email = idinfo.get('email', '').lower()
+        name = idinfo.get('name', '')
+        avatar_url = idinfo.get('picture', '')
+        email_verified = idinfo.get('email_verified', False)
+
+        if not email:
+            return jsonify({"error": "Email not provided by Google"}), 400
+
+        if not email_verified:
+            return jsonify({"error": "Google email is not verified"}), 400
+
+        # Check if user exists by OAuth provider + ID
+        user = User.query.filter_by(oauth_provider='google', oauth_id=google_id).first()
+
+        if not user:
+            # Check if a user with the same email already exists (registered via email/password)
+            user = User.query.filter_by(email=email).first()
+
+            if user:
+                # Link existing account with Google OAuth
+                user.oauth_provider = 'google'
+                user.oauth_id = google_id
+                if not user.avatar_url and avatar_url:
+                    user.avatar_url = avatar_url
+                if not user.is_verified:
+                    user.is_verified = True
+                db.session.commit()
+                AuditLogger.log_event('OAUTH_LINK', user_id=user.id, details=f"Linked Google account: {email}")
+            else:
+                # No account found — if this is a login attempt, reject it
+                if action == "login":
+                    return jsonify({
+                        "error": "No account found with this Google email. Please sign up first.",
+                        "redirect": "register"
+                    }), 404
+
+                # Create new user via Google OAuth (register flow)
+                user = User(
+                    name=name,
+                    email=email,
+                    password_hash=None,
+                    oauth_provider='google',
+                    oauth_id=google_id,
+                    avatar_url=avatar_url,
+                    role='student',
+                    is_verified=True
+                )
+                db.session.add(user)
+                db.session.commit()
+                db.session.refresh(user)
+
+                AuditLogger.log_event('GOOGLE_REGISTRATION', user_id=user.id, details=f"New user via Google: {email}")
+
+                # Notify Admins about new user
+                admins = User.query.filter(User.role.in_(['admin', 'super_admin'])).all()
+                for admin in admins:
+                    n = Notification(
+                        user_id=admin.id,
+                        type='success',
+                        title='New User Registered (Google)',
+                        message=f'User {name} ({email}) has joined via Google OAuth.',
+                        link='/sector-delta/users'
+                    )
+                    db.session.add(n)
+                db.session.commit()
+
+        # Generate JWT token and create session
+        access_token = create_access_token(identity=str(user.id))
+        jti = get_jti(access_token)
+
+        ua = request.user_agent
+        new_session = UserSession(
+            user_id=user.id,
+            jti=jti,
+            browser=getattr(ua, "browser", "Unknown"),
+            os=getattr(ua, "platform", "Unknown"),
+            device_type=getattr(ua, "string", "Unknown"),
+            ip_address=request.remote_addr
+        )
+        db.session.add(new_session)
+        db.session.commit()
+
+        log_security_event(user.id, "GOOGLE_LOGIN", metadata={"email": email})
+        AuditLogger.log_event('GOOGLE_LOGIN_SUCCESS', user_id=user.id, details=f"Google login: {email}")
+
+        return jsonify({"token": access_token, "user": user.to_dict()}), 200
+
+    except ValueError as e:
+        AuditLogger.log_event('GOOGLE_LOGIN_FAILED', details=f"Invalid token: {str(e)}")
+        return jsonify({"error": "Invalid Google credential"}), 401
+    except Exception as e:
+        current_app.logger.error(f"Google OAuth Error: {traceback.format_exc()}")
+        return jsonify({"error": "Google authentication failed"}), 500
+
+
 @auth_bp.route("/me", methods=["GET"])
 @jwt_required_with_user
 def get_me(**kwargs):
@@ -335,6 +463,10 @@ def change_password(**kwargs):
 
     if not current_password or not new_password:
         return jsonify({"error": "Current and new password are required"}), 400
+
+    # OAuth-only users don't have a local password
+    if current_user.oauth_provider and not current_user.password_hash:
+        return jsonify({"error": "Your account uses Google sign-in. You can set a password from your security settings."}), 400
 
     if not bcrypt.check_password_hash(current_user.password_hash, current_password):
         return jsonify({"error": "Incorrect current password"}), 401

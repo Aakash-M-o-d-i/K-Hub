@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useSearchParams } from 'react-router-dom';
 import api from '../api/axios';
 
 function Profile() {
     const { user, refreshUser } = useAuth();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [departments, setDepartments] = useState([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
+
+    const isCompleteProfile = searchParams.get('complete') === '1';
+    const profileIncomplete = !user?.department_id || !user?.semester || !user?.phone_number;
 
     const [formData, setFormData] = useState({
         name: '',
@@ -49,6 +54,11 @@ function Profile() {
             await api.put('/auth/me', formData);
             await refreshUser();
             setMessage({ type: 'success', text: 'Profile updated successfully!' });
+            // Clear the complete profile query param if present
+            if (searchParams.has('complete')) {
+                searchParams.delete('complete');
+                setSearchParams(searchParams, { replace: true });
+            }
         } catch (err) {
             console.error('Failed to update profile:', err);
             setMessage({ type: 'error', text: err.response?.data?.error || 'Failed to update profile' });
@@ -61,6 +71,40 @@ function Profile() {
 
     return (
         <div className="flex-1 overflow-y-auto bg-bg-main scrollbar-thin scrollbar-thumb-border-main scrollbar-track-transparent">
+            {/* Complete Profile Banner for Google OAuth users */}
+            {(isCompleteProfile || profileIncomplete) && user.oauth_provider && (
+                <div className="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 border-b border-primary/20 px-6 py-5 animate-fade-in-up">
+                    <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-primary/15 rounded-2xl flex items-center justify-center shrink-0">
+                                <span className="material-symbols-outlined text-primary text-2xl">waving_hand</span>
+                            </div>
+                            <div>
+                                <h3 className="font-black text-sm text-text-main">Welcome to Knowledge Hub! Complete your profile</h3>
+                                <p className="text-xs text-text-muted font-medium mt-0.5">
+                                    Add your department, semester, and phone number to get full access to all features.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                            {[
+                                { label: 'Department', done: !!user.department_id },
+                                { label: 'Semester', done: !!user.semester },
+                                { label: 'Phone', done: !!user.phone_number },
+                            ].map((item) => (
+                                <span key={item.label} className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border ${
+                                    item.done
+                                        ? 'bg-success/10 text-success border-success/20'
+                                        : 'bg-danger/10 text-danger border-danger/20 animate-pulse'
+                                }`}>
+                                    {item.done ? '✓' : '!'} {item.label}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="max-w-7xl mx-auto px-6 py-10 space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-4">
@@ -111,7 +155,7 @@ function Profile() {
                                         <h2 className="text-3xl font-black text-text-main tracking-tight">{user.name}</h2>
                                         <p className="flex items-center gap-2 text-[11px] font-black text-text-muted uppercase tracking-widest opacity-70">
                                             <span className="material-symbols-outlined text-lg text-primary">school</span>
-                                            {user.department?.name || 'Department Neutral'}, Semester {user.semester || '1'}
+                                            {user.department?.name || 'No Department'}{user.semester ? `, Semester ${user.semester}` : ''}
                                         </p>
                                     </div>
                                     <div className="flex flex-wrap gap-2">
@@ -151,10 +195,10 @@ function Profile() {
                                 {/* Shared Stats Grid */}
                                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
                                     {[
-                                        { label: 'Total Uploads', value: user.total_uploads || 42, trend: '+5', color: 'primary' },
-                                        { label: 'Current Rank', value: `#${user.rank || '5'}`, trend: 'Top 1%', color: 'success' },
-                                        { label: 'Reputation', value: user.total_points?.toLocaleString() || '1,240', color: 'warning' },
-                                        { label: 'Downloads', value: user.total_downloads || 856, color: 'primary' }
+                                        { label: 'Total Uploads', value: user.total_uploads ?? 0, trend: user.total_uploads > 0 ? `${user.total_uploads}` : null, color: 'primary' },
+                                        { label: 'Current Rank', value: user.rank ? `#${user.rank}` : 'Unranked', trend: user.rank && user.rank <= 10 ? 'Top 10' : null, color: 'success' },
+                                        { label: 'Reputation', value: (user.total_points ?? 0).toLocaleString(), color: 'warning' },
+                                        { label: 'Downloads', value: user.total_downloads ?? 0, color: 'primary' }
                                     ].map((stat, i) => (
                                         <div key={i} className="bg-bg-main/30 p-4 rounded-2xl border border-border-main/50 group/stat hover:border-primary/30 transition-all">
                                             <p className="text-[8px] font-black text-text-muted uppercase tracking-widest mb-1 opacity-60">{stat.label}</p>

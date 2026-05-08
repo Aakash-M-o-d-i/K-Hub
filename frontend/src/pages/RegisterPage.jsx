@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 
@@ -13,7 +14,8 @@ export default function RegisterPage() {
     const [departments, setDepartments] = useState([]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { register } = useAuth();
+    const [googleLoading, setGoogleLoading] = useState(false);
+    const { register, googleLogin } = useAuth();
     const navigate = useNavigate();
 
     const [step, setStep] = useState('register'); // 'register' | 'verify'
@@ -73,6 +75,28 @@ export default function RegisterPage() {
         }
     };
 
+    const handleGoogleSuccess = useCallback(async (credentialResponse) => {
+        setGoogleLoading(true);
+        setError('');
+        try {
+            const loggedInUser = await googleLogin(credentialResponse.credential, 'register');
+            // New Google users won't have department/semester — send them to complete profile
+            if (!loggedInUser.department_id || !loggedInUser.semester) {
+                navigate('/profile?complete=1');
+            } else {
+                navigate(loggedInUser.role === 'student' ? '/dashboard' : '/sector-delta');
+            }
+        } catch (err) {
+            setError(err.response?.data?.error || 'Google sign-up failed');
+        } finally {
+            setGoogleLoading(false);
+        }
+    }, [googleLogin, navigate]);
+
+    const handleGoogleError = useCallback(() => {
+        setError('Google sign-up was cancelled or failed. Please try again.');
+    }, []);
+
     return (
         <div className="min-h-screen flex">
             {/* Left decorative */}
@@ -105,7 +129,7 @@ export default function RegisterPage() {
                     {step === 'register' ? (
                         <>
                             <h1 className="font-display text-3xl font-bold text-main mb-2">Create Account</h1>
-                            <p className="text-muted mb-8">Fill in your details to get started</p>
+                            <p className="text-muted mb-6">Fill in your details to get started</p>
 
                             {error && (
                                 <div className="mb-6 px-4 py-3 rounded-xl bg-danger/10 text-danger text-sm font-medium flex items-center gap-2">
@@ -113,6 +137,38 @@ export default function RegisterPage() {
                                     {error}
                                 </div>
                             )}
+
+                            {/* Google Sign-Up Button */}
+                            <div className="mb-5">
+                                {googleLoading ? (
+                                    <div className="w-full py-3.5 rounded-xl border border-main bg-surface flex items-center justify-center gap-3">
+                                        <div className="w-5 h-5 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+                                        <span className="text-sm font-medium text-muted">Creating account with Google...</span>
+                                    </div>
+                                ) : (
+                                    <div className="google-login-wrapper flex justify-center">
+                                        <GoogleLogin
+                                            onSuccess={handleGoogleSuccess}
+                                            onError={handleGoogleError}
+                                            size="large"
+                                            width="400"
+                                            text="signup_with"
+                                            shape="pill"
+                                            theme="outline"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Divider */}
+                            <div className="relative mb-5">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-main"></div>
+                                </div>
+                                <div className="relative flex justify-center text-xs">
+                                    <span className="px-4 bg-main text-muted font-medium uppercase tracking-wider">or register with email</span>
+                                </div>
+                            </div>
 
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div>
@@ -178,7 +234,7 @@ export default function RegisterPage() {
                                 </div>
 
                                 <button
-                                    type="submit" disabled={loading}
+                                    type="submit" disabled={loading || googleLoading}
                                     className="w-full py-3.5 bg-primary text-white font-bold rounded-xl text-sm hover:bg-primary-light transition-all duration-200 shadow-lg shadow-primary/20 disabled:opacity-50 mt-2"
                                 >
                                     {loading ? 'Creating account...' : 'Create Account'}

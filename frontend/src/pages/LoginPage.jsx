@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {
@@ -8,7 +9,9 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login, user } = useAuth();
+    const [googleLoading, setGoogleLoading] = useState(false);
+    const [showNoAccountModal, setShowNoAccountModal] = useState(false);
+    const { login, googleLogin, user } = useAuth();
     const navigate = useNavigate();
 
     // Auto-redirect if already logged in
@@ -31,6 +34,32 @@ export default function LoginPage() {
             setLoading(false);
         }
     };
+
+    const handleGoogleSuccess = useCallback(async (credentialResponse) => {
+        setGoogleLoading(true);
+        setError('');
+        try {
+            const loggedInUser = await googleLogin(credentialResponse.credential, 'login');
+            if (!loggedInUser.department_id || !loggedInUser.semester) {
+                navigate('/profile?complete=1');
+            } else {
+                navigate(loggedInUser.role === 'student' ? '/dashboard' : '/sector-delta');
+            }
+        } catch (err) {
+            // If backend says user doesn't exist, show the popup modal
+            if (err.response?.data?.redirect === 'register') {
+                setShowNoAccountModal(true);
+                return;
+            }
+            setError(err.response?.data?.error || 'Google sign-in failed');
+        } finally {
+            setGoogleLoading(false);
+        }
+    }, [googleLogin, navigate]);
+
+    const handleGoogleError = useCallback(() => {
+        setError('Google sign-in was cancelled or failed. Please try again.');
+    }, []);
 
     return (
         <div className="min-h-screen flex">
@@ -66,6 +95,38 @@ export default function LoginPage() {
                             {error}
                         </div>
                     )}
+
+                    {/* Google Sign-In Button */}
+                    <div className="mb-6">
+                        {googleLoading ? (
+                            <div className="w-full py-3.5 rounded-xl border border-main bg-surface flex items-center justify-center gap-3">
+                                <div className="w-5 h-5 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+                                <span className="text-sm font-medium text-muted">Signing in with Google...</span>
+                            </div>
+                        ) : (
+                            <div className="google-login-wrapper flex justify-center">
+                                <GoogleLogin
+                                    onSuccess={handleGoogleSuccess}
+                                    onError={handleGoogleError}
+                                    size="large"
+                                    width="400"
+                                    text="continue_with"
+                                    shape="pill"
+                                    theme="outline"
+                                />
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Divider */}
+                    <div className="relative mb-6">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-main"></div>
+                        </div>
+                        <div className="relative flex justify-center text-xs">
+                            <span className="px-4 bg-main text-muted font-medium uppercase tracking-wider">or sign in with email</span>
+                        </div>
+                    </div>
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div>
@@ -110,7 +171,7 @@ export default function LoginPage() {
 
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={loading || googleLoading}
                             className="w-full py-3.5 bg-primary text-white font-bold rounded-xl text-sm
                 hover:bg-primary-light transition-all duration-200 shadow-lg shadow-primary/20 disabled:opacity-50"
                         >
@@ -126,6 +187,53 @@ export default function LoginPage() {
                     </p>
                 </div>
             </div>
+
+            {/* ─── No Account Found Modal (Spotify-style) ─── */}
+            {showNoAccountModal && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                    <div
+                        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+                        onClick={() => setShowNoAccountModal(false)}
+                        style={{ animation: 'noAcctFadeIn 0.2s ease-out' }}
+                    />
+                    <div
+                        className="relative bg-white dark:bg-[#1a1a2e] rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden"
+                        style={{ animation: 'noAcctScaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}
+                    >
+                        <div className="h-1.5 bg-gradient-to-r from-primary via-accent to-primary" />
+                        <div className="p-8 text-center">
+                            <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-primary/10 flex items-center justify-center">
+                                <span className="material-symbols-outlined text-3xl text-primary">person_search</span>
+                            </div>
+                            <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
+                                No Account Found
+                            </h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
+                                This Google account isn't connected to a<br />
+                                <span className="font-semibold text-gray-700 dark:text-gray-300">Knowledge Hub</span> account.
+                            </p>
+                            <div className="space-y-3">
+                                <button
+                                    onClick={() => navigate('/register')}
+                                    className="w-full py-3.5 bg-primary text-white font-bold rounded-full text-sm hover:bg-primary-light transition-all duration-200 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                    Sign Up
+                                </button>
+                                <button
+                                    onClick={() => setShowNoAccountModal(false)}
+                                    className="w-full py-3.5 bg-transparent text-gray-700 dark:text-gray-300 font-bold rounded-full text-sm border-2 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-200"
+                                >
+                                    Log in another way
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <style>{`
+                        @keyframes noAcctFadeIn { from { opacity: 0 } to { opacity: 1 } }
+                        @keyframes noAcctScaleIn { from { opacity: 0; transform: scale(0.9) translateY(10px) } to { opacity: 1; transform: scale(1) translateY(0) } }
+                    `}</style>
+                </div>
+            )}
         </div>
     );
 }

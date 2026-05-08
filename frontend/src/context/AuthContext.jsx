@@ -83,6 +83,16 @@ export function AuthProvider({ children }) {
         return newUser;
     };
 
+    const googleLogin = async (credential, action = 'login') => {
+        const res = await api.post('/auth/google', { credential, action });
+        const { token: newToken, user: newUser } = res.data;
+        localStorage.setItem('pyq_token', newToken);
+        localStorage.setItem('pyq_user', JSON.stringify(newUser));
+        setToken(newToken);
+        setUser(newUser);
+        return newUser;
+    };
+
     const logout = () => {
         localStorage.removeItem('pyq_token');
         localStorage.removeItem('pyq_user');
@@ -103,7 +113,7 @@ export function AuthProvider({ children }) {
 
     return (
         <AuthContext.Provider
-            value={{ user, token, loading, login, register, logout, isAdmin, refreshUser }}
+            value={{ user, token, loading, login, register, googleLogin, logout, isAdmin, refreshUser }}
         >
             {children}
         </AuthContext.Provider>

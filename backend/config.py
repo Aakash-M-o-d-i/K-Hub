@@ -64,3 +64,6 @@ class Config:
     BREVO_API_KEY = os.getenv("BREVO_API_KEY")
     BREVO_SENDER_EMAIL = os.getenv("BREVO_SENDER_EMAIL", "noreply@knowledgehub.com")
     BREVO_SENDER_NAME = os.getenv("BREVO_SENDER_NAME", "Knowledge Hub")
+
+    # Google OAuth
+    GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")

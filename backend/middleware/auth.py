@@ -22,6 +22,8 @@ def jwt_required_with_user(fn):
         user = User.query.get(int(user_id))
         if not user:
             return jsonify({"error": "User not found"}), 404
+        if getattr(user, 'is_banned', False):
+            return jsonify({"error": "Your account has been suspended. Contact an administrator."}), 403
         kwargs["current_user"] = user
         return fn(*args, **kwargs)
     return wrapper

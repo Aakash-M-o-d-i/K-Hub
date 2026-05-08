@@ -9,7 +9,10 @@ from models.paper import Paper
 from models.department import Department
 from models.user import User
 from models.notification import Notification
-from models.leaderboard import AuditLog, LeaderboardPoints, SystemSetting
+from models.leaderboard import AuditLog, LeaderboardPoints, SystemSetting, Download, Bookmark
+from models.security_log import SecurityLog
+from models.session import UserSession
+from models.rating import Rating
 from middleware.auth import admin_required
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/v1/internal")
@@ -487,3 +490,118 @@ def delete_paper(paper_id, **kwargs):
             f"Delete Error ({datetime.utcnow()}): {traceback.format_exc()}"
         )
         return jsonify({"error": "Internal server error"}), 500
+
+
+@admin_bp.route("/users/<int:user_id>/ban", methods=["PUT"])
+@admin_required
+def ban_user(user_id, **kwargs):
+    """Toggle a user's banned/active status."""
+    current_user = kwargs["current_user"]
+    u = User.query.get_or_404(user_id)
+
+    # Cannot ban yourself
+    if u.id == current_user.id:
+        return jsonify({"error": "You cannot ban your own account"}), 400
+
+    # Cannot ban super_admin
+    if u.role == "super_admin":
+        return jsonify({"error": "Cannot ban a super admin"}), 403
+
+    # Toggle the is_banned flag
+    u.is_banned = not getattr(u, 'is_banned', False)
+    action_label = "banned" if u.is_banned else "unbanned"
+
+    # Audit log
+    log = AuditLog(
+        admin_id=current_user.id,
+        action=f"user_{action_label}",
+        target_user_id=u.id,
+        reason=f"User {u.name} ({u.email}) has been {action_label}",
+        ip_address=request.remote_addr,
+    )
+    db.session.add(log)
+    db.session.commit()
+
+    return jsonify({"message": f"User {action_label} successfully", "user": u.to_dict()}), 200
+
+
+@admin_bp.route("/users/<int:user_id>", methods=["DELETE"])
+@admin_required
+def delete_user(user_id, **kwargs):
+    """Permanently delete a user and all their associated data."""
+    current_user = kwargs["current_user"]
+
+    # Only super_admin can delete users
+    if current_user.role != "super_admin":
+        return jsonify({"error": "Only super admin can delete users"}), 403
+
+    u = User.query.get_or_404(user_id)
+
+    # Cannot delete yourself
+    if u.id == current_user.id:
+        return jsonify({"error": "You cannot delete your own account"}), 400
+
+    # Cannot delete other super_admins
+    if u.role == "super_admin":
+        return jsonify({"error": "Cannot delete a super admin account"}), 403
+
+    try:
+        user_name = u.name
+        user_email = u.email
+
+        # Handle user's papers
+        user_papers = Paper.query.filter_by(uploader_id=u.id).all()
+        upload_dir = current_app.config["UPLOAD_FOLDER"]
+        for paper in user_papers:
+            if paper.status == "approved":
+                # Preserve approved papers but remove uploader association
+                paper.uploader_id = None
+            else:
+                # Delete non-approved papers and their files
+                # Delete ratings for these papers
+                Rating.query.filter_by(paper_id=paper.id).delete()
+                # Delete downloads for these papers
+                Download.query.filter_by(paper_id=paper.id).delete()
+                # Delete bookmarks for these papers
+                Bookmark.query.filter_by(paper_id=paper.id).delete()
+                for subdir in ["pending", "approved"]:
+                    file_path = os.path.join(upload_dir, subdir, paper.file_url)
+                    if os.path.exists(file_path):
+                        try:
+                            os.remove(file_path)
+                        except Exception as e:
+                            current_app.logger.error(f"Error deleting file {file_path}: {e}")
+                db.session.delete(paper)
+
+        # Delete all FK-dependent records
+        SecurityLog.query.filter_by(user_id=u.id).delete()
+        UserSession.query.filter_by(user_id=u.id).delete()
+        Notification.query.filter_by(user_id=u.id).delete()
+        Rating.query.filter_by(user_id=u.id).delete()
+        LeaderboardPoints.query.filter_by(user_id=u.id).delete()
+        Download.query.filter_by(user_id=u.id).delete()
+        Bookmark.query.filter_by(user_id=u.id).delete()
+
+        # Nullify audit log references (don't delete — keep audit trail)
+        AuditLog.query.filter_by(target_user_id=u.id).update({"target_user_id": None})
+
+        # Delete user
+        db.session.delete(u)
+
+        # Audit log
+        log = AuditLog(
+            admin_id=current_user.id,
+            action="delete_user",
+            target_user_id=None,
+            reason=f"Permanently deleted user: {user_name} ({user_email})",
+            ip_address=request.remote_addr,
+        )
+        db.session.add(log)
+        db.session.commit()
+
+        return jsonify({"message": f"User {user_name} has been permanently deleted"}), 200
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Delete User Error: {traceback.format_exc()}")
+        return jsonify({"error": "Failed to delete user"}), 500
+

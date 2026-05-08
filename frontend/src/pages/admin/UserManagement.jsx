@@ -28,7 +28,7 @@ function RoleBadge({ role }) {
 
 /* ────────────────────── User Detail Slide-over ────────────────────── */
 
-function UserSlideOver({ userId, onClose }) {
+function UserSlideOver({ userId, onClose, onBan, onDelete }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [adminToggle, setAdminToggle] = useState(false);
@@ -55,6 +55,12 @@ function UserSlideOver({ userId, onClose }) {
         } catch {
             alert('Failed to update role');
         }
+    };
+
+    const handleBan = async () => {
+        if (!onBan) return;
+        const updatedUser = await onBan(userId);
+        if (updatedUser) setUser(updatedUser);
     };
 
     if (!userId) return null;
@@ -87,19 +93,29 @@ function UserSlideOver({ userId, onClose }) {
                                         <div className="flex items-center gap-6">
                                             <div className="relative">
                                                 {user.avatar_url ? (
-                                                    <img src={user.avatar_url} alt={user.name} className="h-20 w-20 rounded-[2rem] object-cover border-4 border-bg-surface shadow-2xl" />
+                                                    <>
+                                                        <img src={user.avatar_url} alt={user.name} className="h-20 w-20 rounded-[2rem] object-cover border-4 border-bg-surface shadow-2xl" referrerPolicy="no-referrer" onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
+                                                        <div className="h-20 w-20 rounded-[2rem] bg-gradient-to-br from-primary to-primary-dark items-center justify-center text-white text-2xl font-black border-4 border-bg-surface shadow-2xl" style={{ display: 'none' }}>
+                                                            {user.name?.charAt(0).toUpperCase()}
+                                                        </div>
+                                                    </>
                                                 ) : (
                                                     <div className="h-20 w-20 rounded-[2rem] bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white text-2xl font-black border-4 border-bg-surface shadow-2xl">
                                                         {user.name?.charAt(0).toUpperCase()}
                                                     </div>
                                                 )}
-                                                <span className="absolute -bottom-1 -right-1 block h-5 w-5 rounded-full bg-success ring-4 ring-bg-surface shadow-lg" />
+                                                <span className={`absolute -bottom-1 -right-1 block h-5 w-5 rounded-full ring-4 ring-bg-surface shadow-lg ${user.is_banned ? 'bg-danger' : 'bg-success'}`} />
                                             </div>
                                             <div className="space-y-1">
                                                 <h2 className="text-xl font-black text-text-main tracking-tight">{user.name}</h2>
                                                 <p className="text-[11px] font-bold text-text-muted opacity-70 tracking-tight">{user.email}</p>
                                                 <div className="flex items-center gap-2 mt-3">
                                                     <RoleBadge role={user.role} />
+                                                    {user.is_banned && (
+                                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black border uppercase tracking-widest bg-danger/10 text-danger border-danger/20">
+                                                            Banned
+                                                        </span>
+                                                    )}
                                                     {user.department && (
                                                         <span className="bg-bg-surface text-text-muted text-[9px] px-2.5 py-0.5 rounded-lg border border-border-main font-black uppercase tracking-widest">
                                                             {user.department.code}
@@ -135,9 +151,26 @@ function UserSlideOver({ userId, onClose }) {
                                                 <span className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-lg ring-0 transition duration-300 ease-in-out ${adminToggle ? 'translate-x-5' : 'translate-x-0'}`} />
                                             </button>
                                         </div>
-                                        <button className="w-full h-14 inline-flex justify-center items-center rounded-[1.5rem] border border-danger/20 bg-danger/5 px-4 py-2.5 text-[11px] font-black text-danger uppercase tracking-[0.2em] shadow-sm hover:bg-danger hover:text-white transition-all group">
-                                            <span className="material-symbols-outlined text-sm mr-2 group-hover:scale-110 transition-transform">block</span>
-                                            Terminal Access Revocation
+                                        {/* Ban User Button */}
+                                        <button
+                                            onClick={handleBan}
+                                            className={`w-full h-14 inline-flex justify-center items-center rounded-[1.5rem] border px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.2em] shadow-sm transition-all group ${user.is_banned
+                                                    ? 'border-success/20 bg-success/5 text-success hover:bg-success hover:text-white'
+                                                    : 'border-warning/20 bg-warning/5 text-warning hover:bg-warning hover:text-white'
+                                                }`}
+                                        >
+                                            <span className="material-symbols-outlined text-sm mr-2 group-hover:scale-110 transition-transform">
+                                                {user.is_banned ? 'lock_open' : 'block'}
+                                            </span>
+                                            {user.is_banned ? 'Restore Access' : 'Suspend Access'}
+                                        </button>
+                                        {/* Delete User Button */}
+                                        <button
+                                            onClick={() => onDelete && onDelete(userId, user.name)}
+                                            className="w-full h-14 inline-flex justify-center items-center rounded-[1.5rem] border border-danger/20 bg-danger/5 px-4 py-2.5 text-[11px] font-black text-danger uppercase tracking-[0.2em] shadow-sm hover:bg-danger hover:text-white transition-all group"
+                                        >
+                                            <span className="material-symbols-outlined text-sm mr-2 group-hover:scale-110 transition-transform">delete_forever</span>
+                                            Delete User Permanently
                                         </button>
                                     </section>
 
@@ -331,6 +364,29 @@ export default function UserManagement() {
         }
     };
 
+    const handleDeleteUser = async (userId, userName) => {
+        if (!window.confirm(`Are you sure you want to permanently delete "${userName}"? This will remove their profile and data. Approved papers contributed by this user will be preserved. This action is IRREVERSIBLE.`)) return;
+        try {
+            await api.delete(`/v1/internal/users/${userId}`);
+            setSelectedUserId(null);
+            fetchUsers();
+            fetchStats();
+        } catch (err) {
+            alert(err.response?.data?.error || 'Failed to delete user');
+        }
+    };
+
+    const handleBanUser = async (userId) => {
+        try {
+            const res = await api.put(`/v1/internal/users/${userId}/ban`);
+            fetchUsers();
+            return res.data.user;
+        } catch (err) {
+            alert(err.response?.data?.error || 'Failed to update user status');
+            return null;
+        }
+    };
+
     return (
         <>
             <div className="space-y-6">
@@ -432,17 +488,29 @@ export default function UserManagement() {
                                 </thead>
                                 <tbody className="divide-y divide-border-main/50">
                                     {users.map(u => (
-                                        <tr key={u.id} className="group hover:bg-bg-main/40 transition-all duration-300 cursor-pointer" onClick={() => setSelectedUserId(u.id)}>
+                                        <tr key={u.id} className={`group hover:bg-bg-main/40 transition-all duration-300 cursor-pointer ${u.is_banned ? 'opacity-60' : ''}`} onClick={() => setSelectedUserId(u.id)}>
                                             <td className="py-5 px-8 whitespace-nowrap">
                                                 <div className="flex items-center">
                                                     <div className="relative">
                                                         {u.avatar_url ? (
-                                                            <img src={u.avatar_url} alt={u.name} className="h-10 w-10 rounded-xl object-cover border-2 border-border-main group-hover:border-primary transition-colors shadow-sm" />
+                                                            <>
+                                                                <img
+                                                                    src={u.avatar_url}
+                                                                    alt={u.name}
+                                                                    className="h-10 w-10 rounded-xl object-cover border-2 border-border-main group-hover:border-primary transition-colors shadow-sm"
+                                                                    referrerPolicy="no-referrer"
+                                                                    onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                                                                />
+                                                                <div className="h-10 w-10 rounded-xl bg-primary/10 items-center justify-center text-primary font-black text-sm border border-primary/20 group-hover:bg-primary group-hover:text-white transition-all shadow-sm" style={{ display: 'none' }}>
+                                                                    {u.name?.charAt(0).toUpperCase()}
+                                                                </div>
+                                                            </>
                                                         ) : (
                                                             <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-black text-sm border border-primary/20 group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
                                                                 {u.name?.charAt(0).toUpperCase()}
                                                             </div>
                                                         )}
+                                                        {u.is_banned && <span className="absolute -top-1 -right-1 w-3 h-3 bg-danger rounded-full border-2 border-bg-surface" />}
                                                     </div>
                                                     <div className="ml-4">
                                                         <div className="text-[13px] font-black text-text-main group-hover:text-primary transition-colors tracking-tight">{u.name}</div>
@@ -451,7 +519,10 @@ export default function UserManagement() {
                                                 </div>
                                             </td>
                                             <td className="py-5 px-6 whitespace-nowrap">
-                                                <RoleBadge role={u.role} />
+                                                <div className="flex items-center gap-2">
+                                                    <RoleBadge role={u.role} />
+                                                    {u.is_banned && <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black bg-danger/10 text-danger border border-danger/20 uppercase tracking-widest">Banned</span>}
+                                                </div>
                                             </td>
                                             <td className="py-5 px-6 whitespace-nowrap">
                                                 <span className="text-[11px] font-black text-text-main/80 uppercase tracking-tight">{u.department?.name || 'Unassigned'}</span>
@@ -464,23 +535,23 @@ export default function UserManagement() {
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); setSelectedUserId(u.id); }}
                                                         className="w-9 h-9 flex items-center justify-center rounded-xl bg-bg-main text-text-muted hover:text-primary hover:bg-primary/5 border border-border-main transition-all shadow-sm"
-                                                        title="Direct Access Profile"
+                                                        title="View Profile"
                                                     >
                                                         <span className="material-symbols-outlined text-[18px]">visibility</span>
                                                     </button>
                                                     <button
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-bg-main text-text-muted hover:text-primary hover:bg-primary/5 border border-border-main transition-all shadow-sm"
-                                                        title="Modifier Protocol"
+                                                        onClick={(e) => { e.stopPropagation(); handleBanUser(u.id); }}
+                                                        className={`w-9 h-9 flex items-center justify-center rounded-xl border transition-all shadow-sm ${u.is_banned ? 'bg-success/10 text-success hover:bg-success hover:text-white border-success/20' : 'bg-warning/5 text-warning/60 hover:bg-warning hover:text-white border-transparent hover:border-warning/20'}`}
+                                                        title={u.is_banned ? 'Unban User' : 'Ban User'}
                                                     >
-                                                        <span className="material-symbols-outlined text-[18px]">edit</span>
+                                                        <span className="material-symbols-outlined text-[18px]">{u.is_banned ? 'lock_open' : 'block'}</span>
                                                     </button>
                                                     <button
-                                                        onClick={(e) => e.stopPropagation()}
+                                                        onClick={(e) => { e.stopPropagation(); handleDeleteUser(u.id, u.name); }}
                                                         className="w-9 h-9 flex items-center justify-center rounded-xl bg-danger/5 text-danger/40 hover:text-white hover:bg-danger border border-transparent hover:border-danger/20 transition-all shadow-sm"
-                                                        title="Sever Connection"
+                                                        title="Delete User"
                                                     >
-                                                        <span className="material-symbols-outlined text-[18px]">block</span>
+                                                        <span className="material-symbols-outlined text-[18px]">delete</span>
                                                     </button>
                                                 </div>
                                             </td>
@@ -532,7 +603,7 @@ export default function UserManagement() {
 
             {/* User Details Slide-over */}
             {selectedUserId && (
-                <UserSlideOver userId={selectedUserId} onClose={() => setSelectedUserId(null)} />
+                <UserSlideOver userId={selectedUserId} onClose={() => setSelectedUserId(null)} onBan={handleBanUser} onDelete={handleDeleteUser} />
             )}
         </>
     );
