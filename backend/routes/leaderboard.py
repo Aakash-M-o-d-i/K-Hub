@@ -3,11 +3,31 @@ from models import db
 from models.user import User
 from models.paper import Paper
 from models.department import Department
+from models.leaderboard import SystemSetting
+from utils.security import limiter
 
 leaderboard_bp = Blueprint("leaderboard", __name__, url_prefix="/api/leaderboard")
 
 
+@leaderboard_bp.route("/config", methods=["GET"])
+def get_leaderboard_config():
+    """Get dynamic leaderboard settings from the database."""
+    config = {
+        "season_name": SystemSetting.get_val("season_name", "Departmental Clash"),
+        "season_year": SystemSetting.get_val("season_year", "2025"),
+        "season_end_date": SystemSetting.get_val("season_end_date", "2026-06-01"),
+        "clash_subtitle": SystemSetting.get_val("clash_subtitle", "The battle for academic supremacy is on."),
+        "hierarchy_title": SystemSetting.get_val("hierarchy_title", "Department Hierarchy"),
+        "sortBy_volume_label": SystemSetting.get_val("sortBy_volume_label", "By Volume"),
+        "sortBy_momentum_label": SystemSetting.get_val("sortBy_momentum_label", "By Momentum"),
+        "elite_rank_label": SystemSetting.get_val("elite_rank_label", "Elite Rank #1"),
+        "scholars_active_label": SystemSetting.get_val("scholars_active_label", "scholars active")
+    }
+    return jsonify(config), 200
+
+
 @leaderboard_bp.route("/scholars", methods=["GET"])
+@limiter.limit("60 per minute")
 def scholar_leaderboard():
     """Top contributors by total points."""
     limit = request.args.get("limit", 20, type=int)
@@ -28,7 +48,7 @@ def scholar_leaderboard():
         ).count()
         result.append({
             "rank": rank,
-            "user": user.to_dict(),
+            "user": user.to_public_dict(),
             "points": user.total_points,
             "uploads": upload_count,
         })
@@ -37,6 +57,7 @@ def scholar_leaderboard():
 
 
 @leaderboard_bp.route("/departments", methods=["GET"])
+@limiter.limit("60 per minute")
 def department_leaderboard():
     """Rankings by department total contributions."""
     departments = Department.query.all()
@@ -79,6 +100,7 @@ def department_leaderboard():
 
 
 @leaderboard_bp.route("/gamified", methods=["GET"])
+@limiter.limit("60 per minute")
 def gamified_leaderboard():
     """Gamified with streaks, badges, and tier info."""
     limit = request.args.get("limit", 20, type=int)
@@ -108,7 +130,7 @@ def gamified_leaderboard():
         ).count()
         result.append({
             "rank": rank,
-            "user": user.to_dict(),
+            "user": user.to_public_dict(),
             "points": user.total_points,
             "uploads": upload_count,
             "tier": get_tier(user.total_points),

@@ -208,9 +208,18 @@ export default function UploadPaper() {
                                     className="w-full px-6 py-4 rounded-2xl border border-border-main bg-bg-main/50 text-text-main font-bold focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/40 transition-all appearance-none cursor-pointer"
                                 >
                                     <option value="">Select Session</option>
-                                    {['2024-2025', '2023-2024', '2022-2023', '2021-2022', '2020-2021'].map((y) => (
-                                        <option key={y} value={y}>{y}</option>
-                                    ))}
+                                    {(() => {
+                                        const years = [];
+                                        const currentYear = new Date().getFullYear();
+                                        for (let i = 0; i < 5; i++) {
+                                            const y = currentYear - i;
+                                            years.push(`${y}-${y + 1}`);
+                                            years.push(`${y-1}-${y}`);
+                                        }
+                                        return [...new Set(years)].sort().reverse().slice(0, 8).map((y) => (
+                                            <option key={y} value={y}>{y}</option>
+                                        ));
+                                    })()}
                                 </select>
                             </div>
                             <div>

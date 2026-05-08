@@ -109,7 +109,7 @@ CREATE TABLE `bookmarks` (
   KEY `paper_id` (`paper_id`),
   CONSTRAINT `bookmarks_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `bookmarks_ibfk_2` FOREIGN KEY (`paper_id`) REFERENCES `papers` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -137,7 +137,7 @@ CREATE TABLE `departments` (
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=59 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -150,17 +150,13 @@ set autocommit=0;
 INSERT INTO `departments` VALUES
 (1,'Department of Computer Science','CS','2026-02-14 14:45:10'),
 (7,'Department of Chemistry','CH','2026-02-14 14:45:10'),
-(47,'Department of Biotechnology','BT','2026-02-15 13:59:56'),
 (48,'Department of Botany','BO','2026-02-15 13:59:56'),
 (49,'Department of Business Management','BM','2026-02-15 13:59:56'),
-(50,'Department of Commerce','CO','2026-02-15 13:59:56'),
 (51,'Department of English','EN','2026-02-15 13:59:56'),
 (52,'Department of Geology','GE','2026-02-15 13:59:56'),
 (53,'Department of Journalism (Journalism and Mass Communication)','JC','2026-02-15 13:59:56'),
-(54,'Department of Social Work','SW','2026-02-15 13:59:56'),
-(55,'Department of Sociology','SO','2026-02-15 13:59:56'),
 (56,'Department of Tourism and Hospitality Management','TH','2026-02-15 13:59:56'),
-(57,'Department of Tribal Studies','TS','2026-02-15 13:59:56');
+(58,'Others (Elective Subjects)','OTH','2026-05-08 18:24:19');
 /*!40000 ALTER TABLE `departments` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -182,7 +178,7 @@ CREATE TABLE `downloads` (
   KEY `paper_id` (`paper_id`),
   CONSTRAINT `downloads_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `downloads_ibfk_2` FOREIGN KEY (`paper_id`) REFERENCES `papers` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -198,7 +194,11 @@ INSERT INTO `downloads` VALUES
 (7,2,17,'2026-02-22 00:44:03'),
 (8,2,19,'2026-02-22 00:57:57'),
 (9,2,18,'2026-03-24 10:13:22'),
-(10,2,99,'2026-05-08 01:00:02');
+(10,2,99,'2026-05-08 01:00:02'),
+(11,9,92,'2026-05-08 11:08:27'),
+(12,9,69,'2026-05-08 11:12:15'),
+(13,9,14,'2026-05-08 11:37:15'),
+(14,9,99,'2026-05-08 12:21:31');
 /*!40000 ALTER TABLE `downloads` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -407,93 +407,93 @@ LOCK TABLES `papers` WRITE;
 set autocommit=0;
 INSERT INTO `papers` VALUES
 (3,'ee','NA1','2024-2025',7,'End Semester','1_268627_downloadfile_compressed.pdf','pdf',45246,NULL,'pending',NULL,0.0,0,0,1,1,'2026-02-14 10:04:28','2026-02-14 10:04:28'),
-(13,'Basics of computer science & Ms-Office Suite','BAI - 301','2023-2024',1,'End Semester','4_68112_Semester-I_Mid-term-1_AImajor.pdf','pdf',119320,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-15 11:51:08','2026-02-16 14:43:24'),
-(14,'Basics of computer science & Ms-Office Suite','BAI - 301','2023-2024',1,'End Semester','4_640671_AI_semester-I_Mid-term-II.pdf','pdf',132859,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-15 12:00:40','2026-02-16 14:43:24'),
-(15,'Mineral Resources-end-semester-iii','GEN-301','2023-2024',3,'End Semester','1_1708000001_Mineral Resources-end-semester-iii.pdf','pdf',728995,NULL,'approved',NULL,0.0,0,0,1,52,'2026-02-16 09:37:04','2026-02-16 09:37:04'),
-(16,'Mineral Resources-mid2-semester-iii','GEN-301','2023-2024',3,'Mid 2','1_1708000002_Mineral Resources-mid2-semester-iii.pdf','pdf',562761,NULL,'approved',NULL,0.0,0,0,1,52,'2026-02-16 09:37:04','2026-02-16 09:44:32'),
-(17,'Geology Mid-I Semester-I','GEN-101','2023-2024',1,'Mid 1','1_1708000003_Geology Mid-I Semester-I.pdf','pdf',146286,NULL,'approved',NULL,5.0,1,3,1,52,'2026-02-16 09:37:05','2026-02-22 00:44:03'),
-(18,'Geology Semester-I','GEN-101','2023-2024',1,'End Semester','1_1708000004_Geology Semester-I.pdf','pdf',270406,NULL,'approved',NULL,5.0,1,1,1,52,'2026-02-16 09:37:05','2026-03-24 10:13:22'),
-(19,'Geology Mid-II Semester-I','GEN-101','2023-2024',1,'Mid 2','1_1708000005_Geology Mid-II Semester-I.pdf','pdf',159147,NULL,'approved',NULL,4.0,1,1,1,52,'2026-02-16 09:37:05','2026-02-22 00:57:57'),
-(20,'BBA-mid1-semester-IV','GEN-401','2023-2024',4,'Mid 1','1_1708000006_BBA-mid1-semester-IV.pdf','pdf',1284387,NULL,'approved',NULL,5.0,1,0,1,49,'2026-02-16 09:37:05','2026-02-27 07:54:10'),
-(21,'BBA-mid2-semester-IV','GEN-401','2023-2024',4,'Mid 2','1_1708000007_BBA-mid2-semester-IV.pdf','pdf',759656,NULL,'approved',NULL,5.0,1,0,1,49,'2026-02-16 09:37:05','2026-02-27 07:54:21'),
-(22,'Geology Mid-II Semester-II','GEN-201','2023-2024',2,'Mid 2','1_1708000008_Geology Mid-II Semester-II.pdf','pdf',118749,NULL,'approved',NULL,0.0,0,0,1,52,'2026-02-16 09:37:05','2026-02-16 09:44:32'),
-(23,'Geology End-Semester-II','GEN-201','2023-2024',2,'End Semester','1_1708000009_Geology End-Semester-II.pdf','pdf',168648,NULL,'approved',NULL,0.0,0,0,1,52,'2026-02-16 09:37:05','2026-02-16 09:37:05'),
-(24,'Botany End-Semester','GEN-101','2023-2024',1,'End Semester','1_1708000010_Botany End-Semester.pdf','pdf',254330,NULL,'approved',NULL,0.0,0,0,1,48,'2026-02-16 09:37:05','2026-02-16 09:37:05'),
-(25,'Botany, Semester-I Mid -1','GEN-101','2023-2024',1,'Mid 1','1_1708000011_Botany, Semester-I Mid -1.pdf','pdf',71927,NULL,'approved',NULL,0.0,0,0,1,48,'2026-02-16 09:37:05','2026-02-16 09:44:06'),
-(26,'Botany, Semester-I Mid -2','GEN-101','2023-2024',1,'Mid 2','1_1708000012_Botany, Semester-I Mid -2.pdf','pdf',101586,NULL,'approved',NULL,0.0,0,0,1,48,'2026-02-16 09:37:05','2026-02-16 09:44:06'),
-(27,'Chemistry Mid-1 semester-1','GEN-101','2023-2024',1,'Mid 1','1_1708000013_Chemistry Mid-1 semester-1.pdf','pdf',147268,NULL,'approved',NULL,0.0,0,0,1,7,'2026-02-16 09:37:05','2026-02-16 09:41:24'),
-(28,'Chemistry Mid-2 semester-1','GEN-101','2023-2024',1,'Mid 2','1_1708000014_Chemistry Mid-2 semester-1.pdf','pdf',127204,NULL,'approved',NULL,0.0,0,0,1,7,'2026-02-16 09:37:05','2026-02-16 09:41:24'),
-(29,'Chemistry Mid-1 semester-1-Batch-24','GEN-101','2023-2024',1,'Mid 1','1_1708000015_Chemistry Mid-1 semester-1-Batch-24.pdf','pdf',698297,NULL,'approved',NULL,4.0,1,0,1,7,'2026-02-16 09:37:05','2026-03-19 06:39:52'),
-(30,'Chemistry End-semester-1','GEN-101','2023-2024',1,'End Semester','1_1708000016_Chemistry End-semester-1.pdf','pdf',322820,NULL,'approved',NULL,0.0,0,0,1,7,'2026-02-16 09:37:05','2026-02-16 09:37:05'),
-(31,'Leadership-Management-Skills-end-semester-iii','GEN-301','2023-2024',3,'End Semester','1_1708000017_Leadership-Management-Skills-end-semester-iii.pdf','pdf',447384,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(32,'Botany End-Semester','GEN-201','2023-2024',2,'End Semester','1_1708000018_Botany End-Semester.pdf','pdf',226362,NULL,'approved',NULL,0.0,0,0,1,48,'2026-02-16 09:37:05','2026-02-16 09:37:05'),
-(33,'Botany, Semester-II Mid -2','GEN-201','2023-2024',2,'Mid 2','1_1708000019_Botany, Semester-II Mid -2.pdf','pdf',80237,NULL,'approved',NULL,0.0,0,0,1,48,'2026-02-16 09:37:05','2026-02-16 09:44:06'),
-(34,'Database-Management-Systems-end-semester-iii','GEN-301','2023-2024',3,'End Semester','1_1708000020_Database-Management-Systems-end-semester-iii.pdf','pdf',847959,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-02-16 09:37:05'),
-(35,'Database-Management-Systems-mid2-semester-iii','GEN-301','2023-2024',3,'Mid 2','1_1708000021_Database-Management-Systems-mid2-semester-iii.pdf','pdf',574067,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-02-16 09:44:32'),
-(36,'C++-mid2-semester-iii','GEN-301','2023-2024',3,'Mid 2','1_1708000022_C++-mid2-semester-iii.pdf','pdf',1236832,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-02-16 09:44:32'),
-(37,'C++-end-semester-iii','GEN-301','2023-2024',3,'End Semester','1_1708000023_C++-end-semester-iii.pdf','pdf',1138415,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-02-16 09:37:05'),
-(38,'chemistry Mid-1 semester-2','GEN-201','2023-2024',2,'Mid 1','1_1708000024_chemistry Mid-1 semester-2.pdf','pdf',136501,NULL,'approved',NULL,0.0,0,0,1,7,'2026-02-16 09:37:05','2026-02-16 09:41:24'),
-(39,'chemistry Semester-2','GEN-201','2023-2024',2,'End Semester','1_1708000025_chemistry Semester-2.pdf','pdf',261200,NULL,'approved',NULL,0.0,0,0,1,7,'2026-02-16 09:37:05','2026-02-16 09:37:05'),
-(40,'Physical Chemistry-mid1-semester-iii','GEN-201','2023-2024',2,'Mid 1','1_1708000026_Physical Chemistry-mid1-semester-iii.pdf','pdf',681838,NULL,'approved',NULL,0.0,0,0,1,7,'2026-02-16 09:37:05','2026-02-16 09:44:32'),
-(41,'Market-Management-mid1-semester-iii','GEN-201','2023-2024',2,'Mid 1','1_1708000027_Market-Management-mid1-semester-iii.pdf','pdf',556565,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-02-16 09:44:32'),
-(42,'End-semester-II','GEN-201','2023-2024',2,'End Semester','1_1708000028_End-semester-II.pdf','pdf',850752,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-02-16 09:37:05'),
-(43,'Market-Management-mid2-semester-iii','GEN-201','2023-2024',2,'Mid 2','1_1708000029_Market-Management-mid2-semester-iii.pdf','pdf',574621,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-02-16 09:44:32'),
-(44,'AI-Minor-Semester-II Mid-1','GEN-201','2023-2024',2,'Mid 1','1_1708000030_AI-Minor-Semester-II Mid-1.pdf','pdf',125557,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-02-16 09:41:24'),
-(45,'semester -II Mid-2','GEN-201','2023-2024',2,'Mid 2','1_1708000031_semester -II Mid-2.pdf','pdf',347096,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-02-16 09:41:24'),
-(46,'Market-Management-end-semester-iii','GEN-201','2023-2024',2,'End Semester','1_1708000032_Market-Management-end-semester-iii.pdf','pdf',774018,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-02-16 09:37:05'),
-(47,'AI-GLP-mid2-semester-IV','GEN-401','2023-2024',4,'Mid 2','1_1708000033_AI-GLP-mid2-semester-IV.pdf','pdf',1041368,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-02-16 09:44:32'),
-(48,'Python-mid2-semester-IV','GEN-401','2023-2024',4,'Mid 2','1_1708000034_Python-mid2-semester-IV.pdf','pdf',1168991,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-02-16 09:44:32'),
-(49,'AI-mid2-semester-IV','GEN-401','2023-2024',4,'Mid 2','1_1708000035_AI-mid2-semester-IV.pdf','pdf',1128337,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-02-16 09:44:32'),
-(50,'End-semester-II','GEN-201','2023-2024',2,'End Semester','1_1708000036_End-semester-II.pdf','pdf',173781,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(51,'EI Semester-II Mid-1 Common','GEN-201','2023-2024',2,'Mid 1','1_1708000037_EI Semester-II Mid-1 Common.pdf','pdf',145311,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(52,'semester -II Mid-2-7','GEN-101','2023-2024',1,'Mid 2','1_1708000038_semester -II Mid-2-7.pdf','pdf',346796,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(53,'End-semester-II','GEN-201','2023-2024',2,'End Semester','1_1708000039_End-semester-II.pdf','pdf',184894,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(54,'TTM Semester-II Mid-1 1-4 Common','GEN-201','2023-2024',2,'Mid 1','1_1708000040_TTM Semester-II Mid-1_1-4 Common.pdf','pdf',103462,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(55,'semester -II Mid-2','GEN-101','2023-2024',1,'Mid 2','1_1708000041_semester -II Mid-2.pdf','pdf',245752,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(56,'End-semester-II','GEN-201','2023-2024',2,'End Semester','1_1708000042_End-semester-II.pdf','pdf',141490,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(57,'semester -II Mid-1-Batch-24','GEN-101','2023-2024',1,'Mid 1','1_1708000043_semester -II Mid-1-Batch-24.pdf','pdf',719152,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(58,'semester -II Mid-2','GEN-101','2023-2024',1,'Mid 2','1_1708000044_semester -II Mid-2.pdf','pdf',354373,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(59,'End-semester-II','GEN-201','2023-2024',2,'End Semester','1_1708000045_End-semester-II.pdf','pdf',82224,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(60,'Hindi-mid2-semester-IV','GEN-401','2023-2024',4,'Mid 2','1_1708000046_Hindi-mid2-semester-IV.pdf','pdf',757003,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(61,'semester -II Mid-2','GEN-101','2023-2024',1,'Mid 2','1_1708000047_semester -II Mid-2.pdf','pdf',163851,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(62,'Mid-1 Semester-II','GEN-201','2023-2024',2,'Mid 1','1_1708000048_Mid-1 Semester-II.pdf','pdf',99131,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(63,'Hindi-mid1-semester-IV','GEN-401','2023-2024',4,'Mid 1','1_1708000049_Hindi-mid1-semester-IV.pdf','pdf',988281,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(64,'End-semester-II','GEN-201','2023-2024',2,'End Semester','1_1708000050_End-semester-II.pdf','pdf',204078,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(65,'Semester-II Mid-1','GEN-201','2023-2024',2,'Mid 1','1_1708000051_Semester-II Mid-1.pdf','pdf',134142,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(66,'semester -II Mid-2','GEN-101','2023-2024',1,'Mid 2','1_1708000052_semester -II Mid-2.pdf','pdf',257787,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(67,'Desktop-Publishing-mid1-semester-iii','GEN-301','2023-2024',3,'Mid 1','1_1708000053_Desktop-Publishing-mid1-semester-iii.pdf','pdf',559943,NULL,'approved',NULL,0.0,0,0,1,53,'2026-02-16 09:37:05','2026-02-16 09:44:32'),
-(68,'Desktop-Publishing-mid2-semester-iii','GEN-301','2023-2024',3,'Mid 2','1_1708000054_Desktop-Publishing-mid2-semester-iii.pdf','pdf',537322,NULL,'approved',NULL,0.0,0,0,1,53,'2026-02-16 09:37:05','2026-02-16 09:44:32'),
-(69,'End-semester-II','GEN-201','2023-2024',2,'End Semester','1_1708000055_End-semester-II.pdf','pdf',181293,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-02-16 09:37:05'),
-(70,'AI Semester-II Mid-2','GEN-201','2023-2024',2,'Mid 2','1_1708000056_AI Semester-II Mid-2.pdf','pdf',539032,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-02-16 09:41:24'),
-(71,'AI Semester-II Mid-1','GEN-201','2023-2024',2,'Mid 1','1_1708000057_AI Semester-II Mid-1.pdf','pdf',127695,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-02-16 09:41:24'),
-(72,'AI semester-I, Mid-term-II','GEN-101','2023-2024',1,'Mid 2','1_1708000058_AI semester-I, Mid-term-II.pdf','pdf',132859,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-02-16 09:45:13'),
-(73,'Semester-I, Mid-term-1, AImajor','GEN-101','2023-2024',1,'Mid 1','1_1708000059_Semester-I, Mid-term-1, AImajor.pdf','pdf',119320,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-02-16 09:44:06'),
-(74,'AI End-semester 1','GEN-101','2023-2024',1,'End Semester','1_1708000060_AI End-semester_1.pdf','pdf',271504,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-02-16 09:37:05'),
-(75,'Renewable Energy-mid1-semester-iii','GEN-301','2023-2024',3,'Mid 1','1_1708000061_Renewable Energy-mid1-semester-iii.pdf','pdf',626656,NULL,'approved',NULL,0.0,0,0,1,49,'2026-02-16 09:37:05','2026-02-16 10:09:28'),
-(76,'Renewable Energy-mid2-semester-iii','GEN-301','2023-2024',3,'Mid 2','1_1708000062_Renewable Energy-mid2-semester-iii.pdf','pdf',616984,NULL,'approved',NULL,0.0,0,0,1,49,'2026-02-16 09:37:05','2026-02-16 10:09:28'),
-(77,'End-semester 1','GEN-101','2023-2024',1,'End Semester','1_1708000063_End-semester_1.pdf','pdf',316066,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(78,'Semester-I Mid-I-Batch-24','GEN-101','2023-2024',1,'Mid 1','1_1708000064_Semester-I Mid-I-Batch-24.pdf','pdf',885957,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(79,'Semester-I Mid-I','GEN-101','2023-2024',1,'Mid 1','1_1708000065_Semester-I Mid-I.pdf','pdf',119211,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(80,'Semester-I Mid-II','GEN-101','2023-2024',1,'Mid 2','1_1708000066_Semester-I Mid-II.pdf','pdf',167009,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(81,'Semester-I, Mid-term-I','GEN-101','2023-2024',1,'Mid 1','1_1708000067_Semester-I, Mid-term-I.pdf','pdf',409706,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(82,'End-semester 1','GEN-101','2023-2024',1,'End Semester','1_1708000068_End-semester_1.pdf','pdf',681390,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(83,'semester-I, Mid-term-II','GEN-101','2023-2024',1,'Mid 2','1_1708000069_semester-I, Mid-term-II.pdf','pdf',339394,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(84,'Semester-I, Mid-term-I-Batch-24','GEN-101','2023-2024',1,'Mid 1','1_1708000070_Semester-I, Mid-term-I-Batch-24.pdf','pdf',1796434,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(85,'Semester-I, Mid-term-I','GEN-101','2023-2024',1,'Mid 1','1_1708000071_Semester-I, Mid-term-I.pdf','pdf',160203,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(86,'End-semester','GEN-101','2023-2024',1,'End Semester','1_1708000072_End-semester_.pdf','pdf',402762,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(87,'English-end-semester-iii','GEN-301','2023-2024',3,'End Semester','1_1708000073_English-end-semester-iii.pdf','pdf',1053677,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(88,'semester-I, Mid-term-II','GEN-101','2023-2024',1,'Mid 2','1_1708000074_semester-I, Mid-term-II.pdf','pdf',218604,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(89,'English-mid2-semester-iii','GEN-301','2023-2024',3,'Mid 2','1_1708000075_English-mid2-semester-iii.pdf','pdf',747804,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(90,'Semester-I, Mid-term-I-Batch-24','GEN-101','2023-2024',1,'Mid 1','1_1708000076_Semester-I, Mid-term-I-Batch-24.pdf','pdf',825278,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(91,'Semester-I, Mid-term-I','GEN-101','2023-2024',1,'Mid 1','1_1708000077_Semester-I, Mid-term-I.pdf','pdf',127374,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(92,'End-semester 1','GEN-101','2023-2024',1,'End Semester','1_1708000078_End-semester_1.pdf','pdf',314196,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(93,'semester-I, Mid-term-II','GEN-101','2023-2024',1,'Mid 2','1_1708000079_semester-I, Mid-term-II.pdf','pdf',123964,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(94,'Semester-I, Mid-term-I-Batch-24','GEN-101','2023-2024',1,'Mid 1','1_1708000080_Semester-I, Mid-term-I-Batch-24.pdf','pdf',746652,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(95,'Semester-I, Mid-term-I','GEN-101','2023-2024',1,'Mid 1','1_1708000081_Semester-I, Mid-term-I.pdf','pdf',115406,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(96,'End-semester 1','GEN-101','2023-2024',1,'End Semester','1_1708000082_End-semester_1.pdf','pdf',277679,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(97,'semester-I, Mid-term-II','GEN-101','2023-2024',1,'Mid 2','1_1708000083_semester-I, Mid-term-II.pdf','pdf',109034,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(98,'Semester-I, Mid-term-I','GEN-101','2023-2024',1,'Mid 1','1_1708000084_Semester-I, Mid-term-I.pdf','pdf',127307,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(99,'semester-I, Mid-term-II','GEN-101','2023-2024',1,'Mid 2','1_1708000085_semester-I, Mid-term-II.pdf','pdf',114080,NULL,'approved',NULL,0.0,0,1,1,57,'2026-02-16 09:37:05','2026-05-08 01:00:02');
+(13,'Basics of Computer Science and MS-Office Suite','BAI - 301','2023-2024',1,'Mid 1','4_68112_Semester-I_Mid-term-1_AImajor.pdf','pdf',119320,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-15 11:51:08','2026-05-08 17:49:39'),
+(14,'Basics of Computer Science & MS-Office Suite','BAI - 301','2023-2024',1,'Mid 2','4_640671_AI_semester-I_Mid-term-II.pdf','pdf',132859,NULL,'approved',NULL,0.0,0,1,1,1,'2026-02-15 12:00:40','2026-05-08 17:49:39'),
+(15,'Mineral Resources of India','MIDC-204','2023-2024',3,'End Semester','1_1708000001_Mineral Resources-end-semester-iii.pdf','pdf',728995,NULL,'approved',NULL,0.0,0,0,1,52,'2026-02-16 09:37:04','2026-05-08 16:46:58'),
+(16,'Mineral Resources of India','GEN-301','2023-2024',3,'Mid 2','1_1708000002_Mineral Resources-mid2-semester-iii.pdf','pdf',562761,NULL,'approved',NULL,0.0,0,0,1,52,'2026-02-16 09:37:04','2026-05-08 18:19:47'),
+(17,'Physical Geology and Geodynamics','GEN-101','2023-2024',1,'Mid 1','1_1708000003_Geology Mid-I Semester-I.pdf','pdf',146286,NULL,'approved',NULL,5.0,1,3,1,52,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(18,'Physical Geology and Geodynamics','GEN-101','2023-2024',1,'End Semester','1_1708000004_Geology Semester-I.pdf','pdf',270406,NULL,'approved',NULL,5.0,1,1,1,52,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(19,'Physical Geology and Geodynamics','GEN-101','2023-2024',1,'Mid 2','1_1708000005_Geology Mid-II Semester-I.pdf','pdf',159147,NULL,'approved',NULL,4.0,1,1,1,52,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(20,'Event Management','GEN-401','2023-2024',4,'Mid 1','1_1708000006_BBA-mid1-semester-IV.pdf','pdf',1284387,NULL,'approved',NULL,5.0,1,0,1,49,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(21,'Event Management','GEN-401','2023-2024',4,'Mid 2','1_1708000007_BBA-mid2-semester-IV.pdf','pdf',759656,NULL,'approved',NULL,5.0,1,0,1,49,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(22,'Crystallography and Mineralogy','GEN-201','2023-2024',2,'Mid 1','1_1708000008_Geology Mid-II Semester-II.pdf','pdf',118749,NULL,'approved',NULL,0.0,0,0,1,52,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(23,'Crystallography and Mineralogy','GEOIS51','2023-2024',2,'End Semester','1_1708000009_Geology End-Semester-II.pdf','pdf',168648,NULL,'approved',NULL,0.0,0,0,1,52,'2026-02-16 09:37:05','2026-05-08 17:02:41'),
+(24,'Biodiversity','GEN-101','2023-2024',1,'End Semester','1_1708000010_Botany End-Semester.pdf','pdf',254330,NULL,'approved',NULL,0.0,0,0,1,48,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(25,'Biodiversity','GEN-101','2023-2024',1,'Mid 1','1_1708000011_Botany, Semester-I Mid -1.pdf','pdf',71927,NULL,'approved',NULL,0.0,0,0,1,48,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(26,'Biodiversity','GEN-101','2023-2024',1,'Mid 1','1_1708000012_Botany, Semester-I Mid -2.pdf','pdf',101586,NULL,'approved',NULL,0.0,0,0,1,48,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(27,'Inorganic Chemistry-1','GEN-101','2023-2024',1,'Mid 1','1_1708000013_Chemistry Mid-1 semester-1.pdf','pdf',147268,NULL,'approved',NULL,0.0,0,0,1,7,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(28,'Inorganic Chemistry-1','GEN-101','2023-2024',1,'Mid 1','1_1708000014_Chemistry Mid-2 semester-1.pdf','pdf',127204,NULL,'approved',NULL,0.0,0,0,1,7,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(29,'Inorganic Chemistry-1','GEN-101','2023-2024',1,'Mid 1','1_1708000015_Chemistry Mid-1 semester-1-Batch-24.pdf','pdf',698297,NULL,'approved',NULL,4.0,1,0,1,7,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(30,'Inorganic Chemistry-I','GEN-101','2023-2024',1,'End Semester','1_1708000016_Chemistry End-semester-1.pdf','pdf',322820,NULL,'approved',NULL,0.0,0,0,1,7,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(31,'Leadership and Management Skills','SEC','2023-2024',3,'End Semester','1_1708000017_Leadership-Management-Skills-end-semester-iii.pdf','pdf',447384,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:43'),
+(32,'Plant Morphology and Anatomy','GEN-201','2023-2024',2,'End Semester','1_1708000018_Botany End-Semester.pdf','pdf',226362,NULL,'approved',NULL,0.0,0,0,1,48,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(33,'Plant Morphology and Anatomy','GEN-201','2023-2024',2,'Mid 2','1_1708000019_Botany, Semester-II Mid -2.pdf','pdf',80237,NULL,'approved',NULL,0.0,0,0,1,48,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(34,'Database Management Systems','GEN-301','2023-2024',3,'End Semester','1_1708000020_Database-Management-Systems-end-semester-iii.pdf','pdf',847959,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(35,'Database Management Systems','GEN-301','2023-2024',3,'Mid 2','1_1708000021_Database-Management-Systems-mid2-semester-iii.pdf','pdf',574067,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(36,'Object Oriented Programming using C++','GEN-301','2023-2024',3,'Mid 2','1_1708000022_C++-mid2-semester-iii.pdf','pdf',1236832,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(37,'Object Programming using C++','GEN-301','2023-2024',3,'End Semester','1_1708000023_C++-end-semester-iii.pdf','pdf',1138415,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(38,'Organic Chemistry-1','GEN-201','2023-2024',2,'Mid 1','1_1708000024_chemistry Mid-1 semester-2.pdf','pdf',136501,NULL,'approved',NULL,0.0,0,0,1,7,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(39,'Organic Chemistry-I','GEN-201','2023-2024',2,'End Semester','1_1708000025_chemistry Semester-2.pdf','pdf',261200,NULL,'approved',NULL,0.0,0,0,1,7,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(40,'Physical Chemistry-I','GEN-201','2023-2024',3,'Mid 1','1_1708000026_Physical Chemistry-mid1-semester-iii.pdf','pdf',681838,NULL,'approved',NULL,0.0,0,0,1,7,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(41,'Marketing Management','GEN-201','2023-2024',3,'Mid 1','1_1708000027_Market-Management-mid1-semester-iii.pdf','pdf',556565,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(42,'Basics of Accounting','BTM','2023-2024',2,'End Semester','1_1708000028_End-semester-II.pdf','pdf',850752,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-05-08 17:03:23'),
+(43,'Marketing Management','GEN-201','2023-2024',3,'Mid 2','1_1708000029_Market-Management-mid2-semester-iii.pdf','pdf',574621,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(44,'Basics of Accounting','GEN-201','2023-2024',2,'Mid 1','1_1708000030_AI-Minor-Semester-II Mid-1.pdf','pdf',125557,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(45,'Basics of Accounting','GEN-201','2023-2024',2,'Mid 2','1_1708000031_semester -II Mid-2.pdf','pdf',347096,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(46,'Marketing Management','GEN-201','2023-2024',3,'End Semester','1_1708000032_Market-Management-end-semester-iii.pdf','pdf',774018,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(47,'Good Laboratory Practices','GEN-401','2023-2024',4,'Mid 2','1_1708000033_AI-GLP-mid2-semester-IV.pdf','pdf',1041368,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(48,'Python Programming','GEN-401','2023-2024',4,'Mid 2','1_1708000034_Python-mid2-semester-IV.pdf','pdf',1168991,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(49,'Introduction to Artificial Intelligence','GEN-401','2023-2024',4,'Mid 2','1_1708000035_AI-mid2-semester-IV.pdf','pdf',1128337,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-05-08 18:19:47'),
+(50,'Emotional Intelligence','GEN-201','2023-2024',2,'End Semester','1_1708000036_End-semester-II.pdf','pdf',173781,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:43'),
+(51,'Emotional Intelligence','GEN-201','2023-2024',2,'Mid 1','1_1708000037_EI Semester-II Mid-1 Common.pdf','pdf',145311,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:43'),
+(52,'Emotional Intelligence','GEN-101','2023-2024',2,'Mid 2','1_1708000038_semester -II Mid-2-7.pdf','pdf',346796,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:43'),
+(53,'Tourism Concepts, Systems, and Functions','MDC155','2023-2024',2,'End Semester','1_1708000039_End-semester-II.pdf','pdf',184894,NULL,'approved',NULL,0.0,0,0,1,56,'2026-02-16 09:37:05','2026-05-08 17:51:29'),
+(54,'Tourism Concepts, Systems and Functions','GEN-201','2023-2024',2,'Mid 2','1_1708000040_TTM Semester-II Mid-1_1-4 Common.pdf','pdf',103462,NULL,'approved',NULL,0.0,0,0,1,56,'2026-02-16 09:37:05','2026-05-08 17:51:29'),
+(55,'Tourism Concepts, Systems and Functions','GEN-101','2023-2024',2,'Mid 1','1_1708000041_semester -II Mid-2.pdf','pdf',245752,NULL,'approved',NULL,0.0,0,0,1,56,'2026-02-16 09:37:05','2026-05-08 17:51:29'),
+(56,'Software, Hardware and Networking','GEN-201','2023-2024',2,'End Semester','1_1708000042_End-semester-II.pdf','pdf',141490,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:43'),
+(57,'Basics of Computer Science and MS-Office Suite','GEN-101','2023-2024',1,'Mid 1','1_1708000043_semester -II Mid-1-Batch-24.pdf','pdf',719152,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:43'),
+(58,'Software, Hardware and Networking','GEN-101','2023-2024',2,'Mid 2','1_1708000044_semester -II Mid-2.pdf','pdf',354373,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:43'),
+(59,'Hindi','GEN-201','2023-2024',2,'End Semester','1_1708000045_End-semester-II.pdf','pdf',82224,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:30'),
+(60,'Hindi','GEN-401','2023-2024',4,'Mid 2','1_1708000046_Hindi-mid2-semester-IV.pdf','pdf',757003,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:30'),
+(61,'Hindi','GEN-101','2023-2024',2,'Mid 2','1_1708000047_semester -II Mid-2.pdf','pdf',163851,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:30'),
+(62,'Hindi','GEN-201','2023-2024',1,'Mid 1','1_1708000048_Mid-1 Semester-II.pdf','pdf',99131,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:30'),
+(63,'Hindi','GEN-401','2023-2024',4,'Mid 1','1_1708000049_Hindi-mid1-semester-IV.pdf','pdf',988281,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:30'),
+(64,'Environmental Science','VACI51','2023-2024',2,'End Semester','1_1708000050_End-semester-II.pdf','pdf',204078,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:30'),
+(65,'Environmental Science','GEN-201','2023-2024',2,'Mid 1','1_1708000051_Semester-II Mid-1.pdf','pdf',134142,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:30'),
+(66,'Environmental Science','GEN-101','2023-2024',2,'Mid 2','1_1708000052_semester -II Mid-2.pdf','pdf',257787,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:30'),
+(67,'Desktop Publishing (DTP)','GEN-301','2023-2024',3,'Mid 1','1_1708000053_Desktop-Publishing-mid1-semester-iii.pdf','pdf',559943,NULL,'approved',NULL,0.0,0,0,1,53,'2026-02-16 09:37:05','2026-05-08 17:49:39'),
+(68,'DTP (Multi Disciplinary)','GEN-301','2023-2024',3,'Mid 2','1_1708000054_Desktop-Publishing-mid2-semester-iii.pdf','pdf',537322,NULL,'approved',NULL,0.0,0,0,1,53,'2026-02-16 09:37:05','2026-05-08 17:49:39'),
+(69,'Programming for Problem Solving using \"C\"','GEN-201','2023-2024',2,'End Semester','1_1708000055_End-semester-II.pdf','pdf',181293,NULL,'approved',NULL,0.0,0,1,1,1,'2026-02-16 09:37:05','2026-05-08 17:49:39'),
+(70,'Programming for Problem Solving using \"C\"','GEN-201','2023-2024',2,'Mid 2','1_1708000056_AI Semester-II Mid-2.pdf','pdf',539032,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-05-08 17:49:39'),
+(71,'Programming for Problem Solving using \"C\"','GEN-201','2023-2024',2,'Mid 1','1_1708000057_AI Semester-II Mid-1.pdf','pdf',127695,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-05-08 17:49:39'),
+(72,'Basics of Computer Science & MS-Office Suite','GEN-101','2023-2024',1,'Mid 2','1_1708000058_AI semester-I, Mid-term-II.pdf','pdf',132859,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-05-08 17:49:39'),
+(73,'Basics of Computer Science and MS-Office Suite','GEN-101','2023-2024',1,'Mid 1','1_1708000059_Semester-I, Mid-term-1, AImajor.pdf','pdf',119320,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-05-08 17:49:39'),
+(74,'Basics of Computer Science and MS-Office Suite','GEN-101','2023-2024',1,'End Semester','1_1708000060_AI End-semester_1.pdf','pdf',271504,NULL,'approved',NULL,0.0,0,0,1,1,'2026-02-16 09:37:05','2026-05-08 17:49:39'),
+(75,'Introduction to Renewable Energy','GEN-301','2023-2024',4,'Mid 1','1_1708000061_Renewable Energy-mid1-semester-iii.pdf','pdf',626656,NULL,'approved',NULL,0.0,0,0,1,49,'2026-02-16 09:37:05','2026-05-08 17:49:39'),
+(76,'Good Laboratory Practices (GLP)','GEN-301','2023-2024',4,'Mid 1','1_1708000062_Renewable Energy-mid2-semester-iii.pdf','pdf',616984,NULL,'approved',NULL,0.0,0,0,1,49,'2026-02-16 09:37:05','2026-05-08 17:49:39'),
+(77,'Indian Constitution and Heritage','GEN-101','2023-2024',1,'End Semester','1_1708000063_End-semester_1.pdf','pdf',316066,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:30'),
+(78,'Indian Heritage and Constitution','GEN-101','2023-2024',1,'Mid 1','1_1708000064_Semester-I Mid-I-Batch-24.pdf','pdf',885957,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:30'),
+(79,'Indian Constitution and Heritage','GEN-101','2023-2024',1,'Mid 1','1_1708000065_Semester-I Mid-I.pdf','pdf',119211,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:30'),
+(80,'Indian Constitution and Heritage','GEN-101','2023-2024',1,'Mid 2','1_1708000066_Semester-I Mid-II.pdf','pdf',167009,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:30'),
+(81,'Verbal Ability and Quantitative Aptitude','GEN-101','2023-2024',1,'Mid 1','1_1708000067_Semester-I, Mid-term-I.pdf','pdf',409706,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:30'),
+(82,'Verbal Ability and Quantitative Aptitude','GEN-101','2023-2024',1,'End Semester','1_1708000068_End-semester_1.pdf','pdf',681390,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:30'),
+(83,'Verbal Ability and Quantitative Aptitude','GEN-101','2023-2024',2,'Mid 2','1_1708000069_semester-I, Mid-term-II.pdf','pdf',339394,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:30'),
+(84,'Verbal Ability and Quantitative Aptitude','GEN-101','2023-2024',1,'Mid 1','1_1708000070_Semester-I, Mid-term-I-Batch-24.pdf','pdf',1796434,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:30'),
+(85,'English for Communication - I','GEN-101','2023-2024',1,'Mid 1','1_1708000071_Semester-I, Mid-term-I.pdf','pdf',160203,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-05-08 17:49:39'),
+(86,'English for Communication - I','GEN-101','2023-2024',1,'End Semester','1_1708000072_End-semester_.pdf','pdf',402762,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-05-08 17:49:39'),
+(87,'English for Communication - II','GEN-301','2023-2024',3,'End Semester','1_1708000073_English-end-semester-iii.pdf','pdf',1053677,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-05-08 17:49:39'),
+(88,'English for Communication - I','GEN-101','2023-2024',1,'Mid 2','1_1708000074_semester-I, Mid-term-II.pdf','pdf',218604,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-05-08 17:49:39'),
+(89,'English for Communication - II','GEN-301','2023-2024',3,'Mid 2','1_1708000075_English-mid2-semester-iii.pdf','pdf',747804,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-05-08 17:49:39'),
+(90,'English for Communication - I','GEN-101','2023-2024',1,'Mid 1','1_1708000076_Semester-I, Mid-term-I-Batch-24.pdf','pdf',825278,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-05-08 17:49:39'),
+(91,'Personality Development','GEN-101','2023-2024',1,'Mid 1','1_1708000077_Semester-I, Mid-term-I.pdf','pdf',127374,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:30'),
+(92,'Personality Development','GEN-101','2023-2024',1,'End Semester','1_1708000078_End-semester_1.pdf','pdf',314196,NULL,'approved',NULL,0.0,0,1,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:30'),
+(93,'Personality Development','GEN-101','2023-2024',1,'Mid 2','1_1708000079_semester-I, Mid-term-II.pdf','pdf',123964,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:30'),
+(94,'Personality Development','GEN-101','2023-2024',1,'Mid 1','1_1708000080_Semester-I, Mid-term-I-Batch-24.pdf','pdf',746652,NULL,'approved',NULL,0.0,0,0,1,58,'2026-02-16 09:37:05','2026-05-08 18:24:30'),
+(95,'Global Tourism Geography','GEN-101','2023-2024',1,'Mid 1','1_1708000081_Semester-I, Mid-term-I.pdf','pdf',115406,NULL,'approved',NULL,0.0,0,0,1,56,'2026-02-16 09:37:05','2026-05-08 17:51:29'),
+(96,'Global Tourism Geography','GEN-101','2023-2024',1,'End Semester','1_1708000082_End-semester_1.pdf','pdf',277679,NULL,'approved',NULL,0.0,0,0,1,56,'2026-02-16 09:37:05','2026-05-08 17:51:29'),
+(97,'Global Tourism Geography','GEN-101','2023-2024',1,'Mid 2','1_1708000083_semester-I, Mid-term-II.pdf','pdf',109034,NULL,'approved',NULL,0.0,0,0,1,56,'2026-02-16 09:37:05','2026-05-08 17:51:29'),
+(98,'Management Concepts and Organizational Behaviour','GEN-101','2023-2024',1,'Mid 1','1_1708000084_Semester-I, Mid-term-I.pdf','pdf',127307,NULL,'approved',NULL,0.0,0,0,1,49,'2026-02-16 09:37:05','2026-05-08 17:51:29'),
+(99,'MCOB (Management Concepts and Organizational Behaviour)','GEN-101','2023-2024',1,'Mid 2','1_1708000085_semester-I, Mid-term-II.pdf','pdf',114080,NULL,'approved',NULL,0.0,0,2,1,49,'2026-02-16 09:37:05','2026-05-08 12:21:31');
 /*!40000 ALTER TABLE `papers` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -554,7 +554,7 @@ CREATE TABLE `security_logs` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `security_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=151 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=153 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -685,7 +685,9 @@ INSERT INTO `security_logs` VALUES
 (147,2,'LOGIN','127.0.0.1','{\"browser\": null, \"os\": null}','2026-05-08 16:02:10'),
 (148,9,'GOOGLE_LOGIN','127.0.0.1','{\"email\": \"knowledge.pyqs@gmail.com\"}','2026-05-08 16:02:45'),
 (149,1,'GOOGLE_LOGIN','127.0.0.1','{\"email\": \"work.aakash.modi@gmail.com\"}','2026-05-08 16:03:08'),
-(150,9,'GOOGLE_LOGIN','127.0.0.1','{\"email\": \"knowledge.pyqs@gmail.com\"}','2026-05-08 16:03:39');
+(150,9,'GOOGLE_LOGIN','127.0.0.1','{\"email\": \"knowledge.pyqs@gmail.com\"}','2026-05-08 16:03:39'),
+(151,9,'GOOGLE_LOGIN','127.0.0.1','{\"email\": \"knowledge.pyqs@gmail.com\"}','2026-05-08 16:28:20'),
+(152,9,'GOOGLE_LOGIN','127.0.0.1','{\"email\": \"knowledge.pyqs@gmail.com\"}','2026-05-08 16:38:05');
 /*!40000 ALTER TABLE `security_logs` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -715,8 +717,17 @@ set autocommit=0;
 INSERT INTO `system_settings` VALUES
 ('allowed_extensions','[\"pdf\", \"docx\", \"jpg\", \"png\", \"zip\", \"txt\", \"*\"]','2026-02-14 17:23:40'),
 ('auto_approval','false','2026-02-14 17:23:40'),
+('clash_subtitle','\"Which department will contribute the most previous year questions this semester?\"',NULL),
+('elite_rank_label','\"Elite Rank #1\"',NULL),
+('hierarchy_title','\"Department Hierarchy\"',NULL),
 ('max_file_size','1','2026-02-27 13:04:12'),
 ('mod_assignment','\"round-robin\"','2026-02-14 17:23:40'),
+('scholars_active_label','\"scholars active\"',NULL),
+('season_end_date','\"2026-05-20\"',NULL),
+('season_name','\"Departmental Clash\"',NULL),
+('season_year','\"2025\"',NULL),
+('sortBy_momentum_label','\"By Momentum\"',NULL),
+('sortBy_volume_label','\"By Volume\"',NULL),
 ('spam_sensitivity','\"Medium\"','2026-02-14 17:23:40');
 /*!40000 ALTER TABLE `system_settings` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -746,7 +757,7 @@ CREATE TABLE `user_sessions` (
   KEY `jti_2` (`jti`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `user_sessions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=150 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=152 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -877,7 +888,9 @@ INSERT INTO `user_sessions` VALUES
 (146,2,'c2a3bcba-5b74-4cae-96fe-acc416ebddb7',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36','127.0.0.1',NULL,0,'2026-05-08 16:02:10','2026-05-08 16:02:10'),
 (147,9,'4758492c-7dc5-492e-b723-d8b5e5861a69',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36','127.0.0.1',NULL,0,'2026-05-08 16:02:45','2026-05-08 16:02:45'),
 (148,1,'e33516b3-702d-4386-a02f-6e4a81207355',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36','127.0.0.1',NULL,0,'2026-05-08 16:03:08','2026-05-08 16:03:08'),
-(149,9,'3650c1c5-504d-4cf0-b919-68c58cdf2444',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36','127.0.0.1',NULL,0,'2026-05-08 16:03:39','2026-05-08 16:03:39');
+(149,9,'3650c1c5-504d-4cf0-b919-68c58cdf2444',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36','127.0.0.1',NULL,0,'2026-05-08 16:03:39','2026-05-08 16:03:39'),
+(150,9,'e23b91e4-cdbd-49fa-8927-248a4eee7f11',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36','127.0.0.1',NULL,0,'2026-05-08 16:28:20','2026-05-08 16:28:20'),
+(151,9,'16407113-4626-495a-922b-b2aaf6d960ac',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36','127.0.0.1',NULL,0,'2026-05-08 16:38:05','2026-05-08 16:38:05');
 /*!40000 ALTER TABLE `user_sessions` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -939,7 +952,7 @@ LOCK TABLES `users` WRITE;
 set autocommit=0;
 INSERT INTO `users` VALUES
 (1,'Aakash Modi','work.aakash.modi@gmail.com','$2b$12$Jf5YSm2gi/P8kOYUQQxXx..dvxTfqDptlzV2ok2fmxzT78JZSg.Ne','super_admin','https://lh3.googleusercontent.com/a/ACg8ocISYaaJ17cK4mx87itJgMXtQYtgao0SHw2Zi7lSAH8fotmsFZA=s96-c',NULL,95,'2026-02-14 09:39:19','2026-05-08 01:32:53',NULL,NULL,NULL,NULL,NULL,'dark','emerald',1,1,0,NULL,'direct','2026-02-27 13:32:07',0,1,0,0,'google','113264534776486448845',0),
-(2,'AAA','b@gmail.com','$2b$12$Mr1hLyVevfN/36YIxsHwGe9HlbGpDIwZ2QkZ2My7GCnjDmzGwML3K','student',NULL,54,85,'2026-02-14 09:49:01','2026-05-08 01:00:20','23202001',NULL,NULL,NULL,'','dark','blue',1,1,0,NULL,'direct','2026-02-15 10:31:31',0,0,0,0,NULL,NULL,0),
+(2,'AAA','b@gmail.com','$2b$12$Mr1hLyVevfN/36YIxsHwGe9HlbGpDIwZ2QkZ2My7GCnjDmzGwML3K','student',NULL,NULL,85,'2026-02-14 09:49:01','2026-05-08 01:00:20','23202001',NULL,NULL,NULL,'','dark','blue',1,1,0,NULL,'direct','2026-02-15 10:31:31',0,0,0,0,NULL,NULL,0),
 (3,'Aakash','aakashmodi150@gmail.com','$2b$12$QrWELf42heNVIiEBmdV29ud7feM3ZgZM0g7nITi3/3T4K0n3MfhPK','student',NULL,1,0,'2026-02-15 11:02:23','2026-02-15 11:02:23',NULL,NULL,NULL,NULL,NULL,'system','blue',1,1,0,NULL,'direct','2026-02-15 16:32:23',0,0,0,0,NULL,NULL,0),
 (5,'Aakash Modi','yapesiw725@exahut.com','$2b$12$ekivWiuYszOg9WZNcw2zEO6nqTMbygmRxuSmD/n0d/.u/i2cuyp2y','student',NULL,1,20,'2026-03-24 11:18:17','2026-03-24 12:33:42',NULL,NULL,6,'7811950838',NULL,'system','blue',1,1,0,NULL,'direct','2026-03-24 16:48:17',0,1,0,0,NULL,NULL,0),
 (9,'Knowledge Hub','knowledge.pyqs@gmail.com',NULL,'student','https://lh3.googleusercontent.com/a/ACg8ocLfazpt47XRUNS3lJ3gz83u8dSkFeHN20xkVolUUTGC-AK6YQ=s96-c',NULL,0,'2026-05-08 10:32:45','2026-05-08 10:32:45',NULL,NULL,NULL,NULL,NULL,'system','blue',1,1,0,NULL,'direct','2026-05-08 16:02:45',0,1,0,0,'google','111274872534947428448',0);
@@ -956,4 +969,4 @@ commit;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-05-08 21:41:32
+-- Dump completed on 2026-05-08 23:57:52

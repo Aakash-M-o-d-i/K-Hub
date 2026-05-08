@@ -20,16 +20,39 @@ export default function DepartmentalClash() {
     const [scholars, setScholars] = useState([]);
     const [sortBy, setSortBy] = useState('papers');
     const [loading, setLoading] = useState(true);
+    const [config, setConfig] = useState({
+        season_name: 'Departmental Clash',
+        season_year: '2025',
+        season_end_date: '',
+        clash_subtitle: 'The battle for academic supremacy is on.',
+        hierarchy_title: 'Department Hierarchy',
+        sortBy_volume_label: 'By Volume',
+        sortBy_momentum_label: 'By Momentum',
+        elite_rank_label: 'Elite Rank #1',
+        scholars_active_label: 'scholars active'
+    });
 
     useEffect(() => {
         Promise.all([
             api.get('/leaderboard/departments'),
             api.get('/leaderboard/scholars?limit=10'),
-        ]).then(([deptRes, scholarsRes]) => {
+            api.get('/leaderboard/config'),
+        ]).then(([deptRes, scholarsRes, configRes]) => {
             setDepartments(deptRes.data.departments || []);
             setScholars(scholarsRes.data.scholars || []);
+            setConfig(configRes.data);
         }).catch(() => { }).finally(() => setLoading(false));
     }, []);
+
+    const getDaysRemaining = () => {
+        if (!config.season_end_date) return 0;
+        const end = new Date(config.season_end_date);
+        const now = new Date();
+        const diff = end - now;
+        return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+    };
+    
+    const daysRemaining = getDaysRemaining();
 
     // sort departments
     const sorted = [...departments].sort((a, b) =>
@@ -64,15 +87,15 @@ export default function DepartmentalClash() {
                 <header className="mb-8 text-center md:text-left md:flex md:items-end md:justify-between">
                     <div>
                         <h1 className="text-3xl md:text-4xl font-black text-text-main mb-2 uppercase tracking-tight">
-                            Departmental Clash <span className="text-primary">2025</span>
+                            {config.season_name} <span className="text-primary">{config.season_year}</span>
                         </h1>
                         <p className="text-text-muted font-bold opacity-60 max-w-2xl">
-                            The battle for academic supremacy is on. Which department will contribute the most previous year questions this semester?
+                            {config.clash_subtitle}
                         </p>
                     </div>
                     <div className="mt-4 md:mt-0 flex items-center gap-2 bg-danger/10 text-danger px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest animate-pulse border border-danger/20">
                         <span className="material-symbols-outlined text-sm">timer</span>
-                        Season ends in 12 days
+                        Season ends in {daysRemaining} days
                     </div>
                 </header>
 
@@ -116,7 +139,7 @@ export default function DepartmentalClash() {
                             </div>
                             <div className="flex items-center gap-2 text-[10px] text-text-muted font-black uppercase tracking-widest">
                                 <span className="w-2.5 h-2.5 rounded-full bg-warning shadow-[0_0_8px_rgba(234,179,8,0.4)]" />
-                                <span className="text-text-main">{second.department?.code}</span> chasing with {second.total_papers}
+                                <span className="text-text-main">{second.department?.code}</span> {sortBy === 'papers' ? 'chasing with' : 'points:'} {sortBy === 'papers' ? second.total_papers : second.total_points}
                             </div>
                         </div>
                     </section>
@@ -189,7 +212,7 @@ export default function DepartmentalClash() {
                         <div className="flex justify-between items-center mb-2">
                             <h2 className="text-sm font-black flex items-center gap-2 text-text-main uppercase tracking-widest">
                                 <span className="material-symbols-outlined text-primary">domain</span>
-                                Department Hierarchy
+                                {config.hierarchy_title}
                             </h2>
                             <div className="flex gap-2 bg-bg-surface p-1 rounded-xl border border-border-main">
                                 <button
@@ -198,7 +221,7 @@ export default function DepartmentalClash() {
                                         ? 'bg-primary text-white shadow-lg shadow-primary/20'
                                         : 'text-text-muted hover:text-text-main'}`}
                                 >
-                                    By Volume
+                                    {config.sortBy_volume_label}
                                 </button>
                                 <button
                                     onClick={() => setSortBy('activity')}
@@ -206,7 +229,7 @@ export default function DepartmentalClash() {
                                         ? 'bg-primary text-white shadow-lg shadow-primary/20'
                                         : 'text-text-muted hover:text-text-main'}`}
                                 >
-                                    By Momentum
+                                    {config.sortBy_momentum_label}
                                 </button>
                             </div>
                         </div>
@@ -218,14 +241,14 @@ export default function DepartmentalClash() {
                                 <div className="absolute bottom-0 left-0 w-48 h-48 bg-white opacity-[0.02] rounded-full -ml-24 -mb-24" />
                                 <div className="relative z-10 flex items-center gap-8">
                                     <div className="bg-white/10 p-6 rounded-2xl backdrop-blur-md border border-white/20 shadow-2xl">
-                                        <span className="material-symbols-outlined text-5xl text-white">{DEPT_ICONS[0]}</span>
+                                        <span className="material-symbols-outlined text-5xl text-white">{DEPT_ICONS[top.department?.id % DEPT_ICONS.length]}</span>
                                     </div>
                                     <div className="flex-grow">
                                         <div className="flex items-center gap-3 mb-2">
-                                            <span className="bg-white/20 px-3 py-1 rounded text-[9px] font-black uppercase tracking-widest border border-white/20">Elite Rank #1</span>
+                                            <span className="bg-white/20 px-3 py-1 rounded text-[9px] font-black uppercase tracking-widest border border-white/20">{config.elite_rank_label}</span>
                                             <span className="flex items-center text-[10px] font-black uppercase tracking-widest text-white/80">
                                                 <span className="material-symbols-outlined text-base mr-1.5 text-success">trending_up</span>
-                                                {top.contributors} scholars active
+                                                {top.contributors} {config.scholars_active_label}
                                             </span>
                                         </div>
                                         <h3 className="text-3xl font-black tracking-tight uppercase">{top.department?.name}</h3>

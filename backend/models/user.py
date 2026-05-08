@@ -88,3 +88,14 @@ class User(db.Model):
             "created_at": self.created_at.isoformat() + "Z" if self.created_at else None,
             "updated_at": self.updated_at.isoformat() + "Z" if self.updated_at else None,
         }
+
+    def to_public_dict(self):
+        """Returns a version of user data safe for public display (only name, dept, sem, avatar)."""
+        return {
+            "id": self.id,
+            "name": self.name,
+            "role": self.role,
+            "avatar_url": self.avatar_url,
+            "department": self.department.to_dict() if self.department else None,
+            "semester": self.semester,
+        }

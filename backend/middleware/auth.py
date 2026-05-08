@@ -30,10 +30,18 @@ def jwt_required_with_user(fn):
 
 
 def admin_required(fn):
-    """Decorator: ensures user is admin or super_admin."""
+    """Decorator: ensures user is admin or super_admin and session is not revoked."""
     @wraps(fn)
     def wrapper(*args, **kwargs):
         verify_jwt_in_request()
+        jwt_data = get_jwt()
+        jti = jwt_data.get("jti")
+        
+        # Check if session is revoked
+        session = UserSession.query.filter_by(jti=jti).first()
+        if session and session.is_revoked:
+            return jsonify({"error": "Session has been revoked"}), 401
+            
         user_id = get_jwt_identity()
         user = User.query.get(int(user_id))
         if not user:
@@ -50,10 +58,18 @@ def admin_required(fn):
 
 
 def super_admin_required(fn):
-    """Decorator: ensures user is super_admin."""
+    """Decorator: ensures user is super_admin and session is not revoked."""
     @wraps(fn)
     def wrapper(*args, **kwargs):
         verify_jwt_in_request()
+        jwt_data = get_jwt()
+        jti = jwt_data.get("jti")
+        
+        # Check if session is revoked
+        session = UserSession.query.filter_by(jti=jti).first()
+        if session and session.is_revoked:
+            return jsonify({"error": "Session has been revoked"}), 401
+            
         user_id = get_jwt_identity()
         user = User.query.get(int(user_id))
         if not user:

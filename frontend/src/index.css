@@ -172,6 +172,17 @@
   -webkit-line-clamp: 2;
 }
 
+/* ──────────────────────── Select Fixes ──────────────────────── */
+select option {
+  background-color: var(--surface-bg);
+  color: var(--text-main);
+}
+
+.dark select option {
+  background-color: #1e293b;
+  color: #f8fafc;
+}
+
 /* ──────────────────────── Pattern Grid ──────────────────────── */
 .pattern-grid {
   background-image: radial-gradient(rgba(25, 120, 229, 0.1) 1px, transparent 1px);
