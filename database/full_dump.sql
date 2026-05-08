@@ -37,10 +37,11 @@ CREATE TABLE `audit_logs` (
   KEY `admin_id` (`admin_id`),
   KEY `target_paper_id` (`target_paper_id`),
   KEY `target_user_id` (`target_user_id`),
+  KEY `idx_audit_logs_created_at` (`created_at`),
   CONSTRAINT `audit_logs_ibfk_1` FOREIGN KEY (`admin_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `audit_logs_ibfk_2` FOREIGN KEY (`target_paper_id`) REFERENCES `papers` (`id`) ON DELETE SET NULL,
   CONSTRAINT `audit_logs_ibfk_3` FOREIGN KEY (`target_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -73,7 +74,20 @@ INSERT INTO `audit_logs` VALUES
 (20,1,'update_role',NULL,NULL,'Changed to admin',NULL,'2026-02-16 04:54:50','127.0.0.1'),
 (29,1,'delete_paper',NULL,NULL,'Deleted paper: rr (RR - 2024-2025) by a',NULL,'2026-02-16 04:59:39','127.0.0.1'),
 (31,1,'update_settings',NULL,NULL,'Updated system configuration: auto_approval, mod_assignment, spam_sensitivity, max_file_size, allowed_extensions',NULL,'2026-02-27 07:34:12','127.0.0.1'),
-(32,1,'reject',101,2,'Metadata Inconsistency: Adidnudnsidjdj',NULL,'2026-02-27 08:00:44','127.0.0.1');
+(32,1,'reject',NULL,2,'Metadata Inconsistency: Adidnudnsidjdj',NULL,'2026-02-27 08:00:44','127.0.0.1'),
+(33,1,'approve',NULL,5,NULL,NULL,'2026-03-24 12:33:42','127.0.0.1'),
+(34,1,'delete_paper',NULL,NULL,'Deleted paper: Test (101 - 2023) by Aakash Modi',NULL,'2026-03-24 12:45:53','127.0.0.1'),
+(35,1,'delete_paper',NULL,NULL,'Deleted paper: Testing (BAI - 101 - 2024-2025) by AAA',NULL,'2026-03-24 12:45:56','127.0.0.1'),
+(36,1,'update_role',NULL,NULL,'Changed to admin',NULL,'2026-05-08 01:49:34','127.0.0.1'),
+(37,1,'update_role',NULL,NULL,'Changed to student',NULL,'2026-05-08 01:49:34','127.0.0.1'),
+(38,1,'update_role',NULL,NULL,'Changed to admin',NULL,'2026-05-08 01:49:35','127.0.0.1'),
+(39,1,'update_role',NULL,NULL,'Changed to student',NULL,'2026-05-08 01:49:36','127.0.0.1'),
+(42,1,'delete_user',NULL,NULL,'Permanently deleted user: Knowledge Hub (knowledge.pyqs@gmail.com)',NULL,'2026-05-08 02:04:52','127.0.0.1'),
+(43,1,'delete_user',NULL,NULL,'Permanently deleted user: Knowledge Hub (knowledge.pyqs@gmail.com)',NULL,'2026-05-08 02:29:49','127.0.0.1'),
+(44,1,'approve',NULL,NULL,NULL,NULL,'2026-05-08 10:30:15','127.0.0.1'),
+(45,1,'delete_user',NULL,NULL,'Permanently deleted user: Knowledge Hub (knowledge.pyqs@gmail.com)',NULL,'2026-05-08 10:31:37','127.0.0.1'),
+(46,1,'delete_paper',NULL,NULL,'Deleted paper: test2_delete (1 - 2022) by Unknown',NULL,'2026-05-08 10:33:15','127.0.0.1'),
+(47,1,'delete_paper',NULL,NULL,'Deleted paper: Jshs (ISJD - 2023-2024) by AAA',NULL,'2026-05-08 10:33:25','127.0.0.1');
 /*!40000 ALTER TABLE `audit_logs` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -168,7 +182,7 @@ CREATE TABLE `downloads` (
   KEY `paper_id` (`paper_id`),
   CONSTRAINT `downloads_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `downloads_ibfk_2` FOREIGN KEY (`paper_id`) REFERENCES `papers` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -183,7 +197,8 @@ INSERT INTO `downloads` VALUES
 (6,2,17,'2026-02-22 00:32:48'),
 (7,2,17,'2026-02-22 00:44:03'),
 (8,2,19,'2026-02-22 00:57:57'),
-(9,2,18,'2026-03-24 10:13:22');
+(9,2,18,'2026-03-24 10:13:22'),
+(10,2,99,'2026-05-08 01:00:02');
 /*!40000 ALTER TABLE `downloads` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -205,7 +220,7 @@ CREATE TABLE `leaderboard_points` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `leaderboard_points_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -235,7 +250,9 @@ INSERT INTO `leaderboard_points` VALUES
 (17,2,5,'upload',NULL,'2026-02-15 08:23:37'),
 (22,2,5,'upload',NULL,'2026-02-16 06:43:51'),
 (23,2,15,'approved',100,'2026-02-16 06:46:44'),
-(24,2,5,'upload',NULL,'2026-02-27 07:59:57');
+(24,2,5,'upload',NULL,'2026-02-27 07:59:57'),
+(25,5,5,'upload',NULL,'2026-03-24 12:32:40'),
+(26,5,15,'approved',102,'2026-03-24 12:33:42');
 /*!40000 ALTER TABLE `leaderboard_points` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -259,7 +276,7 @@ CREATE TABLE `notifications` (
   PRIMARY KEY (`id`),
   KEY `idx_user_notif` (`user_id`,`is_read`),
   CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -286,7 +303,15 @@ INSERT INTO `notifications` VALUES
 (17,2,'success','Submission Approved','Success! Archive Entry \'Testing\' has been verified and added to the official repository.','/dashboard?tab=uploads',0,'2026-02-16 06:46:44'),
 (18,1,'warning','New Pending Paper','User AAA uploaded \"Jshs\". Approval required.','/sector-delta/moderation',0,'2026-02-27 07:59:58'),
 (19,2,'danger','Submission Rejected','Archive Entry \'Jshs\' was rejected by moderation protocol. Reason: Metadata Inconsistency: Adidnudnsidjdj','/dashboard?tab=uploads',1,'2026-02-27 08:00:44'),
-(20,1,'success','New User Registered','User Aakash Modi (yapesiw725@exahut.com) has joined and verified their account.','/sector-delta/users',0,'2026-03-24 11:18:17');
+(20,1,'success','New User Registered','User Aakash Modi (yapesiw725@exahut.com) has joined and verified their account.','/sector-delta/users',0,'2026-03-24 11:18:17'),
+(21,1,'warning','New Pending Paper','User Aakash Modi uploaded \"Test\". Approval required.','/sector-delta/moderation',0,'2026-03-24 12:32:40'),
+(22,5,'success','Submission Approved','Success! Archive Entry \'Test\' has been verified and added to the official repository.','/dashboard?tab=uploads',0,'2026-03-24 12:33:42'),
+(23,1,'success','New User Registered (Google)','User Knowledge Hub (knowledge.pyqs@gmail.com) has joined via Google OAuth.','/sector-delta/users',0,'2026-05-08 01:34:18'),
+(24,1,'success','New User Registered (Google)','User Knowledge Hub (knowledge.pyqs@gmail.com) has joined via Google OAuth.','/sector-delta/users',0,'2026-05-08 02:05:15'),
+(25,1,'success','New User Registered (Google)','User Knowledge Hub (knowledge.pyqs@gmail.com) has joined via Google OAuth.','/sector-delta/users',0,'2026-05-08 02:30:30'),
+(26,1,'warning','New Pending Paper','User Knowledge Hub uploaded \"test1\". Approval required.','/sector-delta/moderation',0,'2026-05-08 10:28:21'),
+(27,1,'warning','New Pending Paper','User Knowledge Hub uploaded \"test2_delete\". Approval required.','/sector-delta/moderation',0,'2026-05-08 10:29:16'),
+(29,1,'success','New User Registered (Google)','User Knowledge Hub (knowledge.pyqs@gmail.com) has joined via Google OAuth.','/sector-delta/users',0,'2026-05-08 10:32:45');
 /*!40000 ALTER TABLE `notifications` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -357,7 +382,7 @@ CREATE TABLE `papers` (
   `rating_avg` decimal(2,1) DEFAULT 0.0,
   `rating_count` int(11) DEFAULT 0,
   `download_count` int(11) DEFAULT 0,
-  `uploader_id` int(11) NOT NULL,
+  `uploader_id` int(11) DEFAULT NULL,
   `department_id` int(11) NOT NULL,
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -367,9 +392,10 @@ CREATE TABLE `papers` (
   KEY `idx_dept` (`department_id`),
   KEY `idx_semester` (`semester`),
   KEY `idx_year` (`year`),
+  KEY `idx_papers_created_at` (`created_at`),
   CONSTRAINT `papers_ibfk_1` FOREIGN KEY (`uploader_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `papers_ibfk_2` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=105 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -467,9 +493,7 @@ INSERT INTO `papers` VALUES
 (96,'End-semester 1','GEN-101','2023-2024',1,'End Semester','1_1708000082_End-semester_1.pdf','pdf',277679,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
 (97,'semester-I, Mid-term-II','GEN-101','2023-2024',1,'Mid 2','1_1708000083_semester-I, Mid-term-II.pdf','pdf',109034,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
 (98,'Semester-I, Mid-term-I','GEN-101','2023-2024',1,'Mid 1','1_1708000084_Semester-I, Mid-term-I.pdf','pdf',127307,NULL,'approved',NULL,0.0,0,0,1,51,'2026-02-16 09:37:05','2026-02-16 10:09:27'),
-(99,'semester-I, Mid-term-II','GEN-101','2023-2024',1,'Mid 2','1_1708000085_semester-I, Mid-term-II.pdf','pdf',114080,NULL,'approved',NULL,0.0,0,0,1,57,'2026-02-16 09:37:05','2026-02-16 10:00:10'),
-(100,'Testing','BAI - 101','2024-2025',6,'End Semester','2_31304_admit-card-status_1.pdf','pdf',1323070,NULL,'approved',NULL,0.0,0,0,2,1,'2026-02-16 06:43:51','2026-02-16 06:46:44'),
-(101,'Jshs','ISJD','2023-2024',6,'End Semester','2_997913_Screenshot_20260227-075418.png','png',173974,NULL,'rejected','Metadata Inconsistency: Adidnudnsidjdj',0.0,0,0,2,1,'2026-02-27 07:59:58','2026-02-27 08:00:44');
+(99,'semester-I, Mid-term-II','GEN-101','2023-2024',1,'Mid 2','1_1708000085_semester-I, Mid-term-II.pdf','pdf',114080,NULL,'approved',NULL,0.0,0,1,1,57,'2026-02-16 09:37:05','2026-05-08 01:00:02');
 /*!40000 ALTER TABLE `papers` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -530,7 +554,7 @@ CREATE TABLE `security_logs` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `security_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=124 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=151 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -642,7 +666,26 @@ INSERT INTO `security_logs` VALUES
 (120,2,'LOGIN','127.0.0.1','{\"browser\": null, \"os\": null}','2026-03-24 16:42:22'),
 (121,5,'REGISTER_COMPLETED','127.0.0.1','null','2026-03-24 16:48:17'),
 (122,5,'EMAIL_VERIFIED','127.0.0.1','null','2026-03-24 16:48:17'),
-(123,5,'LOGIN','127.0.0.1','{\"browser\": null, \"os\": null}','2026-03-24 16:48:32');
+(123,5,'LOGIN','127.0.0.1','{\"browser\": null, \"os\": null}','2026-03-24 16:48:32'),
+(124,5,'LOGIN','127.0.0.1','{\"browser\": null, \"os\": null}','2026-03-24 18:03:25'),
+(125,1,'LOGIN','127.0.0.1','{\"browser\": null, \"os\": null}','2026-03-24 18:03:31'),
+(126,5,'LOGIN','127.0.0.1','{\"browser\": null, \"os\": null}','2026-03-24 18:04:04'),
+(127,1,'LOGIN','127.0.0.1','{\"browser\": null, \"os\": null}','2026-03-24 18:15:42'),
+(128,5,'LOGIN','127.0.0.1','{\"browser\": null, \"os\": null}','2026-03-24 18:16:04'),
+(129,5,'LOGIN','127.0.0.1','{\"browser\": null, \"os\": null}','2026-03-24 18:26:52'),
+(130,2,'LOGIN','127.0.0.1','{\"browser\": null, \"os\": null}','2026-05-08 06:29:07'),
+(131,1,'GOOGLE_LOGIN','127.0.0.1','{\"email\": \"work.aakash.modi@gmail.com\"}','2026-05-08 07:02:53'),
+(134,1,'GOOGLE_LOGIN','127.0.0.1','{\"email\": \"work.aakash.modi@gmail.com\"}','2026-05-08 07:16:56'),
+(137,1,'GOOGLE_LOGIN','127.0.0.1','{\"email\": \"work.aakash.modi@gmail.com\"}','2026-05-08 07:24:58'),
+(139,1,'GOOGLE_LOGIN','127.0.0.1','{\"email\": \"work.aakash.modi@gmail.com\"}','2026-05-08 07:35:51'),
+(140,1,'GOOGLE_LOGIN','127.0.0.1','{\"email\": \"work.aakash.modi@gmail.com\"}','2026-05-08 07:59:40'),
+(142,1,'GOOGLE_LOGIN','127.0.0.1','{\"email\": \"work.aakash.modi@gmail.com\"}','2026-05-08 08:00:56'),
+(144,1,'GOOGLE_LOGIN','127.0.0.1','{\"email\": \"work.aakash.modi@gmail.com\"}','2026-05-08 15:59:34'),
+(146,1,'GOOGLE_LOGIN','127.0.0.1','{\"email\": \"work.aakash.modi@gmail.com\"}','2026-05-08 16:00:59'),
+(147,2,'LOGIN','127.0.0.1','{\"browser\": null, \"os\": null}','2026-05-08 16:02:10'),
+(148,9,'GOOGLE_LOGIN','127.0.0.1','{\"email\": \"knowledge.pyqs@gmail.com\"}','2026-05-08 16:02:45'),
+(149,1,'GOOGLE_LOGIN','127.0.0.1','{\"email\": \"work.aakash.modi@gmail.com\"}','2026-05-08 16:03:08'),
+(150,9,'GOOGLE_LOGIN','127.0.0.1','{\"email\": \"knowledge.pyqs@gmail.com\"}','2026-05-08 16:03:39');
 /*!40000 ALTER TABLE `security_logs` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -703,7 +746,7 @@ CREATE TABLE `user_sessions` (
   KEY `jti_2` (`jti`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `user_sessions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=123 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=150 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -815,7 +858,26 @@ INSERT INTO `user_sessions` VALUES
 (119,2,'e8993c69-f007-490f-83fd-bc8c6ce7278d',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0','127.0.0.1',NULL,0,'2026-03-24 16:41:35','2026-03-24 16:41:35'),
 (120,2,'88ec86a6-a6b4-4728-b700-c370d2283172',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0','127.0.0.1',NULL,0,'2026-03-24 16:42:22','2026-03-24 16:42:22'),
 (121,5,'b551bafb-782f-481a-a485-2966c662b6fc',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0','127.0.0.1',NULL,0,'2026-03-24 16:48:17','2026-03-24 16:48:17'),
-(122,5,'34c242f5-991d-430c-9d81-0366962867df',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0','127.0.0.1',NULL,0,'2026-03-24 16:48:32','2026-03-24 16:48:32');
+(122,5,'34c242f5-991d-430c-9d81-0366962867df',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0','127.0.0.1',NULL,0,'2026-03-24 16:48:32','2026-03-24 16:48:32'),
+(123,5,'c6378989-735e-4891-acc5-8a3dc3700100',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0','127.0.0.1',NULL,0,'2026-03-24 18:03:25','2026-03-24 18:03:25'),
+(124,1,'e1ead9df-1efb-46bd-92ff-50f7d33a2ae7',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0','127.0.0.1',NULL,0,'2026-03-24 18:03:31','2026-03-24 18:03:31'),
+(125,5,'cd3aacdc-b385-4bb5-ad63-c623a1d81cc6',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0','127.0.0.1',NULL,0,'2026-03-24 18:04:04','2026-03-24 18:04:04'),
+(126,1,'4309dff1-9922-4b25-bb91-c927a9e15da0',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0','127.0.0.1',NULL,0,'2026-03-24 18:15:42','2026-03-24 18:15:42'),
+(127,5,'cba60a0d-c156-47f9-bbe5-b510e7915881',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0','127.0.0.1',NULL,0,'2026-03-24 18:16:04','2026-03-24 18:16:04'),
+(128,5,'c13e51d3-4f89-44ac-b322-c01d300b637f',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0','127.0.0.1',NULL,0,'2026-03-24 18:26:52','2026-03-24 18:26:52'),
+(129,2,'0c6785cc-a61c-4c93-bbf5-5b89ff5d9e2d',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36','127.0.0.1',NULL,0,'2026-05-08 06:29:07','2026-05-08 06:29:07'),
+(130,1,'da66f654-6bcd-43e2-9e30-c0632766c50c',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36','127.0.0.1',NULL,0,'2026-05-08 07:02:53','2026-05-08 07:02:53'),
+(133,1,'aa27b536-9679-45c2-98da-d54b8a5c31d6',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36','127.0.0.1',NULL,0,'2026-05-08 07:16:56','2026-05-08 07:16:56'),
+(136,1,'85fac6b4-b221-4c46-a651-723cb325f28c',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36','127.0.0.1',NULL,0,'2026-05-08 07:24:58','2026-05-08 07:24:58'),
+(138,1,'b4609027-a13a-43d8-a9b5-e8dacd69431e',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36','127.0.0.1',NULL,0,'2026-05-08 07:35:51','2026-05-08 07:35:51'),
+(139,1,'02356f55-9964-4df0-9a8b-c8e329547f79',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36','127.0.0.1',NULL,0,'2026-05-08 07:59:40','2026-05-08 07:59:40'),
+(141,1,'aa832fef-f3bb-411e-9a79-f8a5006124bd',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36','127.0.0.1',NULL,0,'2026-05-08 08:00:56','2026-05-08 08:00:56'),
+(143,1,'844c0705-f4b5-4f9a-a17c-e709ed1ec2d1',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36','127.0.0.1',NULL,0,'2026-05-08 15:59:34','2026-05-08 15:59:34'),
+(145,1,'18eb7bf1-bac2-4c91-842e-f774376a7451',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36','127.0.0.1',NULL,0,'2026-05-08 16:00:59','2026-05-08 16:00:59'),
+(146,2,'c2a3bcba-5b74-4cae-96fe-acc416ebddb7',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36','127.0.0.1',NULL,0,'2026-05-08 16:02:10','2026-05-08 16:02:10'),
+(147,9,'4758492c-7dc5-492e-b723-d8b5e5861a69',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36','127.0.0.1',NULL,0,'2026-05-08 16:02:45','2026-05-08 16:02:45'),
+(148,1,'e33516b3-702d-4386-a02f-6e4a81207355',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36','127.0.0.1',NULL,0,'2026-05-08 16:03:08','2026-05-08 16:03:08'),
+(149,9,'3650c1c5-504d-4cf0-b919-68c58cdf2444',NULL,NULL,'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36','127.0.0.1',NULL,0,'2026-05-08 16:03:39','2026-05-08 16:03:39');
 /*!40000 ALTER TABLE `user_sessions` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -831,7 +893,7 @@ CREATE TABLE `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `email` varchar(150) NOT NULL,
-  `password_hash` varchar(255) NOT NULL,
+  `password_hash` varchar(255) DEFAULT NULL,
   `role` enum('student','admin','super_admin') DEFAULT 'student',
   `avatar_url` varchar(500) DEFAULT NULL,
   `department_id` int(11) DEFAULT NULL,
@@ -855,13 +917,17 @@ CREATE TABLE `users` (
   `is_verified` tinyint(1) DEFAULT 0,
   `is_top_contributor` tinyint(1) DEFAULT 0,
   `is_beta_tester` tinyint(1) DEFAULT 0,
+  `oauth_provider` varchar(20) DEFAULT NULL COMMENT 'OAuth provider: google, github, etc.',
+  `oauth_id` varchar(255) DEFAULT NULL COMMENT 'Unique ID from the OAuth provider',
+  `is_banned` tinyint(1) DEFAULT 0 COMMENT 'Whether the user account is banned/suspended',
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `idx_oauth_provider_id` (`oauth_provider`,`oauth_id`),
   KEY `department_id` (`department_id`),
   KEY `fk_user_default_dept` (`default_department_id`),
   CONSTRAINT `fk_user_default_dept` FOREIGN KEY (`default_department_id`) REFERENCES `departments` (`id`),
   CONSTRAINT `users_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -872,10 +938,11 @@ LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 set autocommit=0;
 INSERT INTO `users` VALUES
-(1,'Aakash Modi','work.aakash.modi@gmail.com','$2b$12$Jf5YSm2gi/P8kOYUQQxXx..dvxTfqDptlzV2ok2fmxzT78JZSg.Ne','super_admin',NULL,NULL,95,'2026-02-14 09:39:19','2026-02-27 08:02:07',NULL,NULL,NULL,NULL,NULL,'dark','emerald',1,1,0,NULL,'direct','2026-02-27 13:32:07',0,0,0,0),
-(2,'AAA','b@gmail.com','$2b$12$Mr1hLyVevfN/36YIxsHwGe9HlbGpDIwZ2QkZ2My7GCnjDmzGwML3K','student',NULL,54,85,'2026-02-14 09:49:01','2026-03-24 11:14:53','23202001',NULL,NULL,NULL,'','dark','blue',1,1,0,NULL,'direct','2026-02-15 10:31:31',0,0,0,0),
-(3,'Aakash','aakashmodi150@gmail.com','$2b$12$QrWELf42heNVIiEBmdV29ud7feM3ZgZM0g7nITi3/3T4K0n3MfhPK','student',NULL,1,0,'2026-02-15 11:02:23','2026-02-15 11:02:23',NULL,NULL,NULL,NULL,NULL,'system','blue',1,1,0,NULL,'direct','2026-02-15 16:32:23',0,0,0,0),
-(5,'Aakash Modi','yapesiw725@exahut.com','$2b$12$ekivWiuYszOg9WZNcw2zEO6nqTMbygmRxuSmD/n0d/.u/i2cuyp2y','student',NULL,1,0,'2026-03-24 11:18:17','2026-03-24 11:18:17',NULL,NULL,6,'7811950838',NULL,'system','blue',1,1,0,NULL,'direct','2026-03-24 16:48:17',0,1,0,0);
+(1,'Aakash Modi','work.aakash.modi@gmail.com','$2b$12$Jf5YSm2gi/P8kOYUQQxXx..dvxTfqDptlzV2ok2fmxzT78JZSg.Ne','super_admin','https://lh3.googleusercontent.com/a/ACg8ocISYaaJ17cK4mx87itJgMXtQYtgao0SHw2Zi7lSAH8fotmsFZA=s96-c',NULL,95,'2026-02-14 09:39:19','2026-05-08 01:32:53',NULL,NULL,NULL,NULL,NULL,'dark','emerald',1,1,0,NULL,'direct','2026-02-27 13:32:07',0,1,0,0,'google','113264534776486448845',0),
+(2,'AAA','b@gmail.com','$2b$12$Mr1hLyVevfN/36YIxsHwGe9HlbGpDIwZ2QkZ2My7GCnjDmzGwML3K','student',NULL,54,85,'2026-02-14 09:49:01','2026-05-08 01:00:20','23202001',NULL,NULL,NULL,'','dark','blue',1,1,0,NULL,'direct','2026-02-15 10:31:31',0,0,0,0,NULL,NULL,0),
+(3,'Aakash','aakashmodi150@gmail.com','$2b$12$QrWELf42heNVIiEBmdV29ud7feM3ZgZM0g7nITi3/3T4K0n3MfhPK','student',NULL,1,0,'2026-02-15 11:02:23','2026-02-15 11:02:23',NULL,NULL,NULL,NULL,NULL,'system','blue',1,1,0,NULL,'direct','2026-02-15 16:32:23',0,0,0,0,NULL,NULL,0),
+(5,'Aakash Modi','yapesiw725@exahut.com','$2b$12$ekivWiuYszOg9WZNcw2zEO6nqTMbygmRxuSmD/n0d/.u/i2cuyp2y','student',NULL,1,20,'2026-03-24 11:18:17','2026-03-24 12:33:42',NULL,NULL,6,'7811950838',NULL,'system','blue',1,1,0,NULL,'direct','2026-03-24 16:48:17',0,1,0,0,NULL,NULL,0),
+(9,'Knowledge Hub','knowledge.pyqs@gmail.com',NULL,'student','https://lh3.googleusercontent.com/a/ACg8ocLfazpt47XRUNS3lJ3gz83u8dSkFeHN20xkVolUUTGC-AK6YQ=s96-c',NULL,0,'2026-05-08 10:32:45','2026-05-08 10:32:45',NULL,NULL,NULL,NULL,NULL,'system','blue',1,1,0,NULL,'direct','2026-05-08 16:02:45',0,1,0,0,'google','111274872534947428448',0);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -889,4 +956,4 @@ commit;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-03-24 22:28:55
+-- Dump completed on 2026-05-08 21:41:32
