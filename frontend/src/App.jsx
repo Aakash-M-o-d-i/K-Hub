@@ -65,9 +65,7 @@ export default function App() {
             <Route
               path="/dashboard"
               element={
-                <PrivateRoute>
-                  <AppLayout><Dashboard /></AppLayout>
-                </PrivateRoute>
+                <AppLayout><Dashboard /></AppLayout>
               }
             />
             <Route

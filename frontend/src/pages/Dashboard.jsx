@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 import PaperCard from '../components/PaperCard';
 import FilterBar from '../components/FilterBar';
 import PaperPreview from '../components/PaperPreview';
 
 export default function Dashboard() {
+    const { user } = useAuth();
     const [papers, setPapers] = useState([]);
     const [departments, setDepartments] = useState([]);
     const [filters, setFilters] = useState({ department_id: '', semester: '', year: '', exam_type: '', sort: 'newest' });
@@ -28,8 +30,9 @@ export default function Dashboard() {
         api.get('/papers/departments').then((res) => setDepartments(res.data.departments)).catch(() => { });
     }, []);
 
-    // Fetch bookmarks if logged in
+    // Fetch bookmarks only if logged in
     const fetchBookmarks = () => {
+        if (!user) return;
         api.get('/papers/me/bookmarks').then((res) => {
             setBookmarkIds(new Set(res.data.papers.map(p => p.id)));
         }).catch(() => { });
@@ -37,7 +40,7 @@ export default function Dashboard() {
 
     useEffect(() => {
         fetchBookmarks();
-    }, []);
+    }, [user]);
 
     // Fetch papers when filters or page changes
     useEffect(() => {

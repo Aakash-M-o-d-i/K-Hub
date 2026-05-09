@@ -1,7 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 
 export default function PaperCard({ paper, onPreview, onBookmark: externalOnBookmark, isBookmarked: initialIsBookmarked }) {
+    const { user } = useAuth();
+    const navigate = useNavigate();
     const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked);
     const [bookmarking, setBookmarking] = useState(false);
 
@@ -11,6 +15,10 @@ export default function PaperCard({ paper, onPreview, onBookmark: externalOnBook
 
     const handleBookmark = async (e) => {
         e.stopPropagation();
+        if (!user) {
+            navigate('/login');
+            return;
+        }
         if (bookmarking) return;
         setBookmarking(true);
         try {
@@ -24,15 +32,33 @@ export default function PaperCard({ paper, onPreview, onBookmark: externalOnBook
         }
     };
 
+    const handleCardClick = () => {
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+        onPreview?.(paper);
+    };
+
     return (
         <div
             className="group relative bg-bg-surface rounded-[2rem] border border-border-main p-6
         hover:border-primary/20 hover:shadow-[0_20px_50px_rgba(0,0,0,0.04)] transition-all duration-500 cursor-pointer
         flex flex-col h-full overflow-hidden"
-            onClick={() => onPreview?.(paper)}
+            onClick={handleCardClick}
         >
             {/* Glass Background Glow */}
             <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+            {/* Guest Lock Overlay */}
+            {!user && (
+                <div className="absolute inset-0 z-20 rounded-[2rem] bg-gradient-to-t from-bg-surface/95 via-transparent to-transparent flex flex-col items-center justify-end pb-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+                    <div className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-xs font-black rounded-full shadow-xl shadow-primary/30 pointer-events-auto">
+                        <span className="material-symbols-outlined text-[16px]">lock</span>
+                        Sign in to View & Download
+                    </div>
+                </div>
+            )}
 
             {/* Top row: file badge + bookmark */}
             <div className="flex items-start justify-between mb-5 relative z-10">

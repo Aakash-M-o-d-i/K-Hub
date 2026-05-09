@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 import StarRating from './StarRating';
 
 export default function PaperPreview({ paper, onClose }) {
+    const { user } = useAuth();
+    const navigate = useNavigate();
     const [downloading, setDownloading] = useState(false);
     const [myScore, setMyScore] = useState(null);
     const [ratingAvg, setRatingAvg] = useState(paper?.rating_avg || 0);
     const [ratingCount, setRatingCount] = useState(paper?.rating_count || 0);
     const [loadingRating, setLoadingRating] = useState(false);
 
-    const isLoggedIn = !!localStorage.getItem('pyq_token');
+    const isLoggedIn = !!user;
 
     // Fetch user's existing rating on mount
     useEffect(() => {
@@ -24,6 +28,10 @@ export default function PaperPreview({ paper, onClose }) {
     if (!paper) return null;
 
     const handleDownload = async () => {
+        if (!isLoggedIn) {
+            navigate('/login');
+            return;
+        }
         setDownloading(true);
         try {
             const res = await api.get(`/papers/${paper.id}/download`, { responseType: 'blob' });
@@ -36,7 +44,7 @@ export default function PaperPreview({ paper, onClose }) {
             link.remove();
             window.URL.revokeObjectURL(url);
         } catch (err) {
-            alert('Download failed. Please log in first.');
+            alert('Download failed. Please try again.');
         } finally {
             setDownloading(false);
         }
@@ -70,25 +78,72 @@ export default function PaperPreview({ paper, onClose }) {
 
             {/* Modal */}
             <div className="relative bg-bg-surface rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden animate-fade-in-up flex flex-col lg:flex-row border border-border-main">
-                {/* Left: File preview */}
+                {/* Left: File preview or Login Gate */}
                 <div className="lg:w-3/5 bg-bg-main flex items-center justify-center min-h-[300px] lg:min-h-0 relative overflow-hidden">
-                    {paper.file_type === 'pdf' ? (
-                        <iframe
-                            src={`${api.defaults.baseURL}/papers/${paper.id}/preview`}
-                            title={`Preview of ${paper.title}`}
-                            className="w-full h-full min-h-[400px] lg:min-h-[600px] border-0"
-                        />
-                    ) : ['jpg', 'jpeg', 'png'].includes(paper.file_type) ? (
-                        <img
-                            src={`${api.defaults.baseURL}/papers/${paper.id}/preview`}
-                            alt={paper.title}
-                            className="max-w-full max-h-full object-contain p-4"
-                        />
+                    {isLoggedIn ? (
+                        // Authenticated: show actual preview
+                        paper.file_type === 'pdf' ? (
+                            <iframe
+                                src={`${api.defaults.baseURL}/papers/${paper.id}/preview`}
+                                title={`Preview of ${paper.title}`}
+                                className="w-full h-full min-h-[400px] lg:min-h-[600px] border-0"
+                            />
+                        ) : ['jpg', 'jpeg', 'png'].includes(paper.file_type) ? (
+                            <img
+                                src={`${api.defaults.baseURL}/papers/${paper.id}/preview`}
+                                alt={paper.title}
+                                className="max-w-full max-h-full object-contain p-4"
+                            />
+                        ) : (
+                            <div className="text-center p-8">
+                                <span className="material-symbols-outlined text-6xl text-text-muted/20 mb-4 block">description</span>
+                                <p className="text-text-muted text-sm">Preview not available for .{paper.file_type} files</p>
+                                <p className="text-xs text-text-muted/60 mt-1">Download to view this file</p>
+                            </div>
+                        )
                     ) : (
-                        <div className="text-center p-8">
-                            <span className="material-symbols-outlined text-6xl text-text-muted/20 mb-4 block">description</span>
-                            <p className="text-text-muted text-sm">Preview not available for .{paper.file_type} files</p>
-                            <p className="text-xs text-text-muted/60 mt-1">Download to view this file</p>
+                        // Guest: show login/register prompt
+                        <div className="flex flex-col items-center justify-center text-center p-10 w-full h-full min-h-[400px] lg:min-h-[600px]">
+                            {/* Animated lock icon */}
+                            <div className="relative mb-8">
+                                <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center border-2 border-primary/20 shadow-xl shadow-primary/10">
+                                    <span className="material-symbols-outlined text-5xl text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
+                                </div>
+                                <div className="absolute -top-2 -right-2 w-8 h-8 bg-gold rounded-full flex items-center justify-center shadow-lg shadow-gold/30 animate-bounce">
+                                    <span className="material-symbols-outlined text-sm text-white" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                                </div>
+                            </div>
+
+                            <h3 className="text-xl font-black text-text-main mb-2">
+                                Preview Restricted
+                            </h3>
+                            <p className="text-sm text-text-muted max-w-xs mb-8 leading-relaxed">
+                                Sign in to your Knowledge Hub account to preview, download, and rate academic papers.
+                            </p>
+
+                            {/* CTA Buttons */}
+                            <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
+                                <Link
+                                    to="/login"
+                                    className="flex-1 py-3.5 bg-primary text-white font-black rounded-xl text-sm
+                                    hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 shadow-xl shadow-primary/20"
+                                >
+                                    <span className="material-symbols-outlined text-lg">login</span>
+                                    Sign In
+                                </Link>
+                                <Link
+                                    to="/register"
+                                    className="flex-1 py-3.5 bg-bg-surface text-text-main font-black rounded-xl text-sm border border-border-main
+                                    hover:scale-[1.02] active:scale-[0.98] hover:border-primary/30 transition-all duration-200 flex items-center justify-center gap-2"
+                                >
+                                    <span className="material-symbols-outlined text-lg">person_add</span>
+                                    Register
+                                </Link>
+                            </div>
+
+                            <p className="text-[10px] text-text-muted/40 mt-6 uppercase tracking-widest font-bold">
+                                Free • Instant Access • No Spam
+                            </p>
                         </div>
                     )}
                 </div>
@@ -225,20 +280,43 @@ export default function PaperPreview({ paper, onClose }) {
 
                         {/* Actions */}
                         <div className="space-y-3">
-                            <button
-                                onClick={handleDownload}
-                                disabled={downloading}
-                                className="w-full py-4 bg-white text-primary font-black rounded-2xl text-sm
-                    hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 shadow-xl shadow-black/10"
-                            >
-                                <span className="material-symbols-outlined font-bold">download</span>
-                                {downloading ? 'Preparing File...' : 'Download This Paper'}
-                            </button>
-                            <button className="w-full py-4 bg-white/10 text-white font-bold rounded-2xl text-sm
-                  hover:bg-white/20 transition-all duration-200 flex items-center justify-center gap-2">
-                                <span className="material-symbols-outlined">flag</span>
-                                Report Content
-                            </button>
+                            {isLoggedIn ? (
+                                <>
+                                    <button
+                                        onClick={handleDownload}
+                                        disabled={downloading}
+                                        className="w-full py-4 bg-white text-primary font-black rounded-2xl text-sm
+                            hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 shadow-xl shadow-black/10"
+                                    >
+                                        <span className="material-symbols-outlined font-bold">download</span>
+                                        {downloading ? 'Preparing File...' : 'Download This Paper'}
+                                    </button>
+                                    <button className="w-full py-4 bg-white/10 text-white font-bold rounded-2xl text-sm
+                          hover:bg-white/20 transition-all duration-200 flex items-center justify-center gap-2">
+                                        <span className="material-symbols-outlined">flag</span>
+                                        Report Content
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <Link
+                                        to="/login"
+                                        className="w-full py-4 bg-white text-primary font-black rounded-2xl text-sm
+                            hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 shadow-xl shadow-black/10"
+                                    >
+                                        <span className="material-symbols-outlined font-bold">login</span>
+                                        Sign In to Download
+                                    </Link>
+                                    <Link
+                                        to="/register"
+                                        className="w-full py-4 bg-white/10 text-white font-bold rounded-2xl text-sm
+                            hover:bg-white/20 transition-all duration-200 flex items-center justify-center gap-2"
+                                    >
+                                        <span className="material-symbols-outlined">person_add</span>
+                                        Create Free Account
+                                    </Link>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
