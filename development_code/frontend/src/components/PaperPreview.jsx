@@ -70,6 +70,8 @@ export default function PaperPreview({ paper, onClose }) {
         })
         : '—';
 
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
     return (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
             {/* Backdrop */}
@@ -80,13 +82,33 @@ export default function PaperPreview({ paper, onClose }) {
                 {/* Left: File preview or Login Gate */}
                 <div className="lg:w-2/3 bg-bg-main flex items-center justify-center min-h-[300px] lg:min-h-0 relative overflow-hidden">
                     {isLoggedIn ? (
-
                         paper.file_type === 'pdf' ? (
-                            <iframe
-                                src={`${api.defaults.baseURL}/papers/${paper.id}/preview#toolbar=0&navpanes=0`}
-                                title={`Preview of ${paper.title}`}
-                                className="w-full h-full min-h-[500px] lg:min-h-[85vh] border-0"
-                            />
+                            isMobileDevice ? (
+                                <div className="flex flex-col items-center justify-center p-8 text-center w-full max-w-md mx-auto">
+                                    <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mb-6 border border-primary/20 shadow-inner">
+                                        <span className="material-symbols-outlined text-4xl text-primary">picture_as_pdf</span>
+                                    </div>
+                                    <h4 className="text-xl font-black text-text-main mb-3">Mobile Preview Optimized</h4>
+                                    <p className="text-sm text-text-muted mb-8 leading-relaxed">
+                                        To ensure the best viewing experience on mobile, please open the PDF in a dedicated viewer tab.
+                                    </p>
+                                    <a 
+                                        href={`${api.defaults.baseURL}/papers/${paper.id}/preview`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="w-full py-4 bg-primary text-white font-black rounded-2xl text-sm flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20"
+                                    >
+                                        <span className="material-symbols-outlined">open_in_new</span>
+                                        View Document Fullscreen
+                                    </a>
+                                </div>
+                            ) : (
+                                <iframe
+                                    src={`${api.defaults.baseURL}/papers/${paper.id}/preview#toolbar=0&navpanes=0`}
+                                    title={`Preview of ${paper.title}`}
+                                    className="w-full h-full min-h-[500px] lg:min-h-[85vh] border-0"
+                                />
+                            )
                         ) : ['jpg', 'jpeg', 'png'].includes(paper.file_type) ? (
                             <img
                                 src={`${api.defaults.baseURL}/papers/${paper.id}/preview`}
