@@ -1,0 +1,193 @@
+{
+  "pass": 29,
+  "fail": 2,
+  "total": 31,
+  "tests": [
+    {
+      "category": "AUTH",
+      "name": "T1.1 Invalid credentials rejected",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "AUTH",
+      "name": "T1.2 Empty login body rejected",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "AUTH",
+      "name": "T1.3 SQL injection in email blocked",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "AUTH",
+      "name": "T1.4 Protected route rejects no-token",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "AUTH",
+      "name": "T1.5 Forged JWT rejected",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "AUTH",
+      "name": "T1.6 Weak password rejected",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "AUTH",
+      "name": "T1.7 Invalid email format rejected",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "UPLOAD",
+      "name": "T2.1-T2.4 Skipped (no auth token)",
+      "status": "\u274c FAIL",
+      "details": "No token available"
+    },
+    {
+      "category": "INJECT",
+      "name": "T3.1 XSS in search sanitized",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "INJECT",
+      "name": "T3.2 SQL injection in search safe",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "INJECT",
+      "name": "T3.3 Oversized search input handled",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "INJECT",
+      "name": "T3.4 Null byte in search handled",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "AUTHZ",
+      "name": "T4.1-T4.3 Skipped",
+      "status": "\u274c FAIL",
+      "details": "No student token"
+    },
+    {
+      "category": "AUTHZ",
+      "name": "T4.4 Unauthenticated admin access blocked",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "AUTHZ",
+      "name": "T4.5 Download requires authentication",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "AUTHZ",
+      "name": "T4.6 Preview blocked for pending papers",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "STORAGE",
+      "name": "T5.2 No server paths leaked in response",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "STORAGE",
+      "name": "T5.3 X-Content-Type-Options header",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "STORAGE",
+      "name": "T5.4 X-Frame-Options header",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "STORAGE",
+      "name": "T5.5 Content-Security-Policy header",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "LOGIC",
+      "name": "T6.4 Pagination capped at 100",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "LOGIC",
+      "name": "T6.6 Public stats returns valid data",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "MISCONFIG",
+      "name": "T7.1 Health check responds",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "MISCONFIG",
+      "name": "T7.2 No stack trace in 404",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "MISCONFIG",
+      "name": "T7.3 CORS configured",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "MISCONFIG",
+      "name": "T7.4 Malformed JSON handled gracefully",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "MISCONFIG",
+      "name": "T7.5 Cache-Control no-store set",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "MISCONFIG",
+      "name": "T7.6 Permissions-Policy set",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "MISCONFIG",
+      "name": "T7.7 Referrer-Policy set",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "MISCONFIG",
+      "name": "T7.8 Leaderboard returns data",
+      "status": "\u2705 PASS",
+      "details": ""
+    },
+    {
+      "category": "MISCONFIG",
+      "name": "T7.9 Departments endpoint works",
+      "status": "\u2705 PASS",
+      "details": ""
+    }
+  ]
+}
