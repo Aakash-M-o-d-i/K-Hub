@@ -306,6 +306,7 @@ def download_paper(paper_id, **kwargs):
 
 
 @papers_bp.route("/<int:paper_id>/preview", methods=["GET"])
+@limiter.limit("60 per minute")  # Rate limit preview to prevent scraping
 def preview_paper(paper_id):
     """Serve the paper file inline for preview (no auth needed for approved papers)."""
     paper = Paper.query.get_or_404(paper_id)
@@ -313,6 +314,11 @@ def preview_paper(paper_id):
     # ✅ SECURITY: Only allow previewing approved papers
     if paper.status != "approved":
         return jsonify({"error": "Paper not available"}), 404
+
+    # ✅ SECURITY: Only allow safe file types for inline preview
+    safe_preview_types = {'pdf', 'jpg', 'jpeg', 'png'}
+    if paper.file_type not in safe_preview_types:
+        return jsonify({"error": "Preview not available for this file type"}), 403
 
     # Try approved folder first
     upload_dir = current_app.config["UPLOAD_FOLDER"]
@@ -333,6 +339,14 @@ def preview_paper(paper_id):
     # utils/security.py will detect this and automatically adjust the 
     # Content-Security-Policy to allow 'frame-ancestors self'.
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    
+    # ✅ SECURITY: Explicitly set Content-Disposition to inline
+    # Prevents browsers from interpreting downloaded content as executable
+    response.headers['Content-Disposition'] = 'inline'
+    
+    # ✅ SECURITY: Prevent caching of paper content in shared proxies
+    response.headers['Cache-Control'] = 'private, no-store'
+    
     return response
 
 
