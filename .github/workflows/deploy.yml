@@ -24,14 +24,21 @@ jobs:
       - name: Install Dependencies
         run: |
           cd production_code/backend
+
           python -m pip install --upgrade pip
+
           pip install flake8
           pip install -r requirements.txt
 
       - name: Lint Check
         run: |
           cd production_code/backend
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+          flake8 . \
+            --count \
+            --select=E9,F63,F7,F82 \
+            --show-source \
+            --statistics
 
   build-frontend:
     runs-on: ubuntu-latest
@@ -47,10 +54,15 @@ jobs:
           cache: 'npm'
           cache-dependency-path: production_code/frontend/package-lock.json
 
-      - name: Install & Build Frontend
+      - name: Install Frontend Dependencies
         run: |
           cd production_code/frontend
+
           npm ci
+
+      - name: Build Frontend
+        run: |
+          cd production_code/frontend
 
           echo "VITE_API_URL=/api" > .env.production
 
@@ -60,7 +72,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frontend-dist
-          path: production_code/frontend/dist/
+          path: production_code/frontend/dist
           retention-days: 1
 
   deploy:
@@ -80,7 +92,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: frontend-dist
-          path: production_code/frontend/dist/
+          path: frontend-dist
 
       - name: Setup SSH
         run: |
@@ -105,24 +117,27 @@ jobs:
             production_code/backend/ \
             ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ env.APP_DIR }}/backend/
 
+      - name: Clean Frontend Directory
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+            ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} \
+            "rm -rf /var/www/knowledgehub/frontend/dist/*"
+
       - name: Deploy Frontend
         run: |
           rsync -avz --delete \
             -e "ssh -i ~/.ssh/deploy_key" \
-            production_code/frontend/dist/ \
+            frontend-dist/ \
             ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ env.APP_DIR }}/frontend/dist/
 
-      - name: Install Dependencies & Restart Service
+      - name: Restart Backend Service
         run: |
-          ssh -i ~/.ssh/deploy_key ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << 'EOF'
-
-            cd /var/www/knowledgehub/backend
-
-            source venv/bin/activate
-
-            pip install -r requirements.txt --quiet
+          ssh -i ~/.ssh/deploy_key \
+            ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} << 'EOF'
 
             sudo systemctl restart knowledgehub
+
+            sudo systemctl reload nginx
 
             sleep 5
 
