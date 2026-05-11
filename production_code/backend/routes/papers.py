@@ -43,7 +43,7 @@ def list_papers():
     department_id = request.args.get("department_id", type=int)
     semester = request.args.get("semester", type=int)
     exam_type = InputValidator.sanitize_text(request.args.get("exam_type", ""), max_length=50)
-    year = InputValidator.sanitize_text(request.args.get("year", ""), max_length=4)
+    year = InputValidator.sanitize_text(request.args.get("year", ""), max_length=10)
     sort_by = request.args.get("sort", "newest")
     
     # ✅ VALIDATION: Limit pagination

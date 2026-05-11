@@ -79,7 +79,8 @@ export default function MobilePdfViewer({ url, title }) {
             await task.promise;
             renderTaskRef.current = null;
         } catch (err) {
-            if (err?.name !== 'RenderingCancelled') {
+            // Silently ignore cancelled renders to avoid console clutter
+            if (err?.name !== 'RenderingCancelledException' && err?.name !== 'RenderingCancelled') {
                 console.error('Render error:', err);
             }
         }
@@ -113,41 +114,9 @@ export default function MobilePdfViewer({ url, title }) {
     }
 
     return (
-        <div ref={containerRef} className="relative flex flex-col w-full h-full bg-bg-main">
-            {/* Toolbar */}
-            <div className="sticky top-0 z-10 flex items-center justify-between gap-2 px-3 py-2
-                bg-bg-surface/95 backdrop-blur-md border-b border-border-main text-text-main text-xs font-medium">
-                {/* Page navigation */}
-                <div className="flex items-center gap-1">
-                    <button onClick={prevPage} disabled={currentPage <= 1}
-                        className="p-1.5 rounded-lg hover:bg-bg-main disabled:opacity-30 transition-colors">
-                        <span className="material-symbols-outlined text-base">chevron_left</span>
-                    </button>
-                    <span className="tabular-nums min-w-[4rem] text-center">
-                        {currentPage} / {totalPages}
-                    </span>
-                    <button onClick={nextPage} disabled={currentPage >= totalPages}
-                        className="p-1.5 rounded-lg hover:bg-bg-main disabled:opacity-30 transition-colors">
-                        <span className="material-symbols-outlined text-base">chevron_right</span>
-                    </button>
-                </div>
-
-                {/* Zoom controls */}
-                <div className="flex items-center gap-1">
-                    <button onClick={zoomOut} disabled={scale <= 0.5}
-                        className="p-1.5 rounded-lg hover:bg-bg-main disabled:opacity-30 transition-colors">
-                        <span className="material-symbols-outlined text-base">zoom_out</span>
-                    </button>
-                    <span className="tabular-nums min-w-[3rem] text-center">{Math.round(scale * 100)}%</span>
-                    <button onClick={zoomIn} disabled={scale >= 3}
-                        className="p-1.5 rounded-lg hover:bg-bg-main disabled:opacity-30 transition-colors">
-                        <span className="material-symbols-outlined text-base">zoom_in</span>
-                    </button>
-                </div>
-            </div>
-
+        <div ref={containerRef} className="relative flex flex-col w-full h-full bg-bg-main overflow-hidden">
             {/* Canvas area */}
-            <div className="flex-1 overflow-auto flex justify-center p-2">
+            <div className="flex-1 overflow-auto flex justify-center p-2 pb-16">
                 {loading ? (
                     <div className="flex flex-col items-center justify-center gap-3 py-12">
                         <div className="w-8 h-8 border-3 border-primary/30 border-t-primary rounded-full animate-spin" />
@@ -156,10 +125,46 @@ export default function MobilePdfViewer({ url, title }) {
                 ) : (
                     <canvas
                         ref={canvasRef}
-                        className="shadow-lg rounded-lg max-w-full"
+                        className="shadow-xl rounded-lg max-w-full"
                         style={{ touchAction: 'pan-y pinch-zoom' }}
                     />
                 )}
+            </div>
+
+            {/* Toolbar — Bottom Floating Bar */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 px-4 py-2.5
+                bg-bg-surface/80 backdrop-blur-xl border border-border-main/50 rounded-2xl shadow-2xl
+                text-text-main text-xs font-medium min-w-[280px] justify-between">
+                
+                {/* Page navigation */}
+                <div className="flex items-center gap-1.5">
+                    <button onClick={prevPage} disabled={currentPage <= 1}
+                        className="p-1.5 rounded-xl hover:bg-white/10 disabled:opacity-30 transition-all active:scale-95">
+                        <span className="material-symbols-outlined text-xl">chevron_left</span>
+                    </button>
+                    <span className="tabular-nums font-bold tracking-tight px-1">
+                        {currentPage} <span className="text-text-muted/60 font-normal mx-0.5">/</span> {totalPages}
+                    </span>
+                    <button onClick={nextPage} disabled={currentPage >= totalPages}
+                        className="p-1.5 rounded-xl hover:bg-white/10 disabled:opacity-30 transition-all active:scale-95">
+                        <span className="material-symbols-outlined text-xl">chevron_right</span>
+                    </button>
+                </div>
+
+                <div className="w-[1px] h-4 bg-border-main/50" />
+
+                {/* Zoom controls */}
+                <div className="flex items-center gap-1.5">
+                    <button onClick={zoomOut} disabled={scale <= 0.5}
+                        className="p-1.5 rounded-xl hover:bg-white/10 disabled:opacity-30 transition-all active:scale-95">
+                        <span className="material-symbols-outlined text-xl font-light">zoom_out</span>
+                    </button>
+                    <span className="tabular-nums min-w-[3rem] text-center font-bold">{Math.round(scale * 100)}%</span>
+                    <button onClick={zoomIn} disabled={scale >= 3}
+                        className="p-1.5 rounded-xl hover:bg-white/10 disabled:opacity-30 transition-all active:scale-95">
+                        <span className="material-symbols-outlined text-xl font-light">zoom_in</span>
+                    </button>
+                </div>
             </div>
         </div>
     );
