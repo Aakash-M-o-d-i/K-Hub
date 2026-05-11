@@ -438,12 +438,18 @@ def add_security_headers(response):
     """
     Add security headers to all responses
     Prevents XSS, Clickjacking, MIME sniffing, etc.
+    
+    Routes that need iframe embedding (e.g. PDF preview) can set
+    X-Frame-Options to 'SAMEORIGIN' before this middleware runs;
+    this function will respect that override.
     """
     # Prevent MIME sniffing
     response.headers['X-Content-Type-Options'] = 'nosniff'
     
-    # Prevent Clickjacking
-    response.headers['X-Frame-Options'] = 'DENY'
+    # Prevent Clickjacking — respect route-level SAMEORIGIN overrides
+    allow_iframe = response.headers.get('X-Frame-Options') == 'SAMEORIGIN'
+    if not allow_iframe:
+        response.headers['X-Frame-Options'] = 'DENY'
     
     # SECURITY FIX [L2]: Changed from '1; mode=block' to '0'.
     # The XSS auditor is deprecated in modern browsers and can introduce
@@ -453,6 +459,8 @@ def add_security_headers(response):
     # SECURITY FIX [L1]: Removed 'unsafe-inline' from script-src.
     # React SPAs don't need inline scripts. Also added fonts.gstatic.com
     # to font-src for Google Fonts support.
+    # Use frame-ancestors 'self' for routes that allow same-origin iframes.
+    frame_ancestors = "'self'" if allow_iframe else "'none'"
     response.headers['Content-Security-Policy'] = (
         "default-src 'self'; "
         "script-src 'self'; "
@@ -460,7 +468,9 @@ def add_security_headers(response):
         "img-src 'self' data: https:; "
         "font-src 'self' https://fonts.gstatic.com; "
         "connect-src 'self'; "
-        "frame-ancestors 'none'; "
+        "frame-src 'self'; "
+        "object-src 'none'; "
+        f"frame-ancestors {frame_ancestors}; "
         "base-uri 'self'; "
         "form-action 'self'"
     )
@@ -481,11 +491,37 @@ def add_security_headers(response):
     # Prevent cross-domain policy files
     response.headers['X-Permitted-Cross-Domain-Policies'] = 'none'
     
+    is_production = os.getenv('FLASK_ENV') == 'production'
+    
     # SECURITY FIX [L3]: Changed from current_app.config.get('ENV') to os.getenv('FLASK_ENV').
     # Flask deprecated app.config['ENV'] in 2.3+ and it may not reflect the actual
     # environment variable, causing HSTS to silently not apply in production.
-    if os.getenv('FLASK_ENV') == 'production':
+    if is_production:
         response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains; preload'
+    
+    # ✅ COOKIE SECURITY: Harden all Set-Cookie headers with security attributes.
+    # Ensures every cookie (session, CSRF, etc.) gets HttpOnly, SameSite, Secure flags.
+    if 'Set-Cookie' in response.headers:
+        cookies = response.headers.getlist('Set-Cookie')
+        new_cookies = []
+        for cookie in cookies:
+            # Add HttpOnly if not present (prevents JS access)
+            if 'HttpOnly' not in cookie:
+                cookie += '; HttpOnly'
+            # Add SameSite=Lax if not present (CSRF protection)
+            if 'SameSite' not in cookie:
+                cookie += '; SameSite=Lax'
+            # Add Secure flag in production (HTTPS-only cookies)
+            if is_production and 'Secure' not in cookie:
+                cookie += '; Secure'
+            # Add Path=/ if not present
+            if 'Path' not in cookie:
+                cookie += '; Path=/'
+            new_cookies.append(cookie)
+        # Replace all Set-Cookie headers
+        response.headers.remove('Set-Cookie')
+        for cookie in new_cookies:
+            response.headers.add('Set-Cookie', cookie)
     
     return response
 
@@ -572,10 +608,20 @@ class SessionSecurity:
     
     @staticmethod
     def validate_session_cookie_settings(app):
-        """Configure secure session cookie settings"""
-        app.config['SESSION_COOKIE_SECURE'] = True  # Only send over HTTPS
-        app.config['SESSION_COOKIE_HTTPONLY'] = True  # No JS access
-        app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # CSRF protection
+        """Configure secure session cookie settings.
+        Respects the environment — only forces Secure flag in production
+        so local dev over HTTP still works.
+        """
+        is_prod = os.getenv('FLASK_ENV') == 'production'
+        app.config['SESSION_COOKIE_SECURE'] = is_prod        # HTTPS-only in prod
+        app.config['SESSION_COOKIE_HTTPONLY'] = True           # No JS access
+        app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'         # CSRF protection
+        app.config['SESSION_COOKIE_NAME'] = '__Host-session' if is_prod else 'session'
         app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
         app.config['SESSION_REFRESH_EACH_REQUEST'] = True
+        
+        # JWT cookie settings (if JWT_TOKEN_LOCATION includes 'cookies')
+        app.config.setdefault('JWT_COOKIE_SECURE', is_prod)
+        app.config.setdefault('JWT_COOKIE_SAMESITE', 'Lax')
+        app.config.setdefault('JWT_COOKIE_CSRF_PROTECT', True)
 

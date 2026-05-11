@@ -3,10 +3,26 @@ import { useNavigate, Link } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import StarRating from './StarRating';
+import MobilePdfViewer from './MobilePdfViewer';
+
+/** Detect mobile: narrow viewport OR touch-primary device */
+function useIsMobile() {
+    const [mobile, setMobile] = useState(() =>
+        window.innerWidth < 1024 || window.matchMedia('(pointer: coarse)').matches
+    );
+    useEffect(() => {
+        const mq = window.matchMedia('(max-width: 1023px), (pointer: coarse)');
+        const handler = (e) => setMobile(e.matches);
+        mq.addEventListener('change', handler);
+        return () => mq.removeEventListener('change', handler);
+    }, []);
+    return mobile;
+}
 
 export default function PaperPreview({ paper, onClose }) {
     const { user } = useAuth();
     const navigate = useNavigate();
+    const isMobile = useIsMobile();
     const [downloading, setDownloading] = useState(false);
     const [myScore, setMyScore] = useState(null);
     const [ratingAvg, setRatingAvg] = useState(paper?.rating_avg || 0);
@@ -94,12 +110,16 @@ export default function PaperPreview({ paper, onClose }) {
                 `}>
                     {isLoggedIn ? (
                         paper.file_type === 'pdf' ? (
-                            <iframe
-                                src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=1`}
-                                title={`Preview of ${paper.title}`}
-                                className="w-full h-full border-0"
-                                referrerPolicy="no-referrer"
-                            />
+                            isMobile ? (
+                                <MobilePdfViewer url={previewUrl} title={paper.title} />
+                            ) : (
+                                <iframe
+                                    src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=1`}
+                                    title={`Preview of ${paper.title}`}
+                                    className="w-full h-full border-0"
+                                    referrerPolicy="no-referrer"
+                                />
+                            )
                         ) : ['jpg', 'jpeg', 'png'].includes(paper.file_type) ? (
                             <img
                                 src={previewUrl}
