@@ -143,13 +143,13 @@ export default function LandingPage() {
                     </div>
 
                     <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white tracking-tight mb-6 leading-[1.1] drop-shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
-                        Your Knowledge Hub <br />
-                        <span className="text-landing-primary drop-shadow-[0_0_30px_rgba(59,130,246,0.4)]">Simplified.</span>
+                        CTUAP <br />
+                        <span className="text-landing-primary drop-shadow-[0_0_30px_rgba(59,130,246,0.4)]">Knowledge Hub.</span>
                     </h1>
 
                     <p className="max-w-2xl text-lg md:text-xl text-slate-300 mb-10 leading-relaxed">
-                        Access over {formatNumber(stats.papers)} previous year question papers instantly. Stop searching through dusty library folders and start studying smarter today.
-                        <span className="block mt-00.1 text-landing-primary font-semibold italic tracking-wider">CTUAP PYQS BANKS</span>
+                        The ultimate repository for <b>Central Tribal University of Andhra Pradesh</b> students. Access verified previous year question papers instantly and study smarter.
+                        <span className="block mt-2 text-landing-primary font-semibold italic tracking-wider">OFFICIAL CTUAP STUDENT RESOURCE</span>
                     </p>
 
                     {/* Search Form */}
@@ -351,6 +351,28 @@ export default function LandingPage() {
                                     );
                                 })}
                                 {topDepts.length === 0 && <p className="col-span-full text-slate-500 text-center py-20 text-xs font-bold uppercase tracking-widest italic">Recalibrating departmental rankings...</p>}
+                            </div>
+                        </div>
+                    </div>
+                    {/* FAQ Section - Snippet Hunter */}
+                    <div className="mt-32 w-full text-left mb-20">
+                        <h2 className="text-3xl font-black text-white uppercase tracking-tight mb-10">Frequently Asked Questions</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10">
+                                <h3 className="text-white font-bold mb-2">Where can I find CTUAP previous year question papers?</h3>
+                                <p className="text-slate-400 text-sm">Knowledge Hub is the dedicated platform for CTUAP students to access all verified previous year papers (PYQs) across all departments including Computer Science, Geology, and Business Management.</p>
+                            </div>
+                            <div className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10">
+                                <h3 className="text-white font-bold mb-2">Are these papers officially verified?</h3>
+                                <p className="text-slate-400 text-sm">All papers uploaded to the Knowledge Hub are peer-reviewed and verified by student contributors to ensure they are relevant and accurate for CTUAP semester exams.</p>
+                            </div>
+                            <div className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10">
+                                <h3 className="text-white font-bold mb-2">How can I contribute my own question papers?</h3>
+                                <p className="text-slate-400 text-sm">Simply create an account, click the "Upload" button, and submit your scanned papers. Once approved, you'll earn points and appear on the Academic Leaderboard!</p>
+                            </div>
+                            <div className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10">
+                                <h3 className="text-white font-bold mb-2">Is the Knowledge Hub free for all CTUAP students?</h3>
+                                <p className="text-slate-400 text-sm">Yes, Knowledge Hub is a non-profit, student-led initiative aimed at helping all CTUAP scholars excel in their academic journey without any cost.</p>
                             </div>
                         </div>
                     </div>

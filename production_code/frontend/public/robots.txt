@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://knhub.app/sitemap.xml

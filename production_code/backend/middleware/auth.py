@@ -29,6 +29,34 @@ def jwt_required_with_user(fn):
     return wrapper
 
 
+def jwt_optional_with_user(fn):
+    """Decorator: injects current_user if JWT is present, otherwise continues as guest."""
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        try:
+            verify_jwt_in_request(optional=True)
+            user_id = get_jwt_identity()
+            if user_id:
+                user = User.query.get(int(user_id))
+                if user and not getattr(user, 'is_banned', False):
+                    jwt_data = get_jwt()
+                    jti = jwt_data.get("jti")
+                    session = UserSession.query.filter_by(jti=jti).first()
+                    if session and not session.is_revoked:
+                        kwargs["current_user"] = user
+                    else:
+                        kwargs["current_user"] = None
+                else:
+                    kwargs["current_user"] = None
+            else:
+                kwargs["current_user"] = None
+        except Exception:
+            kwargs["current_user"] = None
+            
+        return fn(*args, **kwargs)
+    return wrapper
+
+
 def admin_required(fn):
     """Decorator: ensures user is admin or super_admin and session is not revoked."""
     @wraps(fn)

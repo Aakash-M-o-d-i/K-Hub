@@ -9,7 +9,9 @@ from models.leaderboard import Download, LeaderboardPoints, SystemSetting, Bookm
 from models.user import User
 from models.notification import Notification
 from models.rating import Rating
-from middleware.auth import jwt_required_with_user
+from middleware.auth import (
+    admin_required, jwt_required_with_user, jwt_optional_with_user
+)
 from utils.security import (
     FileSecurityValidator, InputValidator, AccessControl, 
     AuditLogger, EncryptionUtils, limiter
@@ -127,7 +129,7 @@ def upload_paper(**kwargs):
     # ✅ INPUT VALIDATION: Sanitize form inputs
     title = InputValidator.sanitize_text(request.form.get("title", ""), max_length=200)
     subject_code = InputValidator.sanitize_text(request.form.get("subject_code", ""), max_length=50)
-    year = InputValidator.sanitize_text(request.form.get("year", ""), max_length=4)
+    year = InputValidator.sanitize_text(request.form.get("year", ""), max_length=10)
     semester = request.form.get("semester", type=int)
     exam_type = InputValidator.sanitize_text(request.form.get("exam_type", "End Semester"), max_length=50)
     department_id = request.form.get("department_id", type=int)
@@ -260,14 +262,18 @@ def download_paper(paper_id, **kwargs):
     current_user = kwargs["current_user"]
     paper = Paper.query.get_or_404(paper_id)
 
-    # ✅ ACCESS CONTROL: Check if paper is approved
-    if paper.status != "approved":
+    # ✅ ACCESS CONTROL: Only allow public access to approved papers.
+    # Admins and the original uploader can access regardless of status (IDOR Protection).
+    is_admin = current_user.role in ('admin', 'super_admin')
+    is_uploader = paper.uploader_id == current_user.id
+    
+    if paper.status != "approved" and not (is_admin or is_uploader):
         AuditLogger.log_event(
             'UNAUTHORIZED_DOWNLOAD_ATTEMPT',
             user_id=current_user.id,
-            details=f"Paper {paper_id} not approved"
+            details=f"Paper {paper_id} status: {paper.status}"
         )
-        return jsonify({"error": "Paper not available for download"}), 403
+        return jsonify({"error": "Access denied"}), 403
 
     # ✅ SECURITY: Deduplicate downloads (same user + paper within 1 hour)
     from datetime import datetime, timedelta
@@ -307,12 +313,18 @@ def download_paper(paper_id, **kwargs):
 
 @papers_bp.route("/<int:paper_id>/preview", methods=["GET"])
 @limiter.limit("60 per minute")  # Rate limit preview to prevent scraping
-def preview_paper(paper_id):
+@jwt_optional_with_user
+def preview_paper(paper_id, **kwargs):
     """Serve the paper file inline for preview (no auth needed for approved papers)."""
+    current_user = kwargs.get("current_user")
     paper = Paper.query.get_or_404(paper_id)
 
-    # ✅ SECURITY: Only allow previewing approved papers
-    if paper.status != "approved":
+    # ✅ ACCESS CONTROL: Only allow public access to approved papers.
+    # Admins and the original uploader can preview regardless of status.
+    is_admin = current_user and current_user.role in ('admin', 'super_admin')
+    is_uploader = current_user and paper.uploader_id == current_user.id
+    
+    if paper.status != "approved" and not (is_admin or is_uploader):
         return jsonify({"error": "Paper not available"}), 404
 
     # ✅ SECURITY: Only allow safe file types for inline preview

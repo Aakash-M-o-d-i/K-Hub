@@ -459,11 +459,12 @@ def add_security_headers(response):
     # SECURITY FIX [L1]: Removed 'unsafe-inline' from script-src.
     # React SPAs don't need inline scripts. Also added fonts.gstatic.com
     # to font-src for Google Fonts support.
-    # Use frame-ancestors 'self' for routes that allow same-origin iframes.
+    # Added cdnjs.cloudflare.com to worker-src for PDF.js support.
     frame_ancestors = "'self'" if allow_iframe else "'none'"
     response.headers['Content-Security-Policy'] = (
         "default-src 'self'; "
-        "script-src 'self'; "
+        "script-src 'self' https://cdnjs.cloudflare.com; "
+        "worker-src 'self' blob: https://cdnjs.cloudflare.com; "
         "style-src 'self' 'unsafe-inline'; "
         "img-src 'self' data: https:; "
         "font-src 'self' https://fonts.gstatic.com; "
@@ -477,6 +478,9 @@ def add_security_headers(response):
     
     # Referrer Policy
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+
+    # SECURITY FIX: Cross-Origin Isolation
+    response.headers['Cross-Origin-Opener-Policy'] = 'same-origin-allow-popups'
     
     # Feature Policy / Permissions Policy
     response.headers['Permissions-Policy'] = (
