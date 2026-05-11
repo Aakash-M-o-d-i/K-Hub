@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import * as pdfjsLib from 'pdfjs-dist/build/pdf.mjs';
+import * as pdfjsLib from 'pdfjs-dist';
 
 // Use CDN worker to avoid Vite/Rollup bundling issues with the worker file
 pdfjsLib.GlobalWorkerOptions.workerSrc =
