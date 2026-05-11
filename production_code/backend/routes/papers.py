@@ -34,6 +34,7 @@ def allowed_file(filename):
 
 
 @papers_bp.route("", methods=["GET"])
+@limiter.limit("100 per hour")  # Allow browsing but prevent heavy search scraping
 def list_papers():
     """Public: list approved papers with optional filters."""
     page = request.args.get("page", 1, type=int)
@@ -257,6 +258,7 @@ def upload_paper(**kwargs):
 
 
 @papers_bp.route("/<int:paper_id>/download", methods=["GET"])
+@limiter.limit("20 per hour")  # Prevent bulk scraping
 @jwt_required_with_user
 def download_paper(paper_id, **kwargs):
     current_user = kwargs["current_user"]
