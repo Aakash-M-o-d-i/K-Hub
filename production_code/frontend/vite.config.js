@@ -5,7 +5,7 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   optimizeDeps: {
-    include: ['pdfjs-dist/build/pdf.mjs'],
+    include: ['pdfjs-dist'],
   },
   server: {
     port: 3000,
